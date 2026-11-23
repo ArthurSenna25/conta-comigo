@@ -10,7 +10,9 @@ dev: `pnpm dev` · build: `pnpm build` · lint: `pnpm lint` · tipos: `pnpm type
 
 ## Regras permanentes
 - A IA NUNCA calcula imposto. Quem calcula é `lib/engine` (puro, determinístico, testado). A IA só extrai e explica.
-- Camadas: `lib/engine` e `lib/contracts` são PUROS (sem next, react, supabase, SDK de IA, fs). `lib/ai` e `lib/db` dependem só de `lib/contracts`. `app/` e `components/` não acessam `lib/db` nem `lib/ai` direto: passam por `actions/` ou `app/api/`. Imports internos com alias `@/*`.
+- Camadas: `app` → `actions` (ou `app/api`) → {`lib/db`, `lib/ai`, `lib/engine`} → `lib/contracts`. `lib/engine` e `lib/contracts` são PUROS (sem next, react, supabase, SDK de IA, fs). `lib/ai` e `lib/db` dependem só de `lib/contracts`. `actions/` só valida (Zod), autoriza, chama e devolve `Resultado<T>`, sem regra de negócio. `app/` e `components/` não acessam `lib/db` nem `lib/ai`. Imposto por `eslint.layers.mjs` + `tests/camadas.test.ts`. Imports internos com alias `@/*`. Detalhes: `docs/ARQUITETURA.md`.
+- Contratos em `lib/contracts` são a fonte da verdade (Zod + tipos inferidos). Mudou contrato = PR próprio, avisar o time.
+- Rascunho da IA não é persistido; confirmar revalida tudo com Zod no servidor. Imagem só vai ao Storage ao confirmar; áudio nunca é gravado. `/chat` aceita do cliente só `role=user`.
 - Nunca ler nem imprimir `.env*`, chaves ou `~/.claude.json`. Segredos só em `.env.local`; o `.env.example` tem só nomes.
 - Repositório PÚBLICO (regulamento do hackathon): nada de segredo, dado pessoal ou estratégia sensível em arquivo versionado.
 - Valide toda entrada com Zod no servidor. Nunca interpole entrada em SQL. Authz em toda action e rota; RLS em toda tabela.
