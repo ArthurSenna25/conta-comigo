@@ -1,0 +1,26 @@
+# deps / build
+node_modules
+.next
+out
+coverage
+*.log
+playwright-report
+test-results
+
+# env (nunca versionar; so o exemplo)
+.env*
+!.env.example
+
+# plataformas
+.vercel
+.supabase
+supabase/.temp
+
+# config pessoal da maquina / Claude local
+_ambiente-global/
+.claude/settings.local.json
+.claude/worktrees
+
+# SO
+Thumbs.db
+.DS_Store
