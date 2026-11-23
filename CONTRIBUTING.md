@@ -15,4 +15,4 @@ Repositório **público** (regulamento do Hack Brasil 2026): nunca versione segr
 - Zod em toda entrada; authz em toda action e rota; RLS em toda tabela. Sem `any` e sem `@ts-ignore`.
 
 ## Proteção da main
-(ver abaixo)
+A branch `main` tem proteção no GitHub: PR com 1 aprovação, checks `check` e `secrets` do CI obrigatórios, sem force-push e sem deletar. A proteção **não vale para administradores** (`enforce_admins` desligado), para o dono do repositório poder destravar emergências e, sozinho, aprovar o próprio PR. Na prática: **main protegida por convenção + CI**: todos usam PR e esperam o CI verde. Secret scanning e push protection estão ativos.

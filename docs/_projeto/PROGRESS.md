@@ -1,21 +1,17 @@
 # PROGRESS — Conta Comigo
 
-**Nível:** N2 (segurança e LGPD reforçadas) · **Fase atual:** setup · **Atualizado:** 23/11/2026
+**Nível:** N2 (segurança e LGPD reforçadas) · **Fase atual:** setup concluído · **Atualizado:** 23/11/2026
 
 ## Feito
-- Repositório, .gitignore e docs do kit e do projeto publicados.
-- Scaffold Next 16 + Tailwind v4 + shadcn, com zod, vitest, husky, lint-staged e supabase.
+- Repo público, scaffold Next 16 + Tailwind v4 + shadcn, zod/vitest/husky/lint-staged/supabase CLI.
+- Pastas com donos, regras de camadas (`eslint.layers.mjs`), CLAUDE.md, README, CONTRIBUTING.
+- Husky (gitleaks, bloqueio de .env, lint-staged; typecheck no push), CI, Dependabot, `main` protegida, labels, milestone.
 ## Próximo (1 fase)
-- Fechar o setup (CI, governança) e abrir sessão P3: arquitetura, dados e contratos.
+- Sessão P3: arquitetura, dados e contratos.
 ## Decisões e premissas
-- 23/11 Repositório público — exigência do regulamento do Hack Brasil.
-- 23/11 Regra de camadas por ESLint; a IA nunca calcula imposto.
+- 23/11 Repo público por exigência do regulamento; nada sensível versionado.
 ## Pendências / bloqueios
-- Ligar `eslint.layers.mjs` ao `eslint.config.mjs` (hook config-protection bloqueou a edição).
-- Secret scanning e Push protection no GitHub (manual).
-## Mudanças de escopo aprovadas
-- Nenhuma.
-## Backlog (ideias fora do escopo)
+- Ligar `eslint.layers.mjs` ao `eslint.config.mjs` (hook config-protection do ecc bloqueou a edição).
+- CODEOWNERS só com Arthur; convidar Gui, Murilo e Frigeri e ajustar. Favicon removido (404 em dev).
+## Backlog
 - (vazio)
-## Consumo
-- setup — a medir
