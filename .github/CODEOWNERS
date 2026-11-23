@@ -1,0 +1,6 @@
+# Por enquanto so o Arthur. Atribuicao prevista por area (ajustar quando o time aceitar o convite):
+#   Arthur : app/(app)/dashboard, components, actions, supabase/migrations, .github
+#   Gui    : lib/ai, app/api/ingest, app/api/chat, kb/prompts
+#   Murilo : lib/engine, app/(app)/lancamentos, app/(app)/calendario, supabase/seed
+#   Frigeri: app/(marketing), app/(app)/onboarding, app/legal, kb, docs
+* @ArthurSenna25

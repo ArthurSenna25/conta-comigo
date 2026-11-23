@@ -33,3 +33,6 @@ next-env.d.ts
 .pnpm-debug.log*
 /.pnp
 .pnp.*
+
+# Playwright MCP
+.playwright-mcp
