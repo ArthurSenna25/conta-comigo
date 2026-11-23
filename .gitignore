@@ -24,3 +24,12 @@ _ambiente-global/
 # SO
 Thumbs.db
 .DS_Store
+
+# next / ts
+*.tsbuildinfo
+next-env.d.ts
+/build
+*.pem
+.pnpm-debug.log*
+/.pnp
+.pnp.*
