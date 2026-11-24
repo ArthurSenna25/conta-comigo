@@ -1,6 +1,6 @@
 ﻿/**
  * Dados falsos (set–nov/2026) para o front andar antes do back.
- * Ligados por NEXT_PUBLIC_USE_MOCKS=true. Nenhum dado real de pessoa.
+ * Quem decide usá-los é lib/security/modo-mock.ts (modoMock()). Nenhum dado real de pessoa.
  * Números do dashboard são escritos à mão (coerentes com os lançamentos de nov),
  * não calculados: quem calcula é lib/engine.
  */
@@ -10,8 +10,6 @@ import type { DashboardResponse } from "./dashboard";
 import type { IngestResponse } from "./ingest";
 import type { Categoria, FormaPgto, Lancamento, Origem, TipoLancamento } from "./lancamento";
 import type { Perfil } from "./perfil";
-
-export const USE_MOCKS = process.env.NEXT_PUBLIC_USE_MOCKS === "true";
 
 const id = (n: number) => `00000000-0000-4000-8000-${n.toString(16).padStart(12, "0")}`;
 const ts = (data: string) => `${data}T15:00:00.000Z`;

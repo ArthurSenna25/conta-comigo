@@ -1,26 +1,27 @@
 # PROGRESS — Conta Comigo
 
-**Nível:** N2 (segurança e LGPD reforçadas) · **Fase atual:** P4 (banco) em andamento · **Atualizado:** 24/11/2026
+**Nível:** N2 (segurança e LGPD reforçadas) · **Fase atual:** auth e consentimento (Arthur) · **Atualizado:** 24/11/2026
 
 ## Feito
 - Setup: scaffold Next 16 + Tailwind v4 + shadcn, husky/gitleaks, CI, `main` protegida, regras de camadas no ESLint.
-- P3: `lib/contracts` (Zod, mocks set–nov/2026, `AiProvider`), stubs de `lib/engine`, `tests/camadas.test.ts`, `docs/ARQUITETURA.md`, `DADOS.md` (5 tabelas), `AMEACAS.md`, `LGPD.md`, ADR-001..004.
-- P4: 4 migrations aplicadas no projeto remoto (esquema, funções/triggers, RLS + GRANT, storage); RLS e policies conferidas no painel.
-- P4: `db advisors` achou 2 WARN (`rls_auto_enable()` executável por anon/authenticated) + 1 INFO (FK sem índice de cobertura). Corrigido e aplicado em `20261124130000_corrige_advisors.sql`; advisors agora: "No issues found".
-- P4: `pnpm test:rls` 30/30 (2 usuários descartáveis, limpeza garantida). Achou 1 bug de desenho: check `revogado_em >= aceito_em` quebra com skew de relógio (removido).
-## Próximo (1 fase)
-- P4 (resto): `gen types`, repositórios em `lib/db`, `seed/demo.sql` e EXPLAIN das 6 consultas.
-- Em paralelo: Murilo implementa `lib/engine`; Gui `AiProvider`; Frigeri o onboarding contra `PerfilInput`.
-## Decisões e premissas
-- 23/11 Repo público por exigência do regulamento; nada sensível versionado.
-- 23/11 Rascunho só na tela; alertas calculados na leitura; histórico do chat só no navegador; sem audit_log (ADR-004).
-- 23/11 Exclusão de conta: Storage pela API → `auth.admin.deleteUser` → cascade.
-- 24/11 P4 segue `DADOS.md`/ADR-004, não o kit: sem audit_log, sem tabela de categorias, sem status de rascunho, sem trigger de perfil (nasce no onboarding), bucket só imagem 5 MiB.
-- 24/11 Projeto com acesso automático a tabelas desligado: GRANT explícito só para `authenticated`; `service_role` sem GRANT de tabela (menor privilégio).
-- 24/11 `.mcp.json` fora do git (tem o project_ref). MCP do Supabase adicionado no meio da sessão não carrega: precisa reiniciar o Claude Code e autenticar em `/mcp`.
+- P3: `lib/contracts` (Zod, mocks, `AiProvider`), stubs de `lib/engine`, `docs/ARQUITETURA.md`, `DADOS.md`, `AMEACAS.md`, `LGPD.md`, ADR-001..004.
+- P4 (PR #7, mergeado): 5 migrations no Supabase, RLS + GRANT explícito, bucket privado, `pnpm test:rls`, advisors sem issues.
+- Auth (`feat/auth`): `proxy.ts` (getClaims, negar por padrão), `lib/db` (client SSR, cookie HttpOnly/Secure), `lib/security` (open redirect, mock, portão), `actions/auth.ts`, telas `/entrar` `/cadastrar` `/consentimento`, stubs `/onboarding` e `/painel`.
+- Auth: contrato novo `lib/contracts/auth.ts` (commit separado). `cacheComponents`/PPR desligados (nada usava). 184 testes em `pnpm check`; `test:rls` 34 casos; reviews de código e segurança em 3 blocos. Achados corrigidos: open redirect por dot-segments, cookie sem HttpOnly/Secure, senha na URL em envio antes da hidratação, falha de rede mostrada como senha errada.
+## Próximo
+- Cadastro ponta a ponta **verificado em 24/11** com "Confirm email" desligado (Playwright 390 px): cadastro → `/onboarding`, 2 linhas em `consentimentos` (sem `envio_ia`) e 3 (com), e-mail existente → mensagem genérica. Se religar a confirmação, o aceite do cadastro não é gravado (sem sessão) e o usuário reaceita em `/consentimento` ao entrar.
+- Frigeri: conteúdo de `/onboarding` (stub fora de `app/(app)`, chama `exigirAcesso("consentimento")`) e **`app/legal/{termos,privacidade}`: BLOQUEADOR DE RELEASE**, pois as caixas de aceite já apontam para lá e hoje dão 404 (AMEACAS #20).
+- Gui: `app/api/*` precisa de variante do portão que devolva 401/403 (não redirect), checagem de Origin e de `envio_ia` (AMEACAS #16).
+- P4 (resto): `gen types`, repositórios, `seed/demo.sql`, EXPLAIN.## Decisões e premissas
+- 23/11 Repo público; rascunho só na tela; sem audit_log (ADR-004); exclusão de conta: Storage → `auth.admin.deleteUser` → cascade.
+- 24/11 P4 segue `DADOS.md`/ADR-004; GRANT só para `authenticated`; `service_role` sem GRANT de tabela.
+- 24/11 Toda página protegida chama `exigirAcesso()` (layout não re-renderiza a cada navegação); `tests/portao.test.ts` vigia.
+- 24/11 Modo mock só com `NODE_ENV` development/test; fora disso a flag **lança**. `pnpm build` local com a flag em `.env.local` falha de propósito: rode `NEXT_PUBLIC_USE_MOCKS=false pnpm build`.
+- 24/11 `USE_MOCKS` removido de `lib/contracts/mocks.ts` (`modoMock()` é a única porta); `lib/security` tem bloco de camadas (só `lib/contracts`); `shadcn` em devDependencies.
+- 24/11 Sem client de navegador (login por server action); `lib/supabase/` é pasta reservada sem código.
 ## Pendências / bloqueios
-- CODEOWNERS só com Arthur; convidar Gui, Murilo e Frigeri e ajustar. Favicon removido (404 em dev).
-- LGPD.md: itens "REVISAR COM HUMANO" (encarregado, retenção de imagens, DPA do provedor).
-- Demo: usuário de demonstração é criado por script (senha fora do repo); ainda não existe.
+- Riscos abertos em `AMEACAS.md` #14–#19: enumeração de e-mail (aceito, Confirm email desligado), força bruta/limite por IP, portão em route handlers, token vale até expirar, reaceite de consentimento revogado.
+- `pnpm audit`: 1 moderada em `minimatch` via `shadcn › ts-morph` (CLI de dev, pré-existente). `shadcn` já está em devDependencies: `pnpm audit --prod` limpo.
+- CODEOWNERS só com Arthur; favicon 404 em dev; LGPD.md com itens "REVISAR COM HUMANO".
 ## Backlog
-- simularEmprestimo (S1) · audit_log de lançamentos · estados de rascunho persistidos · tabela de mensagens do chat.
+- simularEmprestimo (S1) · audit_log de lançamentos · estados de rascunho persistidos · tabela de mensagens do chat · CSP · PWA (matcher do proxy e `/sw.js`).

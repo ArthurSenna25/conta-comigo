@@ -8,6 +8,9 @@ const PERMITIDOS: Record<string, (spec: string) => boolean> = {
   "lib/contracts": (s) => s === "zod" || s.startsWith("./"),
   "lib/engine": (s) =>
     s === "zod" || s.startsWith("./") || s === "@/lib/contracts" || s.startsWith("@/lib/contracts/"),
+  // lib/security: lógica de segurança pura (redirect, rotas, modo mock, mapa de erros), só lib/contracts.
+  "lib/security": (s) =>
+    s === "zod" || s.startsWith("./") || s === "@/lib/contracts" || s.startsWith("@/lib/contracts/"),
 };
 
 const IMPORT = /(?:from\s*|import\s*\(\s*|import\s+|require\s*\(\s*)["']([^"']+)["']/g;

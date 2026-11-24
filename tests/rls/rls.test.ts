@@ -6,6 +6,10 @@
 import { randomUUID } from "node:crypto";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { VERSAO_CONSENTIMENTO } from "@/lib/contracts";
+import { listarAceites, registrarAceites } from "@/lib/db/consentimento";
+import { existePerfil } from "@/lib/db/perfil";
+import { consentimentoVigente } from "@/lib/security/acesso";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
@@ -315,5 +319,34 @@ describe("Storage: bucket documentos", () => {
     expect((await up(A, path, "image/png")).error).toBeNull();
     const sobrescreve = await A.db.storage.from(BUCKET).upload(path, bytes(20), { contentType: "image/png", upsert: true });
     expect(sobrescreve.error).not.toBeNull();
+  });
+});
+
+describe("lib/db: consentimento e perfil (RLS real)", () => {
+  it("registrarAceites grava, é idempotente, e cada um lê só os seus", async () => {
+    await registrarAceites(A.db, A.id, ["termos_uso", "privacidade"], VERSAO_CONSENTIMENTO);
+    await registrarAceites(A.db, A.id, ["termos_uso", "privacidade", "envio_ia"], VERSAO_CONSENTIMENTO); // repetido: sem erro
+    const vigentes = (await listarAceites(A.db, A.id)).filter((a) => a.versao === VERSAO_CONSENTIMENTO);
+    expect(vigentes.map((a) => a.finalidade).sort()).toEqual(["envio_ia", "privacidade", "termos_uso"]);
+    expect(vigentes.every((a) => a.revogadoEm === null)).toBe(true);
+    expect(consentimentoVigente(await listarAceites(A.db, A.id))).toBe(true);
+    expect(await listarAceites(B.db, B.id)).toEqual([]);
+    expect(consentimentoVigente(await listarAceites(B.db, B.id))).toBe(false);
+  });
+
+  it("A não registra aceite em nome de B", async () => {
+    await expect(registrarAceites(A.db, B.id, ["termos_uso", "privacidade"], VERSAO_CONSENTIMENTO)).rejects.toThrow();
+    expect(await listarAceites(B.db, B.id)).toEqual([]);
+  });
+
+  it("listarAceites de outro usuário volta vazio (RLS), não erro", async () => {
+    expect(await listarAceites(A.db, B.id)).toEqual([]);
+  });
+
+  it("existePerfil: true para o dono, false para quem não tem e para perfil alheio", async () => {
+    expect(await existePerfil(B.db, B.id)).toBe(true);
+    expect(await existePerfil(A.db, B.id)).toBe(false); // RLS esconde o de B
+    const novo = await criarUsuario();
+    expect(await existePerfil(novo.db, novo.id)).toBe(false);
   });
 });
