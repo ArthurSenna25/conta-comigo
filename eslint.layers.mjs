@@ -27,6 +27,23 @@ const layers = [
       "lib/engine e lib/contracts são puros: sem next, react, supabase, SDK de IA, fs nem outras camadas.",
     ),
   },
+  // lib/security: lógica de segurança pura e testável (redirect, rotas, modo mock, mapa de erros de auth).
+  // Só lib/contracts; quem fala com Supabase é lib/db, quem orquestra é proxy/actions.
+  {
+    files: ["lib/security/**/*.{ts,tsx}"],
+    rules: restricted(
+      [
+        ...FRAMEWORK,
+        ...SUPABASE,
+        ...AI_SDK,
+        ...NODE_IO,
+        ...lib("engine"),
+        ...lib("ai"),
+        ...lib("db"),
+      ],
+      "lib/security é pura: só lib/contracts, sem next, react, supabase, SDK de IA, fs nem outras camadas.",
+    ),
+  },
   // lib/ai e lib/db dependem só de lib/contracts.
   {
     files: ["lib/ai/**/*.{ts,tsx}"],
