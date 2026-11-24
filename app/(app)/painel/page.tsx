@@ -8,8 +8,8 @@ export const metadata: Metadata = { title: "Painel · Conta Comigo" };
 
 /** STUB do painel: prova o portão (sessão + consentimento + perfil) e que os dados chegam. TODO: dashboard real. */
 export default async function PaginaPainel() {
-  const { demo } = await exigirAcesso(); // toda página protegida chama o portão: layout não re-renderiza a cada navegação
-  const total = await totalDeLancamentos();
+  const { demo, userId } = await exigirAcesso(); // toda página protegida chama o portão: layout não re-renderiza a cada navegação
+  const total = await totalDeLancamentos(userId);
 
   return (
     <div className="flex min-h-dvh flex-col">

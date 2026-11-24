@@ -4,50 +4,22 @@
  * Cria 2 usuários descartáveis (A e B) e apaga tudo no fim, mesmo se um teste falhar.
  */
 import { randomUUID } from "node:crypto";
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { createClient } from "@supabase/supabase-js";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { VERSAO_CONSENTIMENTO } from "@/lib/contracts";
 import { listarAceites, registrarAceites } from "@/lib/db/consentimento";
 import { contarLancamentos } from "@/lib/db/lancamento";
 import { existePerfil } from "@/lib/db/perfil";
 import { consentimentoVigente } from "@/lib/security/acesso";
-
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-const secretKey = process.env.SUPABASE_SECRET_KEY;
-if (!url || !publishableKey || !secretKey) {
-  throw new Error(
-    "Faltam NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ou SUPABASE_SECRET_KEY. Rode com `pnpm test:rls`.",
-  );
-}
+import { admin, BUCKET, criarUsuario, limparUsuarios, type Usuario } from "./ajuda";
 
 const SEM_SESSAO = { auth: { persistSession: false, autoRefreshToken: false } } as const;
-const BUCKET = "documentos";
 const MIB = 1024 * 1024;
 const PERMISSAO_NEGADA = "42501"; // RLS (with check) ou GRANT ausente
 const VIOLACAO_FK = "23503";
 const VIOLACAO_CHECK = "23514";
 
-const admin = createClient(url, secretKey, SEM_SESSAO);
-const anon = createClient(url, publishableKey, SEM_SESSAO);
-const criados: string[] = [];
-
-type Usuario = { id: string; db: SupabaseClient };
-
-async function criarUsuario(): Promise<Usuario> {
-  const senha = `${randomUUID()}${randomUUID()}`;
-  const { data, error } = await admin.auth.admin.createUser({
-    email: `rls-${randomUUID()}@example.com`,
-    password: senha,
-    email_confirm: true,
-  });
-  if (error || !data.user) throw new Error(`createUser falhou: ${error?.message}`);
-  criados.push(data.user.id); // registra antes do login: o afterAll apaga mesmo se algo falhar depois
-  const db = createClient(url!, publishableKey!, SEM_SESSAO);
-  const login = await db.auth.signInWithPassword({ email: data.user.email!, password: senha });
-  if (login.error) throw new Error(`login falhou: ${login.error.message}`);
-  return { id: data.user.id, db };
-}
+const anon = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!, SEM_SESSAO);
 
 const perfil = (userId: string) => ({
   user_id: userId,
@@ -106,20 +78,7 @@ beforeAll(async () => {
   expect(up.error).toBeNull();
 });
 
-afterAll(async () => {
-  const falhas: string[] = [];
-  for (const id of criados) {
-    try {
-      const { data: arquivos } = await admin.storage.from(BUCKET).list(id);
-      if (arquivos?.length) await admin.storage.from(BUCKET).remove(arquivos.map((f) => `${id}/${f.name}`));
-      const { error } = await admin.auth.admin.deleteUser(id); // cascade apaga as linhas
-      if (error) falhas.push(`deleteUser ${id}: ${error.message}`);
-    } catch (e) {
-      falhas.push(`limpeza ${id}: ${e instanceof Error ? e.message : String(e)}`);
-    }
-  }
-  if (falhas.length) throw new Error(`Usuários de teste podem ter sobrado:\n${falhas.join("\n")}`);
-});
+afterAll(limparUsuarios);
 
 describe("A no que é dele", () => {
   it("insere e lê o próprio perfil", async () => {
@@ -362,10 +321,10 @@ describe("lib/db: consentimento e perfil (RLS real)", () => {
 
   it("contarLancamentos conta só os do próprio usuário (painel da demo)", async () => {
     const proprios = async (u: Usuario) => ((await u.db.from("lancamentos").select("id")).data ?? []).length;
-    expect(await contarLancamentos(B.db)).toBeGreaterThanOrEqual(1);
-    expect(await contarLancamentos(B.db)).toBe(await proprios(B));
-    expect(await contarLancamentos(A.db)).toBe(await proprios(A));
+    expect(await contarLancamentos(B.db, B.id)).toBeGreaterThanOrEqual(1);
+    expect(await contarLancamentos(B.db, B.id)).toBe(await proprios(B));
+    expect(await contarLancamentos(A.db, A.id)).toBe(await proprios(A));
     const novo = await criarUsuario();
-    expect(await contarLancamentos(novo.db)).toBe(0);
+    expect(await contarLancamentos(novo.db, novo.id)).toBe(0);
   });
 });
