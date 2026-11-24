@@ -2,14 +2,15 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AUDIO_MAX_BYTES, IMAGEM_MAX_BYTES, IngestResponse } from "@/lib/contracts";
 import { ErroIa } from "@/lib/ai/erro";
 import { POST } from "@/app/api/ingest/route";
-import { criarPostIngestao } from "@/app/api/ingest/processar";
-import { ErroIngestao } from "@/app/api/ingest/entrada";
+import { criarProcessarIngestao } from "@/app/api/ingest/processar";
+import { respostaErro } from "@/lib/security/portao-api";
 
 const { autorizar, provider, reservarUsoIa } = vi.hoisted(() => ({
   autorizar: vi.fn(), provider: vi.fn(), reservarUsoIa: vi.fn(),
 }));
 vi.mock("server-only", () => ({}));
-vi.mock("@/app/api/ingest/acesso", () => ({ autorizarIngestao: autorizar }));
+// O portão (Origin, sessão, consentimento, perfil, envio_ia, teto) é testado em actions/portao-api.test.ts.
+vi.mock("@/actions/portao-api", () => ({ exigirAcessoApi: autorizar }));
 vi.mock("@/lib/db/uso-ia", () => ({ reservarUsoIa }));
 vi.mock("@/lib/ai/gemini", async () => ({
   ErroIa: (await import("@/lib/ai/erro")).ErroIa, criarGeminiProvider: provider,
@@ -42,28 +43,24 @@ describe("/api/ingest", () => {
     expect(provider).not.toHaveBeenCalled();
   });
 
-  it.each([["origem externa", "https://externo.example"], ["origem nula", "null"]])(
-    "rejeita %s antes da autorização", async (_, origin) => {
-      expect((await POST(pedido(formulario("texto"), origin))).status).toBe(403);
-      expect(autorizar).not.toHaveBeenCalled();
+  it("chama o portão com { ia: true } e o repassa a resposta de recusa sem ler o corpo", async () => {
+    autorizar.mockResolvedValue(respostaErro("proibido"));
+    const req = pedido(formulario("texto"), "https://externo.example");
+    expect((await POST(req)).status).toBe(403);
+    expect(autorizar).toHaveBeenCalledWith(req, { ia: true });
+    expect(req.bodyUsed).toBe(false);
+  });
+
+  it.each([[401, "nao_autenticado"], [403, "proibido"], [429, "limite_ia"], [500, "interno"]] as const)(
+    "preserva a recusa do portão %s", async (status, codigo) => {
+      autorizar.mockResolvedValue(respostaErro(codigo));
+      const resposta = await POST(pedido(formulario("texto")));
+      expect(resposta.status).toBe(status);
+      expect(await resposta.json()).toMatchObject({ erro: { codigo } });
+      expect(provider).not.toHaveBeenCalled();
+      expect(reservarUsoIa).not.toHaveBeenCalled();
     },
   );
-
-  it("aceita o host original quando a URL interna do Next usa localhost", async () => {
-    const resposta = await POST(new Request(origem + "/api/ingest", {
-      method: "POST", body: formulario("texto"),
-      headers: { host: "127.0.0.1:3000", origin: "http://127.0.0.1:3000" },
-    }));
-    expect(resposta.status).toBe(200);
-  });
-
-  it.each([[401, "nao_autenticado"], [403, "proibido"]] as const)("preserva o erro de acesso %s", async (status, codigo) => {
-    autorizar.mockRejectedValue(new ErroIngestao(status, codigo, "Acesso restrito."));
-    const resposta = await POST(pedido(formulario("texto")));
-    expect(resposta.status).toBe(status);
-    expect(await resposta.json()).toMatchObject({ erro: { codigo } });
-    expect(provider).not.toHaveBeenCalled();
-  });
 
   it("recusa JSON e campos repetidos", async () => {
     expect((await POST(pedido("{}"))).status).toBe(415);
@@ -91,7 +88,7 @@ describe("/api/ingest", () => {
   it("fecha a ingestão autenticada quando a reserva compartilhada está ausente", async () => {
     autorizar.mockResolvedValue({ mock: false, userId: "id", demo: true, tetoCentavos: 100 });
     const req = pedido(formulario("texto"));
-    const resposta = await criarPostIngestao()(req);
+    const resposta = await criarProcessarIngestao()(req, { mock: false, userId: "id", demo: true });
     expect(resposta.status).toBe(503);
     expect((await resposta.json()).erro.codigo).toBe("ia_indisponivel");
     expect(req.bodyUsed).toBe(false);
@@ -109,7 +106,7 @@ describe("/api/ingest", () => {
       },
     }));
     const reservar = vi.fn().mockRejectedValue(new ErroIa("cota"));
-    const resposta = await criarPostIngestao(reservar)(pedido(formulario("texto")));
+    const resposta = await criarProcessarIngestao(reservar)(pedido(formulario("texto")), acesso);
     expect(reservar).toHaveBeenCalledWith(acesso, tentativa);
     expect(resposta.status).toBe(429);
   });
