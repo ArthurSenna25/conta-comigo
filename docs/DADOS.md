@@ -87,8 +87,10 @@ erDiagram
 ## RLS e Storage
 
 - `perfis`, `lancamentos`: select/insert/update/delete com `user_id = (select auth.uid())`.
-- `documentos`, `consentimentos`: select/insert do próprio usuário; sem update (consentimento: update só de `revogado_em`).
-- `ai_usage`: **só select** para o usuário. Escrita só no servidor via função `registrar_uso_ia()` (`security definer`), senão o usuário zeraria o próprio contador.
+- `documentos`: select/insert/**delete** do próprio usuário; sem update. O delete é necessário: a action apaga a linha ao excluir o último lançamento que a usa.
+- `consentimentos`: select/insert do próprio usuário; o único update é de `revogado_em` (GRANT por coluna). Sem `check` entre `revogado_em` e `aceito_em`: compararia horário do app com `now()` do banco e quebra com skew de relógio.
+- `ai_usage`: **só select** para o usuário. Escrita só no servidor via `registrar_uso_ia(p_user_id, p_custo_centavos)` (`security definer`, EXECUTE só para `service_role`), senão o usuário zeraria o próprio contador.
+- **GRANT explícito:** o projeto tem acesso automático a novas tabelas desligado. Cada tabela recebe `GRANT` só para `authenticated` (anon: nada). `service_role` **não** tem GRANT de tabela (menor privilégio): o servidor usa o client do usuário; a secret key só faz Storage, `auth.admin` e `registrar_uso_ia`.
 - Storage: bucket **privado** `documentos`; policy em `storage.objects` exige `(storage.foldername(name))[1] = auth.uid()::text`. Leitura por URL assinada curta.
 
 ## Exclusão de conta (LGPD)
@@ -106,4 +108,4 @@ Action no servidor, nesta ordem: (1) listar e apagar os arquivos de `documentos/
 | 5 | Perfil do usuário | PK |
 | 6 | Uso de IA de hoje (antes de cada chamada) | PK (user_id, dia) |
 
-Mais: `documentos (user_id)` (exportar/excluir) e `lancamentos (documento_id) where documento_id is not null` (FK). Volume por usuário é pequeno (centenas de linhas/ano): nada de particionamento nem paginação keyset; lista do mês sem paginação.
+Mais: `documentos (user_id)` (exportar/excluir) e `lancamentos (documento_id, user_id)` (FK composta; o índice parcial não conta para o linter do Supabase). Volume por usuário é pequeno (centenas de linhas/ano): nada de particionamento nem paginação keyset; lista do mês sem paginação.
