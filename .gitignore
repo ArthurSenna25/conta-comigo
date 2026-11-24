@@ -36,3 +36,6 @@ next-env.d.ts
 
 # Playwright MCP
 .playwright-mcp
+
+# MCP local (contem project_ref)
+.mcp.json
