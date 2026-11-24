@@ -46,7 +46,47 @@ describe("destinoSeguro: bloqueia open redirect", () => {
   });
 });
 
+describe("destinoSeguro: normalização de dot-segments não pode produzir //host", () => {
+  it.each([
+    "/..//evil.com",
+    "/.//evil.com",
+    "/a/..//evil.com",
+    "/%2e%2e//evil.com",
+    "/.%2e//evil.com",
+    "/a/%2e%2e//evil.com",
+    "/a/../..//evil.com",
+  ])("rejeita %s", (entrada) => {
+    expect(destinoSeguro(entrada)).toBe(PADRAO);
+  });
+
+  it.each([
+    "/painel",
+    "/a/../painel",
+    "/..//evil.com",
+    "/.%2e//evil.com",
+    "/%2F/evil.com",
+    "/%5Cevil.com",
+    "//evil.com",
+    "/\\evil.com",
+    "/painel?next=//evil.com",
+    "/painel?x=%2F%2Fevil.com",
+  ])("a saída para %s nunca começa com // nem /\\", (entrada) => {
+    expect(destinoSeguro(entrada)).not.toMatch(/^\/[/\\]/);
+  });
+});
+
 describe("destinoSeguro: evita laço de login", () => {
+  it.each(["/%65ntrar", "/%65ntrar/", "/entrar/.", "/cadastrar/..//entrar"])(
+    "codificação e ponto final não escapam da lista (%s)",
+    (entrada) => {
+      expect(destinoSeguro(entrada)).toBe(PADRAO);
+    },
+  );
+
+  it.each(["/entrar/", "/cadastrar/", "/consentimento/", "/entrar//"])("barra final não escapa da lista (%s)", (entrada) => {
+    expect(destinoSeguro(entrada)).toBe(PADRAO);
+  });
+
   it.each(["/entrar", "/cadastrar", "/entrar?next=/painel", "/consentimento"])(
     "não devolve a própria tela de acesso (%s)",
     (entrada) => {

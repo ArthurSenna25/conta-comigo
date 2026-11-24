@@ -3,6 +3,15 @@ const MAX = 512;
 /** Telas de acesso: voltar para elas depois do login criaria um laço. */
 const TELAS_DE_ACESSO = new Set(["/entrar", "/cadastrar", "/consentimento"]);
 
+const semBarraFinal = (caminho: string) => caminho.replace(/\/+$/, "") || "/";
+const decodificar = (caminho: string) => {
+  try {
+    return decodeURIComponent(caminho);
+  } catch {
+    return caminho;
+  }
+};
+
 /**
  * Valida o parâmetro de retorno (?next=) contra open redirect.
  * Só devolve caminho relativo do próprio site (caminho + query); qualquer outra coisa vira `padrao`.
@@ -19,6 +28,14 @@ export function destinoSeguro(next: unknown, padrao = "/painel"): string {
   } catch {
     return padrao;
   }
-  if (url.origin !== BASE || TELAS_DE_ACESSO.has(url.pathname)) return padrao;
-  return url.pathname + url.search;
+  if (url.origin !== BASE) return padrao;
+
+  // O parser remove "." e ".." mas deixa o segmento vazio: "/..//evil.com" vira "//evil.com".
+  // Por isso a SAÍDA também é validada, não só a entrada.
+  const saida = url.pathname + url.search;
+  if (/^\/[/\\]/.test(saida)) return padrao;
+
+  // O Next decodifica a rota e ignora barra final: "/%65ntrar" e "/entrar/" também são /entrar.
+  if (TELAS_DE_ACESSO.has(semBarraFinal(decodificar(url.pathname)))) return padrao;
+  return saida;
 }
