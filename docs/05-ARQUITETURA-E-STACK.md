@@ -41,7 +41,7 @@ Não adicione o que não usa. Cada dependência extra: justificativa em uma linh
 ## 4. Notas sobre Next.js 16.x
 
 - Turbopack é o bundler padrão; o React Compiler está estável; `middleware.ts` foi substituído por `proxy.ts` (há codemod: `npx @next/codemod@canary upgrade latest`). Leia o guia de upgrade antes de migrar.
-- Cache é explícito (Cache Components). Páginas de marketing: estático/ISR; dinâmico só onde precisa.
+- Nada é cacheado por padrão (Cache Components e PPR ficam **desligados** neste projeto: o app autenticado lê cookies em quase toda rota e ninguém usa `use cache`). Páginas de marketing: estático; ligue `cacheComponents` só se medir ganho.
 - **Nunca use `proxy`/middleware como única camada de autorização** (vide CVE-2025-29927). Autorize em cada action e route handler.
 - Node: use uma versão LTS suportada pela versão do Next.
 
