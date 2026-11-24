@@ -37,6 +37,69 @@ function semFaixaDemo(arquivo: string, fonte: string): string | null {
   return /<FaixaDemo\b/.test(codigo) ? null : arquivo;
 }
 
+const ehRoute = (f: string) => /\/route\.ts$/.test(f);
+
+/** route.ts de app/api: o proxy só barra quem não tem sessão; consentimento, Origin e perfil são do portão de API. */
+function rotas(): string[] {
+  if (!existsSync("app")) return [];
+  return readdirSync("app", { recursive: true, encoding: "utf8" })
+    .map((f) => norm(join("app", f)))
+    .filter(ehRoute);
+}
+
+const METODO = "(?:GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS)";
+const semComentarios = (fonte: string) => fonte.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/.*$/gm, "$1");
+
+/**
+ * Problema do route.ts, ou null. Cada handler exportado precisa de uma chamada a exigirAcessoApi( (por contagem,
+ * sem AST); `export const POST =` e reexport são proibidos porque escapam da contagem; rota que importa lib/ai
+ * precisa de `ia: true`. Heurística: não prova que o Response é devolvido; o code review cobre isso.
+ */
+function problemaDeRota(arquivo: string, fonte: string): string | null {
+  const codigo = semComentarios(fonte);
+  if (new RegExp(String.raw`export\s+const\s+${METODO}\b|export\s*\{[^}]*\b${METODO}\b`).test(codigo)) {
+    return `${arquivo}: use "export async function METODO", nunca const nem reexport`;
+  }
+  const handlers = codigo.match(new RegExp(String.raw`export\s+(?:async\s+)?function\s+${METODO}\b`, "g"))?.length ?? 0;
+  const chamadas = codigo.match(/\bexigirAcessoApi\s*\(/g)?.length ?? 0;
+  if (chamadas < Math.max(handlers, 1)) return `${arquivo}: cada handler chama exigirAcessoApi(`;
+  if (/@\/lib\/ai\b/.test(codigo) && !/\bia\s*:\s*true\b/.test(codigo)) {
+    return `${arquivo}: rota de IA usa exigirAcessoApi(req, { ia: true })`;
+  }
+  return null;
+}
+
+describe("portão de API em todo route.ts", () => {
+  it("cada route.ts passa pelo portão", () => {
+    const problemas = rotas().flatMap((arq) => problemaDeRota(arq, readFileSync(arq, "utf8")) ?? []);
+    expect(problemas).toEqual([]);
+  });
+
+  it("pega route.ts sem portão e ignora menção em comentário", () => {
+    expect(problemaDeRota("r.ts", "export async function POST() {}")).not.toBeNull();
+    expect(problemaDeRota("r.ts", "// exigirAcessoApi(req)\nexport async function POST() {}")).not.toBeNull();
+    expect(problemaDeRota("r.ts", "export async function POST(r) { await exigirAcessoApi(r); }")).toBeNull();
+  });
+
+  it("pega handler sem portão quando outro tem, const e reexport", () => {
+    const dois = "export async function GET(r) { await exigirAcessoApi(r) }\nexport async function POST() {}";
+    expect(problemaDeRota("r.ts", dois)).not.toBeNull();
+    expect(problemaDeRota("r.ts", "export const POST = async () => { exigirAcessoApi() }")).not.toBeNull();
+    expect(problemaDeRota("r.ts", "export { POST } from './x'")).not.toBeNull();
+  });
+
+  it("rota que importa lib/ai exige ia: true", () => {
+    const base = 'import { x } from "@/lib/ai/y";\nexport async function POST(r) { await exigirAcessoApi(r%S) }';
+    expect(problemaDeRota("r.ts", base.replace("%S", ""))).not.toBeNull();
+    expect(problemaDeRota("r.ts", base.replace("%S", ", { ia: true }"))).toBeNull();
+  });
+
+  it("ehRoute enxerga subpastas e ignora route.test.ts", () => {
+    expect(ehRoute("app/api/ingest/route.ts")).toBe(true);
+    expect(ehRoute("app/api/ingest/route.test.ts")).toBe(false);
+  });
+});
+
 describe("faixa da conta de demo em toda página protegida", () => {
   it("cada page.tsx fora da lista pública renderiza <FaixaDemo>", () => {
     const sem = paginas().flatMap((arq) => semFaixaDemo(arq, readFileSync(arq, "utf8")) ?? []);
