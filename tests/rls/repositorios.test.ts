@@ -143,6 +143,31 @@ describe("lancamento", () => {
   });
 });
 
+describe("fluxo ponta a ponta (a ordem que as actions executam)", () => {
+  it("perfil → confirmar com comprovante → listar → excluir o último lançamento limpa o documento", async () => {
+    const U = await criarUsuario();
+    await criarPerfil(U.db, U.id, PERFIL);
+
+    const doc = await enviarDocumento(U.db, U.id, png());
+    const criados = await criarLancamentos(U.db, U.id, [lanc({ descricao: "a" }), lanc({ descricao: "b" })], doc.id);
+    const lista = await listarLancamentos(U.db, U.id, { de: "2026-11-01", ate: "2026-12-01" });
+    expect(lista.map((l) => l.descricao).sort()).toEqual(["a", "b"]);
+    expect(lista.every((l) => l.documentoId === doc.id)).toBe(true);
+    expect(await urlAssinadaDocumento(U.db, U.id, doc.id)).not.toBeNull();
+
+    for (const l of criados) {
+      const { documentoId } = (await excluirLancamento(U.db, U.id, l.id))!;
+      if (documentoId && (await contarLancamentosDoDocumento(U.db, U.id, documentoId)) === 0) {
+        await removerDocumento(U.db, U.id, documentoId);
+      }
+    }
+    expect(await listarLancamentos(U.db, U.id, { de: "2026-11-01", ate: "2026-12-01" })).toEqual([]);
+    expect(await urlAssinadaDocumento(U.db, U.id, doc.id)).toBeNull();
+    const { data: arquivos } = await admin.storage.from(BUCKET).list(U.id);
+    expect(arquivos ?? []).toEqual([]);
+  });
+});
+
 describe("documento", () => {
   it("A envia imagem: path {user_id}/{uuid}.ext, linha em documentos, URL assinada curta", async () => {
     const { id } = await enviarDocumento(A.db, A.id, png(2048));
