@@ -1,13 +1,12 @@
 // Guarda do modo mock: a flag só pode ser lida em lib/security/modo-mock.ts (que falha fechado fora de
-// development/test). Qualquer outra leitura, ou import de USE_MOCKS, contorna a proteção de produção:
+// development/test). Qualquer outra leitura, ou símbolo USE_MOCKS (removido de lib/contracts), contorna a proteção de produção:
 // o Next inlina NEXT_PUBLIC_* no build, então um `true` esquecido serviria o usuário falso em produção.
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const RAIZES = ["app", "actions", "components", "lib", "proxy.ts"];
-const LE_A_FLAG = ["lib/security/modo-mock.ts", "lib/contracts/mocks.ts"];
-const DEFINE_USE_MOCKS = "lib/contracts/mocks.ts";
+const LE_A_FLAG = ["lib/security/modo-mock.ts"];
 
 function fontes(raiz: string): string[] {
   const norm = (p: string) => p.replaceAll("\\", "/");
@@ -27,7 +26,7 @@ function violacoesDoModoMock(arquivo: string, fonte: string): Violacao[] {
   if (src.includes("NEXT_PUBLIC_USE_MOCKS") && !LE_A_FLAG.includes(arquivo)) {
     v.push({ arquivo, motivo: "lê NEXT_PUBLIC_USE_MOCKS: use modoMock() de @/lib/security/modo-mock" });
   }
-  if (/\bUSE_MOCKS\b/.test(src) && arquivo !== DEFINE_USE_MOCKS) {
+  if (/\bUSE_MOCKS\b/.test(src)) {
     v.push({ arquivo, motivo: "usa USE_MOCKS (sem guarda de produção): use modoMock()" });
   }
   return v;
@@ -46,6 +45,6 @@ describe("modo mock: única porta é modoMock()", () => {
     expect(violacoesDoModoMock("app/y.tsx", importa)).toHaveLength(1);
     expect(violacoesDoModoMock("actions/z.ts", "// usa NEXT_PUBLIC_USE_MOCKS\n/** USE_MOCKS */")).toEqual([]);
     expect(violacoesDoModoMock("lib/security/modo-mock.ts", leitura)).toEqual([]);
-    expect(violacoesDoModoMock("lib/contracts/mocks.ts", `${leitura}\nexport const USE_MOCKS = 1;`)).toEqual([]);
+    expect(violacoesDoModoMock("lib/contracts/mocks.ts", `${leitura}\nexport const USE_MOCKS = 1;`)).toHaveLength(2);
   });
 });
