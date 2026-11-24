@@ -58,7 +58,7 @@ flowchart TB
 
 ## Fluxos
 
-- **Ingestão (M2–M4):** `/api/ingest` (FormData) → sessão → Zod `IngestRequest` → checa `ai_usage` → `AiProvider.extrair` (imagem/áudio em memória) → Zod `IngestResponse` → rascunhos voltam para a tela. **Nada é gravado**, nem o arquivo.
+- **Ingestão (M2–M4):** `/api/ingest` (FormData) → sessão → Zod `IngestRequest` → reserva 1 chamada por tentativa (`reservar_uso_ia`) → `AiProvider.extrair` (imagem/áudio em memória) → Zod `IngestResponse` → rascunhos voltam para a tela. **Nada é gravado**, nem o arquivo.
 - **Confirmação:** action `confirmar` → sessão → Zod `ConfirmarRequest` (revalida tudo; o que veio da IA não tem privilégio) → se houver imagem: grava no Storage + linha em `documentos` → `INSERT` em `lancamentos`.
 - **Dashboard (M6/M7):** action lê perfil + lançamentos do ano → `lib/engine` (resumoMes, statusLimiteMei, projecaoAnual, proximoVencimentoDas, valorDas, gerarAlertas) → `DashboardResponse`. Alertas calculados na leitura.
 - **Chat (M8):** `/api/chat` aceita só `role=user` → action monta `ContextoChat` (perfil + dashboard do engine + trechos de `kb/` por palavra-chave) → `AiProvider.responder` → fontes só de `kb/`. Histórico fica no navegador.
@@ -70,7 +70,7 @@ flowchart TB
 
 ## Portão de `app/api/*` (para quem cria route handlers)
 
-Todo `route.ts` começa chamando `exigirAcessoApi(req)` de `@/actions/portao-api` (`tests/portao.test.ts` falha se faltar). Ele **nunca redireciona**: devolve `Response` com `ErroResposta` (401 sem sessão, 403 sem consentimento/perfil/Origin, 500 em falha interna). Em método de escrita (POST/PUT/PATCH/DELETE) exige `Origin` igual ao da aplicação; sem Origin, recusa.
+Todo `route.ts` começa chamando `exigirAcessoApi(req)` de `@/actions/portao-api` (`tests/portao.test.ts` falha se faltar). Ele **nunca redireciona**: devolve `Response` com `ErroResposta` (401 sem sessão, 403 sem consentimento/perfil/Origin, 429 com teto de IA em 0 (só com `{ ia: true }`), 500 em falha interna). Em método de escrita (POST/PUT/PATCH/DELETE) exige `Origin` igual ao da aplicação; sem Origin, recusa.
 
 ```ts
 import { exigirAcessoApi } from "@/actions/portao-api";
@@ -79,11 +79,11 @@ export async function POST(req: Request) {
   // Rotas que mandam dado ao provedor de IA (/api/ingest, /api/chat) passam { ia: true }:
   // exige envio_ia aceito NA VERSÃO ATUAL e não revogado. O teste falha se uma rota que importa lib/ai esquecer.
   const acesso = await exigirAcessoApi(req, { ia: true });
-  if (acesso instanceof Response) return acesso; // 401/403/500 prontos
-  // ... acesso.userId, acesso.demo; Zod no corpo; tetoDiarioIaCentavos(acesso.demo, env) antes da IA
+  if (acesso instanceof Response) return acesso; // 401/403/429/500 prontos
+  // ... acesso.userId, acesso.demo, acesso.mock; Zod no corpo; reserva por tentativa (app/api/ingest/reserva.ts) antes da IA
 }
 ```
 
-Use `export async function METODO` (nunca `export const` nem reexport) e chame o portão em CADA handler. GET/HEAD não podem ter efeito colateral (não checam Origin). O Origin esperado vem de `x-forwarded-host/proto` (Vercel) ou da URL; sem Origin em escrita, 403. No modo mock o Origin também vale.
+Use `export async function METODO` (nunca `export const` nem reexport) e chame o portão em CADA handler. GET/HEAD não podem ter efeito colateral (não checam Origin). Há UMA regra de Origin para todo `app/api/*`: esquema da URL + cabeçalho `Host` que o cliente usou (o Next normaliza `req.url` para localhost). `x-forwarded-host/proto` não são lidos: a doc da Vercel só confirma a sobrescrita de `x-forwarded-for`, então a regra não depende deles. Se o `Host` chegar interno, a escrita falha FECHADA (403); validar com um POST real no preview (AMEACAS #16). Sem Origin em escrita, 403. No modo mock o Origin também vale. `/api/ingest` usa o mesmo portão (sem exceção); a reserva de chamadas de IA fica na rota, não no portão.
 
 Erros do corpo/IA usam `respostaErro(codigo)` de `@/lib/security/portao-api` (mensagens genéricas, `cache-control: no-store`). O proxy continua barrando `/api/*` sem sessão com 401; o portão cobre o resto.
