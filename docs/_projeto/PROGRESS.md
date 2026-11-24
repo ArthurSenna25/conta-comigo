@@ -9,19 +9,19 @@
 - Auth (`feat/auth`): `proxy.ts` (getClaims, negar por padrão), `lib/db` (client SSR, cookie HttpOnly/Secure), `lib/security` (open redirect, mock, portão), `actions/auth.ts`, telas `/entrar` `/cadastrar` `/consentimento`, stubs `/onboarding` e `/painel`.
 - Auth: contrato novo `lib/contracts/auth.ts` (commit separado). `cacheComponents`/PPR desligados (nada usava). 184 testes em `pnpm check`; `test:rls` 34 casos; reviews de código e segurança em 3 blocos. Achados corrigidos: open redirect por dot-segments, cookie sem HttpOnly/Secure, senha na URL em envio antes da hidratação, falha de rede mostrada como senha errada.
 ## Próximo
-- Ligar o cadastro ponta a ponta: **desligar "Confirm email"** no painel (hoje LIGADO: `signUp` dá 429 e não cria sessão) e repetir o teste de cadastro no Playwright.
+- Ligar o cadastro ponta a ponta: **"Confirm email" segue LIGADO** no projeto (24/11, 2º teste: `signUp` cria a conta sem sessão, `email_confirmed_at` nulo, e o 2º cadastro dá 429 de envio de e-mail). Conferir em Authentication → Providers → Email (e se o projeto é o da `NEXT_PUBLIC_SUPABASE_URL`); depois repetir cadastro → `/onboarding` com 2 e 3 linhas em `consentimentos`. Com ele ligado o aceite do cadastro não é gravado (sem sessão): o usuário reaceita em `/consentimento` ao entrar.
 - Frigeri: conteúdo de `/onboarding` (stub fora de `app/(app)`, chama `exigirAcesso("consentimento")`) e **`app/legal/{termos,privacidade}`: BLOQUEADOR DE RELEASE**, pois as caixas de aceite já apontam para lá e hoje dão 404 (AMEACAS #20).
 - Gui: `app/api/*` precisa de variante do portão que devolva 401/403 (não redirect), checagem de Origin e de `envio_ia` (AMEACAS #16).
-- P4 (resto): `gen types`, repositórios, `seed/demo.sql`, EXPLAIN. Decidir o fim de `USE_MOCKS` em `lib/contracts/mocks.ts` (segunda fonte da flag).
-## Decisões e premissas
+- P4 (resto): `gen types`, repositórios, `seed/demo.sql`, EXPLAIN.## Decisões e premissas
 - 23/11 Repo público; rascunho só na tela; sem audit_log (ADR-004); exclusão de conta: Storage → `auth.admin.deleteUser` → cascade.
 - 24/11 P4 segue `DADOS.md`/ADR-004; GRANT só para `authenticated`; `service_role` sem GRANT de tabela.
 - 24/11 Toda página protegida chama `exigirAcesso()` (layout não re-renderiza a cada navegação); `tests/portao.test.ts` vigia.
 - 24/11 Modo mock só com `NODE_ENV` development/test; fora disso a flag **lança**. `pnpm build` local com a flag em `.env.local` falha de propósito: rode `NEXT_PUBLIC_USE_MOCKS=false pnpm build`.
+- 24/11 `USE_MOCKS` removido de `lib/contracts/mocks.ts` (`modoMock()` é a única porta); `lib/security` tem bloco de camadas (só `lib/contracts`); `shadcn` em devDependencies.
 - 24/11 Sem client de navegador (login por server action); `lib/supabase/` é pasta reservada sem código.
 ## Pendências / bloqueios
 - Riscos abertos em `AMEACAS.md` #14–#19: enumeração de e-mail (aceito, Confirm email desligado), força bruta/limite por IP, portão em route handlers, token vale até expirar, reaceite de consentimento revogado.
-- `pnpm audit`: 1 moderada em `minimatch` via `shadcn › ts-morph` (CLI de dev, pré-existente); avaliar mover `shadcn` para devDependencies.
+- `pnpm audit`: 1 moderada em `minimatch` via `shadcn › ts-morph` (CLI de dev, pré-existente). `shadcn` já está em devDependencies: `pnpm audit --prod` limpo.
 - CODEOWNERS só com Arthur; favicon 404 em dev; LGPD.md com itens "REVISAR COM HUMANO".
 ## Backlog
 - simularEmprestimo (S1) · audit_log de lançamentos · estados de rascunho persistidos · tabela de mensagens do chat · CSP · PWA (matcher do proxy e `/sw.js`).
