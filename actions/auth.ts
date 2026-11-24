@@ -12,6 +12,7 @@ import {
 import { criarClienteServidor } from "@/lib/db/cliente-servidor";
 import { listarAceites, registrarAceites } from "@/lib/db/consentimento";
 import { consentimentoVigente, finalidadesDoAceite } from "@/lib/security/acesso";
+import { credenciaisDemo, ehContaDemo } from "@/lib/security/demo";
 import { erroDeAuth } from "@/lib/security/erros-auth";
 import { modoMock } from "@/lib/security/modo-mock";
 import { destinoSeguro } from "@/lib/security/redirecionamento";
@@ -37,6 +38,37 @@ export async function entrar(_anterior: Estado<null>, form: FormData): Promise<E
   const { error } = await db.auth.signInWithPassword({ email: entrada.data.email, password: entrada.data.senha });
   if (error) return erroDeAuth("login", error);
   redirect(destino); // o portão (exigirAcesso) manda para /consentimento ou /onboarding se faltar algo
+}
+
+/**
+ * "Ver demonstração": entra na conta de demo compartilhada (dados fictícios; criada por scripts/seed-demo.mjs).
+ * As credenciais vêm só do ambiente do servidor e nunca chegam ao navegador. Qualquer falha (variáveis
+ * ausentes, conta não semeada, limite do Auth) vira a MESMA mensagem genérica; só o código vai ao log.
+ */
+export async function entrarComoDemo(): Promise<Estado<null>> {
+  if (modoMock()) redirect("/painel");
+
+  const indisponivel: Resultado<never> = {
+    ok: false,
+    erro: { codigo: "interno", mensagem: "A demonstração não está disponível agora. Tente de novo mais tarde." },
+  };
+  const credenciais = credenciaisDemo({ DEMO_EMAIL: process.env.DEMO_EMAIL, DEMO_PASSWORD: process.env.DEMO_PASSWORD });
+  if (!credenciais) {
+    console.error("demo: DEMO_EMAIL/DEMO_PASSWORD ausentes");
+    return indisponivel;
+  }
+
+  const db = await criarClienteServidor();
+  // Já está na demo (duplo clique, recarga): não gasta o limite de login do Auth, que é por IP e compartilhado.
+  const { data: atual } = await db.auth.getClaims();
+  if (ehContaDemo(atual?.claims)) redirect("/painel");
+
+  const { error } = await db.auth.signInWithPassword({ email: credenciais.email, password: credenciais.senha });
+  if (error) {
+    console.error("demo: login falhou", error.code ?? error.status ?? "sem código");
+    return indisponivel;
+  }
+  redirect("/painel");
 }
 
 export async function cadastrar(

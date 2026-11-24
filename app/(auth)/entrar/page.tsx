@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BotaoDemo } from "@/components/auth/botao-demo";
 import { FormEntrar } from "@/components/auth/form-entrar";
 
 export const metadata: Metadata = { title: "Entrar · Conta Comigo" };
@@ -20,6 +21,7 @@ export default async function PaginaEntrar({ searchParams }: PageProps<"/entrar"
           Criar conta
         </Link>
       </p>
+      <BotaoDemo />
     </>
   );
 }

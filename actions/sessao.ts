@@ -5,6 +5,7 @@ import { criarClienteServidor } from "@/lib/db/cliente-servidor";
 import { listarAceites } from "@/lib/db/consentimento";
 import { existePerfil } from "@/lib/db/perfil";
 import { consentimentoVigente, destinoDoAcesso } from "@/lib/security/acesso";
+import { ehContaDemo } from "@/lib/security/demo";
 import { modoMock } from "@/lib/security/modo-mock";
 
 /** Até onde o portão exige: só login (tela de consentimento), + consentimento (onboarding) ou tudo (app). */
@@ -18,8 +19,8 @@ export type Etapa = "sessao" | "consentimento" | "completo";
  */
 export async function exigirAcesso(
   etapa: Etapa = "completo",
-): Promise<{ userId: string; consentimentoVigente: boolean }> {
-  if (modoMock()) return { userId: mockPerfil.userId, consentimentoVigente: true };
+): Promise<{ userId: string; consentimentoVigente: boolean; demo: boolean }> {
+  if (modoMock()) return { userId: mockPerfil.userId, consentimentoVigente: true, demo: false };
 
   const db = await criarClienteServidor();
   const { data } = await db.auth.getClaims();
@@ -34,5 +35,6 @@ export async function exigirAcesso(
     temPerfil,
   });
   if (destino) redirect(destino);
-  return { userId, consentimentoVigente: vigente };
+  // demo vem do JWT validado (app_metadata só é escrito pela API admin), não de e-mail nem de user_metadata.
+  return { userId, consentimentoVigente: vigente, demo: ehContaDemo(data?.claims) };
 }

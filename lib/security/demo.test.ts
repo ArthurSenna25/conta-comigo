@@ -1,0 +1,127 @@
+import { describe, expect, it } from "vitest";
+import {
+  bloqueioDaContaDemo,
+  credenciaisDemo,
+  decidirSeed,
+  ehContaDemo,
+  TETO_IA_DEMO_PADRAO_CENTAVOS,
+  tetoDiarioIaCentavos,
+} from "./demo";
+
+describe("ehContaDemo: só app_metadata.demo === true (escrita só pela API admin)", () => {
+  it("true só com o booleano true", () => {
+    expect(ehContaDemo({ app_metadata: { demo: true } })).toBe(true);
+  });
+
+  it.each([
+    ["sem metadata", {}],
+    ["metadata nula", { app_metadata: null }],
+    ["demo false", { app_metadata: { demo: false } }],
+    ["string 'true'", { app_metadata: { demo: "true" } }],
+    ["número 1", { app_metadata: { demo: 1 } }],
+    ["metadata não objeto", { app_metadata: "demo" }],
+  ])("false: %s", (_nome, claims) => {
+    expect(ehContaDemo(claims)).toBe(false);
+  });
+
+  it("ignora user_metadata (o usuário consegue escrever nele)", () => {
+    expect(ehContaDemo({ user_metadata: { demo: true } })).toBe(false);
+  });
+
+  it("claims ausentes (sem sessão) não são demo", () => {
+    expect(ehContaDemo(undefined)).toBe(false);
+    expect(ehContaDemo(null)).toBe(false);
+  });
+});
+
+describe("credenciaisDemo: só do servidor, sem as duas variáveis não há demo", () => {
+  it("devolve e-mail e senha quando as duas existem", () => {
+    expect(credenciaisDemo({ DEMO_EMAIL: "demo@exemplo.test", DEMO_PASSWORD: "x-senha-longa" })).toEqual({
+      email: "demo@exemplo.test",
+      senha: "x-senha-longa",
+    });
+  });
+
+  it.each([
+    ["nenhuma", {}],
+    ["só e-mail", { DEMO_EMAIL: "demo@exemplo.test" }],
+    ["só senha", { DEMO_PASSWORD: "x-senha-longa" }],
+    ["e-mail vazio", { DEMO_EMAIL: "", DEMO_PASSWORD: "x-senha-longa" }],
+    ["senha só com espaços", { DEMO_EMAIL: "demo@exemplo.test", DEMO_PASSWORD: "   " }],
+  ])("null: %s", (_nome, env) => {
+    expect(credenciaisDemo(env)).toBeNull();
+  });
+
+  it("normaliza o e-mail (apara e minúsculas), igual ao que o Auth grava", () => {
+    expect(credenciaisDemo({ DEMO_EMAIL: "  Demo@Exemplo.TEST ", DEMO_PASSWORD: "x-senha-longa" })?.email).toBe("demo@exemplo.test");
+  });
+
+  it("não apara a senha (espaço pode fazer parte dela)", () => {
+    expect(credenciaisDemo({ DEMO_EMAIL: "demo@exemplo.test", DEMO_PASSWORD: " abc " })?.senha).toBe(" abc ");
+  });
+});
+
+describe("tetoDiarioIaCentavos: o teto da demo é o teto global de custo", () => {
+  it("usuário comum: o teto global", () => {
+    expect(tetoDiarioIaCentavos(false, { AI_DAILY_BUDGET_CENTS: "500" })).toBe(500);
+  });
+
+  it("demo: o menor entre o global e o da demo", () => {
+    expect(tetoDiarioIaCentavos(true, { AI_DAILY_BUDGET_CENTS: "500", DEMO_AI_DAILY_BUDGET_CENTS: "50" })).toBe(50);
+    expect(tetoDiarioIaCentavos(true, { AI_DAILY_BUDGET_CENTS: "30", DEMO_AI_DAILY_BUDGET_CENTS: "50" })).toBe(30);
+  });
+
+  it("demo sem valor próprio usa o padrão de 100 centavos", () => {
+    expect(TETO_IA_DEMO_PADRAO_CENTAVOS).toBe(100);
+    expect(tetoDiarioIaCentavos(true, { AI_DAILY_BUDGET_CENTS: "500" })).toBe(100);
+  });
+
+  it("demo com valor próprio inválido cai no padrão, nunca em 'sem teto'", () => {
+    for (const ruim of ["abc", "-5", "1.5", "", "1e9"]) {
+      expect(tetoDiarioIaCentavos(true, { AI_DAILY_BUDGET_CENTS: "500", DEMO_AI_DAILY_BUDGET_CENTS: ruim })).toBe(100);
+    }
+  });
+
+  it("falha fechada: teto global ausente ou inválido = 0 (IA desligada), para todos", () => {
+    for (const ruim of [undefined, "", "abc", "-1", "2.5", "Infinity"]) {
+      expect(tetoDiarioIaCentavos(false, { AI_DAILY_BUDGET_CENTS: ruim })).toBe(0);
+      expect(tetoDiarioIaCentavos(true, { AI_DAILY_BUDGET_CENTS: ruim, DEMO_AI_DAILY_BUDGET_CENTS: "50" })).toBe(0);
+    }
+  });
+
+  it("zero explícito é aceito (IA desligada de propósito)", () => {
+    expect(tetoDiarioIaCentavos(false, { AI_DAILY_BUDGET_CENTS: "0" })).toBe(0);
+    expect(tetoDiarioIaCentavos(true, { AI_DAILY_BUDGET_CENTS: "500", DEMO_AI_DAILY_BUDGET_CENTS: "0" })).toBe(0);
+  });
+});
+
+describe("bloqueioDaContaDemo: trocar e-mail/senha e excluir conta", () => {
+  it("conta comum: sem bloqueio", () => {
+    expect(bloqueioDaContaDemo(false)).toBeNull();
+  });
+
+  it("demo: erro 'proibido' com mensagem segura", () => {
+    const r = bloqueioDaContaDemo(true);
+    expect(r).toEqual({ ok: false, erro: { codigo: "proibido", mensagem: expect.any(String) } });
+    expect(r?.ok === false && r.erro.mensagem).toMatch(/demonstra/i);
+  });
+});
+
+describe("decidirSeed: só apaga usuário que a própria demo criou", () => {
+  it("sem usuário com o e-mail: cria", () => {
+    expect(decidirSeed(undefined)).toBe("criar");
+  });
+
+  it("usuário marcado como demo: recria (apaga e cria)", () => {
+    expect(decidirSeed({ app_metadata: { demo: true } })).toBe("recriar");
+  });
+
+  it.each([
+    ["sem marca", {}],
+    ["marca false", { app_metadata: { demo: false } }],
+    ["marca em user_metadata (forjável)", { user_metadata: { demo: true } }],
+    ["marca como string", { app_metadata: { demo: "true" } }],
+  ])("usuário real com o e-mail da demo (%s): aborta sem apagar", (_nome, existente) => {
+    expect(decidirSeed(existente)).toBe("abortar");
+  });
+});

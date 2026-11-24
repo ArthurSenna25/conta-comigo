@@ -30,6 +30,27 @@ function semPortao(arquivo: string, fonte: string): string | null {
   return /\bexigirAcesso\s*\(/.test(codigo) ? null : arquivo;
 }
 
+/** Páginas protegidas que não renderizam <FaixaDemo — a conta de demo precisa do aviso em toda tela. */
+function semFaixaDemo(arquivo: string, fonte: string): string | null {
+  if (PUBLICAS.some((re) => re.test(arquivo))) return null;
+  const codigo = fonte.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/.*$/gm, "$1");
+  return /<FaixaDemo\b/.test(codigo) ? null : arquivo;
+}
+
+describe("faixa da conta de demo em toda página protegida", () => {
+  it("cada page.tsx fora da lista pública renderiza <FaixaDemo>", () => {
+    const sem = paginas().flatMap((arq) => semFaixaDemo(arq, readFileSync(arq, "utf8")) ?? []);
+    expect(sem).toEqual([]);
+  });
+
+  it("o detector pega página sem a faixa e ignora comentário", () => {
+    expect(semFaixaDemo("app/(app)/x/page.tsx", "export default function P() { return null }")).not.toBeNull();
+    expect(semFaixaDemo("app/(app)/x/page.tsx", "// <FaixaDemo demo />\nexport default function P() {}")).not.toBeNull();
+    expect(semFaixaDemo("app/(app)/x/page.tsx", "return <FaixaDemo demo={demo} />;")).toBeNull();
+    expect(semFaixaDemo("app/legal/termos/page.tsx", "export default function P() {}")).toBeNull();
+  });
+});
+
 describe("portão de acesso em toda página protegida", () => {
   it("cada page.tsx fora da lista pública chama exigirAcesso()", () => {
     const sem = paginas().flatMap((arq) => semPortao(arq, readFileSync(arq, "utf8")) ?? []);
