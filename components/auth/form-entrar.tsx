@@ -5,11 +5,12 @@ import { Aviso, BotaoEnviar, Campo } from "./campos";
 import { useFormularioAcao } from "./use-formulario-acao";
 
 export function FormEntrar({ next }: { next: string }) {
-  const { estado, aoEnviar, pendente } = useFormularioAcao(entrar);
-  const erro = estado && !estado.ok ? estado.erro : null;
+  const { estado, despachar, aoEnviar, pendente } = useFormularioAcao(entrar);
+  // Some enquanto envia: o alerta remonta no próximo erro e o leitor de tela o anuncia de novo.
+  const erro = !pendente && estado && !estado.ok ? estado.erro : null;
 
   return (
-    <form onSubmit={aoEnviar} noValidate className="flex flex-col gap-4">
+    <form action={despachar} onSubmit={aoEnviar} noValidate aria-busy={pendente} className="flex flex-col gap-4">
       <input type="hidden" name="next" value={next} />
       <Campo
         id="email"
@@ -17,7 +18,7 @@ export function FormEntrar({ next }: { next: string }) {
         rotulo="E-mail"
         type="email"
         inputMode="email"
-        autoComplete="email"
+        autoComplete="username"
         autoCapitalize="none"
         required
         erro={erro?.campos?.email}
@@ -31,7 +32,7 @@ export function FormEntrar({ next }: { next: string }) {
         required
         erro={erro?.campos?.senha}
       />
-      {erro && <Aviso>{erro.mensagem}</Aviso>}
+      {erro && <Aviso alerta={!erro.campos}>{erro.mensagem}</Aviso>}
       <BotaoEnviar pendente={pendente}>Entrar</BotaoEnviar>
     </form>
   );

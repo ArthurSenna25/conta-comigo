@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { VERSAO_CONSENTIMENTO } from "@/lib/contracts";
+import { VERSAO_CONSENTIMENTO } from "@/lib/contracts/auth"; // arquivo direto: o barrel levaria todos os schemas ao bundle
 
 /**
  * Caixas de consentimento (LGPD.md): NÃO pré-marcadas. A primeira (termos + privacidade) é obrigatória;
@@ -35,7 +35,7 @@ export function CaixasConsentimento({ erroTermos }: { erroTermos?: string }) {
           </span>
         </label>
         {erroTermos && (
-          <p id="aceiteTermos-erro" role="alert" className="text-sm text-destructive">
+          <p id="aceiteTermos-erro" className="text-sm text-destructive">
             {erroTermos}
           </p>
         )}
