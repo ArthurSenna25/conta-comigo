@@ -11,8 +11,9 @@ import { cookieSeguro } from "./cookies";
  * `getSession()` não é confiável no servidor porque lê o cookie sem validar.
  */
 export async function criarClienteServidor(): Promise<SupabaseClient> {
-  const { url, chave } = configSupabase();
+  // cookies() ANTES da config: marca a rota como dinâmica; senão o build tenta prerenderizar e a config lança.
   const jar = await cookies();
+  const { url, chave } = configSupabase();
   return createServerClient(url, chave, {
     cookies: {
       getAll: () => jar.getAll(),
