@@ -5,11 +5,11 @@
 export function FaixaDemo({ demo }: { demo: boolean }) {
   if (!demo) return null;
   return (
-    <aside
-      aria-label="Aviso"
+    <div
+      role="note"
       className="sticky top-0 z-50 border-b border-amber-700 bg-amber-100 px-4 py-2 text-center text-sm font-medium text-amber-950"
     >
       Conta de demonstração: dados fictícios, não envie dados reais.
-    </aside>
+    </div>
   );
 }

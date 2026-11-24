@@ -351,6 +351,15 @@ describe("lib/db: consentimento e perfil (RLS real)", () => {
     expect(await existePerfil(novo.db, novo.id)).toBe(false);
   });
 
+  it("o usuário não forja a marca de demo: updateUser({ data }) grava user_metadata, nunca app_metadata", async () => {
+    const novo = await criarUsuario();
+    const { error } = await novo.db.auth.updateUser({ data: { demo: true } });
+    expect(error).toBeNull();
+    const { data } = await novo.db.auth.getUser();
+    expect(data.user?.user_metadata.demo).toBe(true); // o campo que o usuário escreve
+    expect(data.user?.app_metadata.demo).toBeUndefined(); // o que vale como marca: só a API admin escreve
+  });
+
   it("contarLancamentos conta só os do próprio usuário (painel da demo)", async () => {
     const proprios = async (u: Usuario) => ((await u.db.from("lancamentos").select("id")).data ?? []).length;
     expect(await contarLancamentos(B.db)).toBeGreaterThanOrEqual(1);

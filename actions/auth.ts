@@ -12,7 +12,7 @@ import {
 import { criarClienteServidor } from "@/lib/db/cliente-servidor";
 import { listarAceites, registrarAceites } from "@/lib/db/consentimento";
 import { consentimentoVigente, finalidadesDoAceite } from "@/lib/security/acesso";
-import { credenciaisDemo } from "@/lib/security/demo";
+import { credenciaisDemo, ehContaDemo } from "@/lib/security/demo";
 import { erroDeAuth } from "@/lib/security/erros-auth";
 import { modoMock } from "@/lib/security/modo-mock";
 import { destinoSeguro } from "@/lib/security/redirecionamento";
@@ -59,6 +59,10 @@ export async function entrarComoDemo(): Promise<Estado<null>> {
   }
 
   const db = await criarClienteServidor();
+  // Já está na demo (duplo clique, recarga): não gasta o limite de login do Auth, que é por IP e compartilhado.
+  const { data: atual } = await db.auth.getClaims();
+  if (ehContaDemo(atual?.claims)) redirect("/painel");
+
   const { error } = await db.auth.signInWithPassword({ email: credenciais.email, password: credenciais.senha });
   if (error) {
     console.error("demo: login falhou", error.code ?? error.status ?? "sem código");
