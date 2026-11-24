@@ -32,6 +32,13 @@ describe("CadastroInput", () => {
     expect(CadastroInput.safeParse({ ...valido, senha: "a".repeat(72) }).success).toBe(true);
   });
 
+  it("o limite de 72 do bcrypt é em BYTES: acentos e emojis contam mais que 1", () => {
+    expect(CadastroInput.safeParse({ ...valido, senha: "ç".repeat(36) }).success).toBe(true); // 72 bytes
+    expect(CadastroInput.safeParse({ ...valido, senha: "ç".repeat(37) }).success).toBe(false); // 74 bytes
+    expect(CadastroInput.safeParse({ ...valido, senha: "😀".repeat(19) }).success).toBe(false); // 76 bytes
+    expect(CadastroInput.safeParse({ ...valido, senha: "😀".repeat(18) }).success).toBe(true); // 72 bytes
+  });
+
   it("exige o aceite dos termos: false e ausente são rejeitados", () => {
     expect(CadastroInput.safeParse({ ...valido, aceiteTermos: false }).success).toBe(false);
     const semAceite = { email: valido.email, senha: valido.senha, aceiteEnvioIa: false };
@@ -63,6 +70,11 @@ describe("LoginInput", () => {
   it("rejeita senha vazia e e-mail inválido", () => {
     expect(LoginInput.safeParse({ email: "a@b.com", senha: "" }).success).toBe(false);
     expect(LoginInput.safeParse({ email: "nao-e-email", senha: "x" }).success).toBe(false);
+  });
+
+  it("senha acima de 72 bytes nunca existiu no cadastro: o login a rejeita sem consultar o Auth", () => {
+    expect(LoginInput.safeParse({ email: "a@b.com", senha: "ç".repeat(37) }).success).toBe(false);
+    expect(LoginInput.safeParse({ email: "a@b.com", senha: "ç".repeat(36) }).success).toBe(true);
   });
 
   it("não impõe regra de força no login (só no cadastro)", () => {
