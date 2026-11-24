@@ -6,10 +6,10 @@
 - Setup: scaffold Next 16 + Tailwind v4 + shadcn, husky/gitleaks, CI, `main` protegida, regras de camadas no ESLint.
 - P3: `lib/contracts` (Zod, mocks set–nov/2026, `AiProvider`), stubs de `lib/engine`, `tests/camadas.test.ts`, `docs/ARQUITETURA.md`, `DADOS.md` (5 tabelas), `AMEACAS.md`, `LGPD.md`, ADR-001..004.
 - P4: 4 migrations aplicadas no projeto remoto (esquema, funções/triggers, RLS + GRANT, storage); RLS e policies conferidas no painel.
-- P4: `db advisors`: 2 WARN (`rls_auto_enable()` executável por anon/authenticated) + 1 INFO (FK sem índice de cobertura); `unused_index` ignorado (tabelas vazias). Correção em `20261124130000_corrige_advisors.sql`.
-- P4: `pnpm test:rls` (30 casos, 2 usuários descartáveis, limpeza garantida). Achou 1 bug de desenho: check `revogado_em >= aceito_em` quebra com skew de relógio (removido na migration de correção).
+- P4: `db advisors` achou 2 WARN (`rls_auto_enable()` executável por anon/authenticated) + 1 INFO (FK sem índice de cobertura). Corrigido e aplicado em `20261124130000_corrige_advisors.sql`; advisors agora: "No issues found".
+- P4: `pnpm test:rls` 30/30 (2 usuários descartáveis, limpeza garantida). Achou 1 bug de desenho: check `revogado_em >= aceito_em` quebra com skew de relógio (removido).
 ## Próximo (1 fase)
-- P4: aplicar `20261124130000` e rerodar `test:rls` (esperado 30/30); depois `gen types`, repositórios em `lib/db`, `seed/demo.sql` e EXPLAIN das 6 consultas.
+- P4 (resto): `gen types`, repositórios em `lib/db`, `seed/demo.sql` e EXPLAIN das 6 consultas.
 - Em paralelo: Murilo implementa `lib/engine`; Gui `AiProvider`; Frigeri o onboarding contra `PerfilInput`.
 ## Decisões e premissas
 - 23/11 Repo público por exigência do regulamento; nada sensível versionado.
