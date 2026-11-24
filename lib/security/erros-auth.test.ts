@@ -37,6 +37,13 @@ describe("erroDeAuth: mensagens genéricas (não revelam se o e-mail existe)", (
     expect(r.erro.campos?.senha).toBeTruthy();
   });
 
+  it("e-mail recusado pelo domínio/formato (email_address_invalid) aponta o campo e-mail, sem revelar contas", () => {
+    const r = erroDeAuth("cadastro", { code: "email_address_invalid", status: 400 });
+    expect(r.erro.codigo).toBe("invalido");
+    expect(r.erro.campos?.email).toMatch(/e-mail/i);
+    expect(r.erro.campos?.email).not.toMatch(/j[áa] (existe|cadastrad|registrad)|existe|cadastrado|registrado/i);
+  });
+
   it.each(["over_request_rate_limit", "over_email_send_rate_limit"])("limite de taxa (%s): pede para aguardar", (code) => {
     const r = erroDeAuth("login", { code, status: 429 });
     expect(r.erro.codigo).toBe("proibido");

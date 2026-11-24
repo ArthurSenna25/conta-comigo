@@ -28,6 +28,10 @@ export function erroDeAuth(contexto: "login" | "cadastro", e: ErroSupabase): Err
   }
   if (contexto === "login") return erro("nao_autenticado", "E-mail ou senha incorretos.");
 
+  // Domínio ou formato recusado (ex.: example.com): é sobre o ENDEREÇO, não sobre existir conta.
+  if (e?.code === "email_address_invalid") {
+    return erro("invalido", "Revise o e-mail.", { email: "Esse e-mail não é aceito. Use outro endereço." });
+  }
   if (e?.code === "weak_password") {
     return erro("invalido", "Revise a senha.", {
       senha: "Senha muito fraca. Use letras, números e ao menos 8 caracteres.",

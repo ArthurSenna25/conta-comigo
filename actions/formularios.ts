@@ -24,7 +24,7 @@ export function camposDoErro(erro: ZodError): Record<string, string> {
   const campos: Record<string, string> = {};
   for (const issue of erro.issues) {
     const chave = issue.path.join(".") || "_";
-    campos[chave] ??= issue.message;
+    campos[chave] ??= issue.message.charAt(0).toUpperCase() + issue.message.slice(1);
   }
   return campos;
 }

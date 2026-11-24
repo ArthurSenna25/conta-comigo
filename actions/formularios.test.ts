@@ -61,7 +61,8 @@ describe("camposDoErro: primeira mensagem por campo, em texto fixo do contrato",
     if (r.success) return;
     const campos = camposDoErro(r.error);
     expect(Object.keys(campos).sort()).toEqual(["aceiteTermos", "email", "senha"]);
-    expect(campos.senha).toBe("use ao menos 8 caracteres");
+    expect(campos.senha).toBe("Use ao menos 8 caracteres");
+    expect(campos.aceiteTermos).toMatch(/^Aceite os Termos/);
   });
 
   it("não ecoa o valor digitado (e-mail e senha nunca voltam na mensagem)", () => {
@@ -73,6 +74,6 @@ describe("camposDoErro: primeira mensagem por campo, em texto fixo do contrato",
   it("erro sem caminho (raiz) vai para a chave _", () => {
     const r = z.string().refine(() => false, "falhou").safeParse("x");
     if (r.success) throw new Error("deveria falhar");
-    expect(camposDoErro(r.error)).toEqual({ _: "falhou" });
+    expect(camposDoErro(r.error)).toEqual({ _: "Falhou" });
   });
 });
