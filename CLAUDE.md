@@ -16,6 +16,7 @@ dev: `pnpm dev` · build: `pnpm build` · lint: `pnpm lint` · tipos: `pnpm type
 - Nunca ler nem imprimir `.env*`, chaves ou `~/.claude.json`. Segredos só em `.env.local`; o `.env.example` tem só nomes.
 - Repositório PÚBLICO (regulamento do hackathon): nada de segredo, dado pessoal ou estratégia sensível em arquivo versionado.
 - Valide toda entrada com Zod no servidor. Nunca interpole entrada em SQL. Authz em toda action e rota; RLS em toda tabela.
+- Banco: tabelas só pelo client do usuário (RLS vale). A secret key só para Storage, `auth.admin` e `registrar_uso_ia`; `service_role` NÃO tem GRANT de tabela. O projeto tem acesso automático a tabelas desligado: toda migration nova leva `ENABLE ROW LEVEL SECURITY`, `GRANT` explícito só para `authenticated` e policies por `user_id`. Migration aplicada nunca se edita (corrige com outra). Após mudar o banco: `pnpm test:rls` e `supabase db advisors --remote`.
 - Nunca `any`, `@ts-ignore` ou `.d.ts` falso. Mesmo erro 3x: pare e diagnostique a causa raiz.
 - Dependência: uma por vez; confirmar que o pacote existe e é o oficial; validar antes da próxima. Nada que gere cobrança.
 - Não mudar model, effortLevel, hooks, auto mode nem provedor.
