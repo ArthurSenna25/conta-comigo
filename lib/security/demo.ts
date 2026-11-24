@@ -34,6 +34,25 @@ function centavos(valor: string | undefined): number | null {
   return Number.isSafeInteger(n) ? n : null;
 }
 
+/** Chamadas de IA por dia: padrão por usuário e padrão da conta de demo (compartilhada). */
+export const CHAMADAS_IA_USUARIO_PADRAO = 30;
+export const CHAMADAS_IA_DEMO_PADRAO = 15;
+
+/**
+ * Limites de CHAMADAS de IA por dia para `reservar_uso_ia`. O global não tem padrão: ausente ou inválido
+ * vira 0 e a reserva nega (falha fechada). Valor inválido do usuário/demo cai no padrão, que é finito.
+ * Na demo vale o menor entre o limite do usuário e o da demo.
+ */
+export function limitesChamadasIa(
+  demo: boolean,
+  env: { AI_DAILY_CALLS_USER?: string; DEMO_AI_DAILY_CALLS?: string; AI_DAILY_CALLS_GLOBAL?: string },
+): { maxUsuario: number; maxGlobal: number } {
+  const maxUsuario = centavos(env.AI_DAILY_CALLS_USER) ?? CHAMADAS_IA_USUARIO_PADRAO;
+  const maxGlobal = centavos(env.AI_DAILY_CALLS_GLOBAL) ?? 0;
+  if (!demo) return { maxUsuario, maxGlobal };
+  return { maxUsuario: Math.min(maxUsuario, centavos(env.DEMO_AI_DAILY_CALLS) ?? CHAMADAS_IA_DEMO_PADRAO), maxGlobal };
+}
+
 /**
  * Teto diário de IA em centavos. Falha FECHADA: teto global ausente/inválido = 0 (IA desligada).
  * Na demo (conta compartilhada e pública) vale o menor entre o global e o da demo, então ela nunca

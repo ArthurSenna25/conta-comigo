@@ -5,8 +5,12 @@ import { POST } from "@/app/api/ingest/route";
 import { criarPostIngestao } from "@/app/api/ingest/processar";
 import { ErroIngestao } from "@/app/api/ingest/entrada";
 
-const { autorizar, provider } = vi.hoisted(() => ({ autorizar: vi.fn(), provider: vi.fn() }));
+const { autorizar, provider, reservarUsoIa } = vi.hoisted(() => ({
+  autorizar: vi.fn(), provider: vi.fn(), reservarUsoIa: vi.fn(),
+}));
+vi.mock("server-only", () => ({}));
 vi.mock("@/app/api/ingest/acesso", () => ({ autorizarIngestao: autorizar }));
+vi.mock("@/lib/db/uso-ia", () => ({ reservarUsoIa }));
 vi.mock("@/lib/ai/gemini", async () => ({
   ErroIa: (await import("@/lib/ai/erro")).ErroIa, criarGeminiProvider: provider,
 }));
@@ -87,7 +91,7 @@ describe("/api/ingest", () => {
   it("fecha a ingestão autenticada quando a reserva compartilhada está ausente", async () => {
     autorizar.mockResolvedValue({ mock: false, userId: "id", demo: true, tetoCentavos: 100 });
     const req = pedido(formulario("texto"));
-    const resposta = await POST(req);
+    const resposta = await criarPostIngestao()(req);
     expect(resposta.status).toBe(503);
     expect((await resposta.json()).erro.codigo).toBe("ia_indisponivel");
     expect(req.bodyUsed).toBe(false);
@@ -108,5 +112,71 @@ describe("/api/ingest", () => {
     const resposta = await criarPostIngestao(reservar)(pedido(formulario("texto")));
     expect(reservar).toHaveBeenCalledWith(acesso, tentativa);
     expect(resposta.status).toBe(429);
+  });
+});
+
+describe("/api/ingest com a reserva atômica de chamadas (reservar_uso_ia)", () => {
+  const tentativa = { modelo: "teste", operacao: "extracao", tentativa: 1 };
+  const extrairViaReserva = () =>
+    provider.mockImplementation(({ antesDaChamada }) => ({
+      extrair: async () => {
+        await antesDaChamada(tentativa);
+        return { resultado: { rascunhos: [], perguntasPendentes: ["Qual foi a movimentação?"] } };
+      },
+    }));
+  const acessoReal = (demo: boolean) => ({ mock: false, userId: "usuario", demo, tetoCentavos: 100 });
+
+  beforeEach(() => {
+    vi.stubEnv("AI_DAILY_CALLS_GLOBAL", "200");
+    vi.stubEnv("AI_DAILY_CALLS_USER", "");
+    vi.stubEnv("DEMO_AI_DAILY_CALLS", "");
+    extrairViaReserva();
+  });
+
+  it("reserva concedida: responde 200 e pede 1 chamada com os limites do usuário", async () => {
+    autorizar.mockResolvedValue(acessoReal(false));
+    reservarUsoIa.mockResolvedValue(true);
+    const resposta = await POST(pedido(formulario("texto")));
+    expect(resposta.status).toBe(200);
+    expect(reservarUsoIa).toHaveBeenCalledTimes(1);
+    expect(reservarUsoIa).toHaveBeenCalledWith("usuario", { maxUsuario: 30, maxGlobal: 200 });
+  });
+
+  it("o teto da demo vale na rota (15 por dia por padrão, o menor dos dois)", async () => {
+    autorizar.mockResolvedValue(acessoReal(true));
+    reservarUsoIa.mockResolvedValue(true);
+    expect((await POST(pedido(formulario("texto")))).status).toBe(200);
+    expect(reservarUsoIa).toHaveBeenCalledWith("usuario", { maxUsuario: 15, maxGlobal: 200 });
+  });
+
+  it("reserva negada: 429 limite_ia, sem rascunho", async () => {
+    autorizar.mockResolvedValue(acessoReal(false));
+    reservarUsoIa.mockResolvedValue(false);
+    const resposta = await POST(pedido(formulario("texto")));
+    expect(resposta.status).toBe(429);
+    expect(await resposta.json()).toMatchObject({ erro: { codigo: "limite_ia" } });
+  });
+
+  it("falha do controle: 503 ia_indisponivel, sem rascunho (falha fechada)", async () => {
+    autorizar.mockResolvedValue(acessoReal(false));
+    reservarUsoIa.mockRejectedValue(new Error("banco fora"));
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const resposta = await POST(pedido(formulario("texto")));
+    expect(resposta.status).toBe(503);
+    expect(await resposta.json()).toMatchObject({ erro: { codigo: "ia_indisponivel" } });
+  });
+
+  it("sem AI_DAILY_CALLS_GLOBAL o limite global enviado é 0 (nega)", async () => {
+    vi.stubEnv("AI_DAILY_CALLS_GLOBAL", "");
+    autorizar.mockResolvedValue(acessoReal(false));
+    reservarUsoIa.mockResolvedValue(false);
+    expect((await POST(pedido(formulario("texto")))).status).toBe(429);
+    expect(reservarUsoIa).toHaveBeenCalledWith("usuario", { maxUsuario: 30, maxGlobal: 0 });
+  });
+
+  it("modo mock não reserva nada", async () => {
+    autorizar.mockResolvedValue({ mock: true });
+    expect((await POST(pedido(formulario("texto")))).status).toBe(200);
+    expect(reservarUsoIa).not.toHaveBeenCalled();
   });
 });
