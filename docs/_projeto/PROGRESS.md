@@ -1,6 +1,6 @@
 # PROGRESS — Conta Comigo
 
-**Nível:** N2 (segurança e LGPD reforçadas) · **Fase atual:** auth e consentimento (Arthur) · **Atualizado:** 24/11/2026
+**Nível:** N2 (segurança e LGPD reforçadas) · **Fase atual:** auth, consentimento e demo (Arthur) · **Atualizado:** 24/11/2026
 
 ## Feito
 - Setup: scaffold Next 16 + Tailwind v4 + shadcn, husky/gitleaks, CI, `main` protegida, regras de camadas no ESLint.
@@ -9,6 +9,7 @@
 - Auth (`feat/auth`): `proxy.ts` (getClaims, negar por padrão), `lib/db` (client SSR, cookie HttpOnly/Secure), `lib/security` (open redirect, mock, portão), `actions/auth.ts`, telas `/entrar` `/cadastrar` `/consentimento`, stubs `/onboarding` e `/painel`.
 - Auth: contrato novo `lib/contracts/auth.ts` (commit separado). `cacheComponents`/PPR desligados (nada usava). 184 testes em `pnpm check`; `test:rls` 34 casos; reviews de código e segurança em 3 blocos. Achados corrigidos: open redirect por dot-segments, cookie sem HttpOnly/Secure, senha na URL em envio antes da hidratação, falha de rede mostrada como senha errada.
 ## Próximo
+- **Demo do júri (feat/demo-acesso, depende do PR #8):** botão "Ver demonstração" (landing e /entrar), faixa de aviso, `pnpm seed:demo`. **Antes da avaliação:** pôr `DEMO_EMAIL`, `DEMO_PASSWORD` (e-mail de domínio real, senha longa e aleatória) e `DEMO_AI_DAILY_BUDGET_CENTS` (padrão 100) no `.env.local` **e na Vercel** (só servidor), rodar `pnpm seed:demo` (recria o usuário, perfil, lançamentos fictícios e 3 aceites) e conferir pelo botão. **Resetar:** repetir `pnpm seed:demo` depois de cada rodada de teste, depois de mudar `VERSAO_CONSENTIMENTO` (senão a demo cai em /consentimento) e se a senha da demo for trocada. Gui: aplicar `tetoDiarioIaCentavos()` antes da IA e degradar para lançamento manual ao estourar (AMEACAS #21).
 - Cadastro ponta a ponta **verificado em 24/11** com "Confirm email" desligado (Playwright 390 px): cadastro → `/onboarding`, 2 linhas em `consentimentos` (sem `envio_ia`) e 3 (com), e-mail existente → mensagem genérica. Se religar a confirmação, o aceite do cadastro não é gravado (sem sessão) e o usuário reaceita em `/consentimento` ao entrar.
 - Frigeri: conteúdo de `/onboarding` (stub fora de `app/(app)`, chama `exigirAcesso("consentimento")`) e **`app/legal/{termos,privacidade}`: BLOQUEADOR DE RELEASE**, pois as caixas de aceite já apontam para lá e hoje dão 404 (AMEACAS #20).
 - Gui: `app/api/*` precisa de variante do portão que devolva 401/403 (não redirect), checagem de Origin e de `envio_ia` (AMEACAS #16).
