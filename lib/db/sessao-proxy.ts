@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { configSupabase } from "./config";
+import { cookieSeguro } from "./cookies";
 
 /**
  * Renova a sessão no proxy e lê a identidade com `getClaims()` (assinatura validada, com chave
@@ -20,7 +21,7 @@ export async function atualizarSessao(
       setAll(lista, cabecalhos) {
         for (const { name, value } of lista) request.cookies.set(name, value);
         response = NextResponse.next({ request });
-        for (const { name, value, options } of lista) response.cookies.set(name, value, options);
+        for (const { name, value, options } of lista) response.cookies.set(name, value, cookieSeguro(options));
         // Cache-Control: private, no-store etc.: resposta com cookie de sessão nunca pode ser cacheada.
         for (const [nome, valor] of Object.entries(cabecalhos)) response.headers.set(nome, valor);
       },

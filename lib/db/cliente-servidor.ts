@@ -3,6 +3,7 @@ import { createServerClient } from "@supabase/ssr";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { configSupabase } from "./config";
+import { cookieSeguro } from "./cookies";
 
 /**
  * Client do USUÁRIO para Server Components, Server Actions e Route Handlers: a RLS vale.
@@ -17,7 +18,7 @@ export async function criarClienteServidor(): Promise<SupabaseClient> {
       getAll: () => jar.getAll(),
       setAll(lista) {
         try {
-          for (const { name, value, options } of lista) jar.set(name, value, options);
+          for (const { name, value, options } of lista) jar.set(name, value, cookieSeguro(options));
         } catch {
           // Server Component não pode escrever cookie. Sem problema: o proxy renova a sessão
           // em toda navegação e grava os cookies na resposta.
