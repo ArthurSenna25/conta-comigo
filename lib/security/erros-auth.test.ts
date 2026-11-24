@@ -55,6 +55,16 @@ describe("erroDeAuth: mensagens genéricas (não revelam se o e-mail existe)", (
     }
   });
 
+  it("falha de rede (fetch sem resposta, status 0) não vira 'senha incorreta' nem 'não foi possível criar a conta'", () => {
+    for (const contexto of ["login", "cadastro"] as const) {
+      for (const e of [{ status: 0 }, { name: "AuthRetryableFetchError" }, { name: "AuthRetryableFetchError", status: 0 }]) {
+        const r = erroDeAuth(contexto, e);
+        expect(r.erro.codigo).toBe("interno");
+        expect(r.erro.mensagem).not.toMatch(/senha|e-mail|conta/i);
+      }
+    }
+  });
+
   it("erro desconhecido ou nulo no login não vaza e usa mensagem genérica", () => {
     const r = erroDeAuth("login", { code: "algo_novo" });
     expect(r.erro.codigo).toBe("nao_autenticado");
