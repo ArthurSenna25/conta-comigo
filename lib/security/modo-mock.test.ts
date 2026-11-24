@@ -2,9 +2,16 @@ import { describe, expect, it } from "vitest";
 import { modoMock } from "./modo-mock";
 
 describe("modoMock", () => {
-  it.each(["development", "test", undefined])("liga com a flag em true fora de produção (NODE_ENV=%s)", (nodeEnv) => {
+  it.each(["development", "test"])("liga com a flag em true só em desenvolvimento ou teste (NODE_ENV=%s)", (nodeEnv) => {
     expect(modoMock({ NEXT_PUBLIC_USE_MOCKS: "true", NODE_ENV: nodeEnv })).toBe(true);
   });
+
+  it.each(["staging", "preview", "prod", "", undefined])(
+    "falha fechado: NODE_ENV desconhecido (%j) com a flag ligada lança",
+    (nodeEnv) => {
+      expect(() => modoMock({ NEXT_PUBLIC_USE_MOCKS: "true", NODE_ENV: nodeEnv })).toThrow(/NEXT_PUBLIC_USE_MOCKS/);
+    },
+  );
 
   it("fica desligado sem a flag, em qualquer ambiente", () => {
     expect(modoMock({ NODE_ENV: "development" })).toBe(false);
