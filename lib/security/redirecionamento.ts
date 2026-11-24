@@ -1,16 +1,10 @@
+import { normalizarCaminho } from "./rotas";
+
 const BASE = "http://localhost";
 const MAX = 512;
 /** Telas de acesso: voltar para elas depois do login criaria um laço. */
 const TELAS_DE_ACESSO = new Set(["/entrar", "/cadastrar", "/consentimento"]);
 
-const semBarraFinal = (caminho: string) => caminho.replace(/\/+$/, "") || "/";
-const decodificar = (caminho: string) => {
-  try {
-    return decodeURIComponent(caminho);
-  } catch {
-    return caminho;
-  }
-};
 
 /**
  * Valida o parâmetro de retorno (?next=) contra open redirect.
@@ -36,6 +30,6 @@ export function destinoSeguro(next: unknown, padrao = "/painel"): string {
   if (/^\/[/\\]/.test(saida)) return padrao;
 
   // O Next decodifica a rota e ignora barra final: "/%65ntrar" e "/entrar/" também são /entrar.
-  if (TELAS_DE_ACESSO.has(semBarraFinal(decodificar(url.pathname)))) return padrao;
+  if (TELAS_DE_ACESSO.has(normalizarCaminho(url.pathname))) return padrao;
   return saida;
 }
