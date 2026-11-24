@@ -8,6 +8,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { VERSAO_CONSENTIMENTO } from "@/lib/contracts";
 import { listarAceites, registrarAceites } from "@/lib/db/consentimento";
+import { contarLancamentos } from "@/lib/db/lancamento";
 import { existePerfil } from "@/lib/db/perfil";
 import { consentimentoVigente } from "@/lib/security/acesso";
 
@@ -348,5 +349,14 @@ describe("lib/db: consentimento e perfil (RLS real)", () => {
     expect(await existePerfil(A.db, B.id)).toBe(false); // RLS esconde o de B
     const novo = await criarUsuario();
     expect(await existePerfil(novo.db, novo.id)).toBe(false);
+  });
+
+  it("contarLancamentos conta só os do próprio usuário (painel da demo)", async () => {
+    const proprios = async (u: Usuario) => ((await u.db.from("lancamentos").select("id")).data ?? []).length;
+    expect(await contarLancamentos(B.db)).toBeGreaterThanOrEqual(1);
+    expect(await contarLancamentos(B.db)).toBe(await proprios(B));
+    expect(await contarLancamentos(A.db)).toBe(await proprios(A));
+    const novo = await criarUsuario();
+    expect(await contarLancamentos(novo.db)).toBe(0);
   });
 });
