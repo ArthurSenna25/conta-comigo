@@ -76,13 +76,22 @@ describe("Gemini", () => {
   it.each([
     [new TypeError("texto privado"), "rede"],
     [Object.assign(new Error("resposta privada"), { status: 429 }), "cota"],
-    [Object.assign(new Error("resposta privada"), { status: 503 }), "indisponivel"],
+    [Object.assign(new Error("resposta privada"), { status: 502 }), "indisponivel"],
     [Object.assign(new Error("API_KEY_INVALID"), { status: 400 }), "autenticacao"],
     [new DOMException("timeout", "TimeoutError"), "tempo"],
   ])("traduz a falha com motivo %s sem repetir a chamada", async (erro, motivo) => {
     gerar.mockRejectedValue(erro);
     await expect(criarGeminiProvider().extrair(entrada, hoje)).rejects.toMatchObject({ motivo });
     expect(gerar).toHaveBeenCalledTimes(1);
+  });
+
+  it("repassa 503 transitório à segunda tentativa sob nova reserva", async () => {
+    gerar.mockRejectedValueOnce(Object.assign(new Error("resposta privada"), { status: 503 }));
+    const antesDaChamada = vi.fn();
+    const aoMedir = vi.fn();
+    await expect(criarGeminiProvider({ antesDaChamada, aoMedir }).extrair(entrada, hoje)).resolves.toMatchObject({ resultado });
+    expect(antesDaChamada).toHaveBeenCalledTimes(2);
+    expect(aoMedir).toHaveBeenNthCalledWith(1, expect.objectContaining({ statusHttp: 503, motivo: "indisponivel" }));
   });
 
   it("fecha o acesso sem atestação do plano Free", async () => {

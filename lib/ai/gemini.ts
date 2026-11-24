@@ -1,4 +1,5 @@
 import "server-only";
+import { setTimeout as aguardar } from "node:timers/promises";
 import { GoogleGenAI } from "@google/genai";
 import type { GenerateContentResponse, Part } from "@google/genai";
 import { DataISO, IngestRequest } from "@/lib/contracts";
@@ -13,6 +14,7 @@ export { ErroIa, type MotivoIa } from "@/lib/ai/erro";
 export const MODELO_GEMINI = "gemini-3.5-flash-lite";
 const MODELOS_FREE = new Set([MODELO_GEMINI, "gemini-3.6-flash"]);
 const TEMPO_TOTAL_MS = 20_000;
+const TEMPO_MINIMO_SEGUNDA_TENTATIVA_MS = 6_000;
 const MOTIVOS_BLOQUEIO = new Set(["SAFETY", "BLOCKLIST", "PROHIBITED_CONTENT", "RECITATION", "SPII", "IMAGE_SAFETY"]);
 
 export type TentativaIa = {
@@ -113,6 +115,8 @@ async function gerar<T>(pedido: Pedido<T>, opcoes: OpcoesGemini): Promise<ComCus
   const modelo = modeloGeminiConfigurado();
   const cliente = criarCliente();
   const sinal = AbortSignal.timeout(TEMPO_TOTAL_MS);
+  const limite = performance.now() + TEMPO_TOTAL_MS;
+  let repararSaida = false;
   for (let tentativa = 1; tentativa <= 2; tentativa++) {
     const info = { modelo, operacao: pedido.operacao, tentativa };
     if (sinal.aborted) throw new ErroIa("tempo");
@@ -128,8 +132,8 @@ async function gerar<T>(pedido: Pedido<T>, opcoes: OpcoesGemini): Promise<ComCus
         model: modelo,
         contents: [{ role: "user", parts: pedido.partes }],
         config: {
-          systemInstruction: tentativa === 1 ? pedido.instrucao : pedido.instrucao +
-            "\nA resposta anterior falhou na validação. Releia os dados e confira campos, limites e tipos. Responda de forma concisa.",
+          systemInstruction: repararSaida ? pedido.instrucao +
+            "\nA resposta anterior falhou na validação. Releia os dados e confira campos, limites e tipos. Responda de forma concisa." : pedido.instrucao,
           responseMimeType: "application/json",
           responseJsonSchema: pedido.esquema,
           maxOutputTokens: pedido.operacao === "chat" ? 4096 : 16_384,
@@ -152,8 +156,12 @@ async function gerar<T>(pedido: Pedido<T>, opcoes: OpcoesGemini): Promise<ComCus
       custoCentavos: 0, motivo: falha?.motivo ?? "sucesso",
     });
     if (!falha) return { resultado: resultado!, custoCentavos: 0 };
-    // Repetir rede, bloqueios e 429 gastaria outra reserva sem reparar a causa.
-    if (falha.motivo !== "resposta" || tentativa === 2) throw falha;
+    // A avaliação encontrou 503 intermitentes. Só uma nova tentativa, com a
+    // mesma chave e modelo e dentro do prazo total. A reserva se repete.
+    if (tentativa === 2 || limite - performance.now() < TEMPO_MINIMO_SEGUNDA_TENTATIVA_MS ||
+        (falha.motivo !== "resposta" && status !== 503)) throw falha;
+    repararSaida = falha.motivo === "resposta";
+    if (status === 503) await aguardar(750);
   }
   throw new ErroIa("resposta");
 }
