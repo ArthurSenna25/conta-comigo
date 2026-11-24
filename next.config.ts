@@ -14,6 +14,9 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Server action de confirmação recebe a imagem (até 5 MiB + campos). O padrão do Next é 1 MB.
+  // Na Vercel o corpo da requisição tem teto de 4,5 MB: o cliente reencoda a foto (AMEACAS #2) para caber.
+  experimental: { serverActions: { bodySizeLimit: "6mb" } },
   turbopack: {
     rules: {
       "*.css": {

@@ -67,3 +67,23 @@ flowchart TB
 ## Mocks
 
 `NEXT_PUBLIC_USE_MOCKS=true`: as actions devolvem `lib/contracts/mocks.ts` e usam `mockAiProvider`. O front fica pronto antes do back; desligar a flag não muda nenhum tipo.
+
+## Portão de `app/api/*` (para quem cria route handlers)
+
+Todo `route.ts` começa chamando `exigirAcessoApi(req)` de `@/actions/portao-api` (`tests/portao.test.ts` falha se faltar). Ele **nunca redireciona**: devolve `Response` com `ErroResposta` (401 sem sessão, 403 sem consentimento/perfil/Origin, 500 em falha interna). Em método de escrita (POST/PUT/PATCH/DELETE) exige `Origin` igual ao da aplicação; sem Origin, recusa.
+
+```ts
+import { exigirAcessoApi } from "@/actions/portao-api";
+
+export async function POST(req: Request) {
+  // Rotas que mandam dado ao provedor de IA (/api/ingest, /api/chat) passam { ia: true }:
+  // exige envio_ia aceito NA VERSÃO ATUAL e não revogado. O teste falha se uma rota que importa lib/ai esquecer.
+  const acesso = await exigirAcessoApi(req, { ia: true });
+  if (acesso instanceof Response) return acesso; // 401/403/500 prontos
+  // ... acesso.userId, acesso.demo; Zod no corpo; tetoDiarioIaCentavos(acesso.demo, env) antes da IA
+}
+```
+
+Use `export async function METODO` (nunca `export const` nem reexport) e chame o portão em CADA handler. GET/HEAD não podem ter efeito colateral (não checam Origin). O Origin esperado vem de `x-forwarded-host/proto` (Vercel) ou da URL; sem Origin em escrita, 403. No modo mock o Origin também vale.
+
+Erros do corpo/IA usam `respostaErro(codigo)` de `@/lib/security/portao-api` (mensagens genéricas, `cache-control: no-store`). O proxy continua barrando `/api/*` sem sessão com 401; o portão cobre o resto.
