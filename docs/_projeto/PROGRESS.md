@@ -3,6 +3,7 @@
 **Nível:** N2 (segurança e LGPD reforçadas) · **Fase atual:** auth, consentimento e demo (Arthur) · **Atualizado:** 24/11/2026
 
 ## Feito
+- Gui: provider Gemini multimodal e rota de rascunho com Zod, modo mock e portão de sessão, consentimento e origem. Suíte real executável em `tests/avaliacao-ia`.
 - Setup: scaffold Next 16 + Tailwind v4 + shadcn, husky/gitleaks, CI, `main` protegida, regras de camadas no ESLint.
 - P3: `lib/contracts` (Zod, mocks, `AiProvider`), stubs de `lib/engine`, `docs/ARQUITETURA.md`, `DADOS.md`, `AMEACAS.md`, `LGPD.md`, ADR-001..004.
 - P4 (PR #7, mergeado): 5 migrations no Supabase, RLS + GRANT explícito, bucket privado, `pnpm test:rls`, advisors sem issues.
@@ -22,6 +23,8 @@
 - 24/11 `USE_MOCKS` removido de `lib/contracts/mocks.ts` (`modoMock()` é a única porta); `lib/security` tem bloco de camadas (só `lib/contracts`); `shadcn` em devDependencies.
 - 24/11 Sem client de navegador (login por server action); `lib/supabase/` é pasta reservada sem código.
 ## Pendências / bloqueios
+- Ingestão real via HTTP: Arthur precisa ligar a reserva de chamadas de IA antes do Gemini. Confirmação e meta ponta a ponta dependem da integração da interface.
+- Gemini Free teve 503 e timeouts na avaliação sintética. Segundo lote completo: 13/25 respostas válidas, 69/182 campos corretos. Critérios de precisão e disponibilidade continuam pendentes.
 - Riscos abertos em `AMEACAS.md` #14–#19: enumeração de e-mail (aceito, Confirm email desligado), força bruta/limite por IP, portão em route handlers, token vale até expirar, reaceite de consentimento revogado.
 - `pnpm audit`: 1 moderada em `minimatch` via `shadcn › ts-morph` (CLI de dev, pré-existente). `shadcn` já está em devDependencies: `pnpm audit --prod` limpo.
 - CODEOWNERS só com Arthur; favicon 404 em dev; LGPD.md com itens "REVISAR COM HUMANO".
