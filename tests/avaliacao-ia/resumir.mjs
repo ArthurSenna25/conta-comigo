@@ -42,6 +42,7 @@ const ultimos = [...casos.values()];
 console.log(JSON.stringify({
   modelo: [...modelos][0],
   total: agregar(ultimos),
+  somenteComResposta: agregar(ultimos.filter((caso) => caso.motivo === "sucesso")),
   modalidades: Object.fromEntries(["foto", "print", "audio", "texto"].map(
     (modalidade) => [modalidade, agregar(ultimos.filter((c) => c.modalidade === modalidade))],
   )),
