@@ -15,7 +15,7 @@ describe("erroDeAuth: mensagens genéricas (não revelam se o e-mail existe)", (
   it("cadastro: e-mail já existente tem a MESMA resposta de uma falha qualquer", () => {
     const existe = erroDeAuth("cadastro", { code: "email_exists", status: 422 });
     const existe2 = erroDeAuth("cadastro", { code: "user_already_exists", status: 422 });
-    const outra = erroDeAuth("cadastro", { code: "unexpected_failure", status: 500 });
+    const outra = erroDeAuth("cadastro", { code: "unexpected_failure", status: 400 });
     expect(existe2).toEqual(existe);
     expect(outra).toEqual(existe);
   });
@@ -45,6 +45,14 @@ describe("erroDeAuth: mensagens genéricas (não revelam se o e-mail existe)", (
 
   it("status 429 sem código também vira limite de taxa", () => {
     expect(erroDeAuth("login", { status: 429 }).erro.codigo).toBe("proibido");
+  });
+
+  it.each([500, 502, 503])("falha do servidor (%i) não vira 'senha incorreta': é erro interno", (status) => {
+    for (const contexto of ["login", "cadastro"] as const) {
+      const r = erroDeAuth(contexto, { status });
+      expect(r.erro.codigo).toBe("interno");
+      expect(r.erro.mensagem).not.toMatch(/senha|e-mail/i);
+    }
   });
 
   it("erro desconhecido ou nulo no login não vaza e usa mensagem genérica", () => {

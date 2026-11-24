@@ -1,4 +1,4 @@
-import { VERSAO_CONSENTIMENTO, type FinalidadeConsentimento } from "@/lib/contracts";
+import { VERSAO_CONSENTIMENTO, type ConsentimentoInput, type FinalidadeConsentimento } from "@/lib/contracts";
 
 /** Linha de `consentimentos` já lida do banco (só o que a regra precisa). */
 export type AceiteRegistrado = {
@@ -14,6 +14,14 @@ export type EstadoAcesso = {
 };
 
 const OBRIGATORIAS: FinalidadeConsentimento[] = ["termos_uso", "privacidade"];
+
+/**
+ * O que o cadastro grava em `consentimentos`. A caixa dos termos cobre as DUAS finalidades obrigatórias:
+ * gravar só uma deixaria `consentimentoVigente` falso e o usuário trancado em /consentimento.
+ */
+export function finalidadesDoAceite(c: ConsentimentoInput): FinalidadeConsentimento[] {
+  return [...OBRIGATORIAS, ...(c.aceiteEnvioIa ? (["envio_ia"] as const) : [])];
+}
 
 /** Vigente = termos e privacidade aceitos na versão atual e não revogados. `envio_ia` é opcional. */
 export function consentimentoVigente(aceites: AceiteRegistrado[], versaoAtual = VERSAO_CONSENTIMENTO): boolean {

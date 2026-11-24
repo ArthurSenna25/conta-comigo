@@ -19,6 +19,10 @@ export function erroDeAuth(contexto: "login" | "cadastro", e: ErroSupabase): Err
   if (e && (e.status === 429 || (e.code && LIMITE_DE_TAXA.has(e.code)))) {
     return erro("proibido", "Muitas tentativas. Aguarde alguns minutos e tente de novo.");
   }
+  // Falha do servidor não é "senha errada": esconder uma queda confunde o usuário e o time.
+  if (e?.status !== undefined && e.status >= 500) {
+    return erro("interno", "Serviço indisponível no momento. Tente novamente em instantes.");
+  }
   if (contexto === "login") return erro("nao_autenticado", "E-mail ou senha incorretos.");
 
   if (e?.code === "weak_password") {
