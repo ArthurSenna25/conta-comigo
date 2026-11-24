@@ -69,6 +69,18 @@ describe("confirmarLancamento", () => {
     expect(m.criarLancamentos).not.toHaveBeenCalled();
   });
 
+  it("autoriza ANTES de parsear: entrada lixo de quem não tem acesso nunca chega ao Zod", async () => {
+    m.exigirAcesso.mockRejectedValue(new Error("NEXT_REDIRECT"));
+    await expect(confirmarLancamento(form("{lixo"))).rejects.toThrow("NEXT_REDIRECT");
+    expect(m.criarLancamentos).not.toHaveBeenCalled();
+  });
+
+  it("JSON de mais de 64 mil caracteres é recusado sem parsear", async () => {
+    const enorme = JSON.stringify(Array.from({ length: 50 }, () => ({ ...item, descricao: "x".repeat(200) }))) + " ".repeat(64_000);
+    expect(await confirmarLancamento(form(enorme))).toMatchObject({ ok: false, erro: { codigo: "invalido" } });
+    expect(m.criarLancamentos).not.toHaveBeenCalled();
+  });
+
   it("recusa data futura (Brasília)", async () => {
     const ano = Number(hojeBrasil().slice(0, 4));
     const r = await confirmarLancamento(form([{ ...item, data: `${ano + 1}-01-01` }]));

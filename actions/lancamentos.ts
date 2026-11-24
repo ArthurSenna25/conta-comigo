@@ -34,7 +34,9 @@ const Periodo = z
 const EdicaoInput = z.object({ id: Uuid, lancamento: LancamentoInput });
 
 const MSG_DATA_FUTURA = "A data não pode ser no futuro.";
-const MSG_IMAGEM = "Imagem inválida. Envie uma foto JPEG, PNG ou WebP de até 5 MB.";
+const MSG_IMAGEM = "Imagem inválida. Envie uma foto JPEG, PNG ou WebP de até 4 MB.";
+/** 50 lançamentos (200 + 120 caracteres cada) cabem em ~30 KB: acima disso nem parseia. */
+const JSON_MAX_CHARS = 64_000;
 
 const comDataFutura = (itens: readonly LancamentoInput[]) => {
   const hoje = hojeBrasil();
@@ -46,7 +48,7 @@ function lerConfirmacao(fd: FormData): unknown {
   const bruto = fd.get("lancamentos");
   let lancamentos: unknown = null;
   try {
-    lancamentos = typeof bruto === "string" ? JSON.parse(bruto) : null;
+    lancamentos = typeof bruto === "string" && bruto.length <= JSON_MAX_CHARS ? JSON.parse(bruto) : null;
   } catch {
     lancamentos = null;
   }
@@ -60,19 +62,21 @@ function lerConfirmacao(fd: FormData): unknown {
  * upload, desfaz o documento. Cliente: FormData com `lancamentos` (JSON) e, opcional, `imagem`.
  */
 export async function confirmarLancamento(form: FormData): Promise<Resultado<ConfirmarResponse>> {
+  const acesso = modoMock() ? null : await exigirAcesso(); // antes de parsear ou ler bytes: anônimo não faz o servidor trabalhar
   const parsed = ConfirmarRequest.safeParse(lerConfirmacao(form));
   if (!parsed.success) return invalido(parsed.error);
   const { lancamentos: itens, imagem } = parsed.data;
   if (comDataFutura(itens)) return erro("invalido", MSG_DATA_FUTURA);
 
-  if (modoMock()) {
+  if (!acesso) {
     const agora = new Date().toISOString();
     const dados = itens.map((i) => ({ ...i, id: crypto.randomUUID(), documentoId: null, criadoEm: agora, atualizadoEm: agora }));
     return { ok: true, dados: { lancamentos: dados } };
   }
 
-  const { userId } = await exigirAcesso(); // antes de ler os bytes: quem não tem acesso não faz o servidor processar arquivo
-  if (imagem && mimeDaImagem(new Uint8Array(await imagem.arrayBuffer())) !== imagem.type) {
+  const { userId } = acesso;
+  // só o cabeçalho decide o tipo: lê 12 bytes, não o arquivo inteiro
+  if (imagem && mimeDaImagem(new Uint8Array(await imagem.slice(0, 12).arrayBuffer())) !== imagem.type) {
     return erro("invalido", MSG_IMAGEM);
   }
 
@@ -84,7 +88,7 @@ export async function confirmarLancamento(form: FormData): Promise<Resultado<Con
     return { ok: true, dados: { lancamentos: await criarLancamentos(db, userId, itens, documentoId) } };
   } catch (e) {
     if (db && documentoId) {
-      await removerDocumento(db, userId, documentoId).catch((r: unknown) => interno("confirmarLancamento/desfazer", r));
+      await removerDocumento(db, userId, documentoId).catch((r: unknown) => interno(`confirmarLancamento/desfazer doc=${documentoId}`, r));
     }
     return interno("confirmarLancamento", e);
   }
@@ -92,14 +96,15 @@ export async function confirmarLancamento(form: FormData): Promise<Resultado<Con
 
 /** Lançamentos do usuário com `de <= data < ate`, do mais novo ao mais antigo. */
 export async function listar(periodo: unknown): Promise<Resultado<Lancamento[]>> {
+  const acesso = modoMock() ? null : await exigirAcesso();
   const parsed = Periodo.safeParse(periodo);
   if (!parsed.success) return invalido(parsed.error);
-  if (modoMock()) {
+  if (!acesso) {
     const { de, ate } = parsed.data;
     return { ok: true, dados: mockLancamentos.filter((l) => l.data >= de && l.data < ate) };
   }
 
-  const { userId } = await exigirAcesso();
+  const { userId } = acesso;
   try {
     return { ok: true, dados: await listarLancamentos(await criarClienteServidor(), userId, parsed.data) };
   } catch (e) {
@@ -109,16 +114,17 @@ export async function listar(periodo: unknown): Promise<Resultado<Lancamento[]>>
 
 /** Edita um lançamento do próprio usuário. O documento anexado não muda. */
 export async function editar(entrada: unknown): Promise<Resultado<Lancamento>> {
+  const acesso = modoMock() ? null : await exigirAcesso();
   const parsed = EdicaoInput.safeParse(entrada);
   if (!parsed.success) return invalido(parsed.error);
   const { id, lancamento } = parsed.data;
   if (comDataFutura([lancamento])) return erro("invalido", MSG_DATA_FUTURA);
-  if (modoMock()) {
+  if (!acesso) {
     const agora = new Date().toISOString();
     return { ok: true, dados: { ...lancamento, id, documentoId: null, criadoEm: agora, atualizadoEm: agora } };
   }
 
-  const { userId } = await exigirAcesso();
+  const { userId } = acesso;
   try {
     const editado = await editarLancamento(await criarClienteServidor(), userId, id, lancamento);
     return editado ? { ok: true, dados: editado } : erro("nao_encontrado");
@@ -132,17 +138,18 @@ export async function editar(entrada: unknown): Promise<Resultado<Lancamento>> {
  * documento (DADOS.md). Falha nessa limpeza é registrada, mas não desfaz a exclusão que o usuário pediu.
  */
 export async function excluir(id: unknown): Promise<Resultado<null>> {
+  const acesso = modoMock() ? null : await exigirAcesso();
   const parsed = Uuid.safeParse(id);
   if (!parsed.success) return invalido(parsed.error);
-  if (modoMock()) return { ok: true, dados: null };
+  if (!acesso) return { ok: true, dados: null };
 
-  const { userId } = await exigirAcesso();
+  const { userId } = acesso;
   try {
     const db = await criarClienteServidor();
     const excluido = await excluirLancamento(db, userId, parsed.data);
     if (!excluido) return erro("nao_encontrado");
     const { documentoId } = excluido;
-    if (documentoId && (await contarLancamentosDoDocumento(db, userId, documentoId).catch(() => 1)) === 0) {
+    if (documentoId && (await contarLancamentosDoDocumento(db, userId, documentoId).catch((e: unknown) => (interno("excluir/contar", e), 1))) === 0) {
       await removerDocumento(db, userId, documentoId).catch((e: unknown) => interno("excluir/documento", e));
     }
     return { ok: true, dados: null };

@@ -47,18 +47,24 @@ function dashboardVazio(mes: string, hoje: string): DashboardResponse {
  * ao lib/engine; esta action NÃO calcula nada. `mes` "YYYY-MM" (padrão: mês atual em Brasília).
  */
 export async function obterDashboard(mes?: unknown): Promise<Resultado<DashboardResponse>> {
+  const acesso = modoMock() ? null : await exigirAcesso();
   const hoje = hojeBrasil();
   const parsed = MesISO.safeParse(mes ?? hoje.slice(0, 7));
   if (!parsed.success) return invalido(parsed.error);
-  if (modoMock()) return { ok: true, dados: mockDashboard };
+  if (!acesso) return { ok: true, dados: mockDashboard };
 
-  const { userId } = await exigirAcesso();
+  const { userId } = acesso;
   try {
     const db = await criarClienteServidor();
     const perfil = await lerPerfil(db, userId);
     if (!perfil) return erro("nao_encontrado");
     const ano = Number(hoje.slice(0, 4));
-    const lancamentos = await listarLancamentos(db, userId, { de: `${ano - 1}-10-01`, ate: `${ano + 1}-01-01` });
+    const anoDoMes = Number(parsed.data.slice(0, 4));
+    // cobre o ano corrente (limite do MEI), o mês pedido e os 3 meses anteriores a cada um (alertas)
+    const lancamentos = await listarLancamentos(db, userId, {
+      de: `${Math.min(ano, anoDoMes) - 1}-10-01`,
+      ate: `${Math.max(ano, anoDoMes) + 1}-01-01`,
+    });
 
     try {
       const receitasAno = lancamentos

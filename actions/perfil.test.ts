@@ -62,6 +62,12 @@ describe("salvarPerfil", () => {
     expect(criarPerfil).not.toHaveBeenCalled();
   });
 
+  it("conta de demonstração não altera o perfil compartilhado", async () => {
+    exigirAcesso.mockResolvedValue({ userId: "demo", demo: true, consentimentoVigente: true });
+    expect(await salvarPerfil(entrada)).toMatchObject({ ok: false, erro: { codigo: "proibido" } });
+    expect(lerPerfil).not.toHaveBeenCalled();
+  });
+
   it("falha do banco: erro genérico, sem a mensagem interna", async () => {
     lerPerfil.mockRejectedValue(new Error("falha ao ler perfil (XX000) segredo-interno"));
     vi.spyOn(console, "error").mockImplementation(() => {});

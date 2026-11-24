@@ -2,6 +2,9 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Lancamento, LancamentoInput } from "@/lib/contracts";
 import { camposDoLancamento, COLUNAS_LANCAMENTO, lancamentoParaLinha, linhaParaLancamento } from "./mapeamento";
 
+/** `max-rows` padrão do PostgREST/Supabase. */
+const LIMITE_LINHAS_API = 1000;
+
 const falha = (o: string, e: { code?: string }) => new Error(`falha ao ${o} lançamento (${e.code ?? "sem código"})`);
 
 /** Quantos lançamentos o usuário tem (só conta, não traz linhas). */
@@ -48,6 +51,8 @@ export async function listarLancamentos(
     .order("data", { ascending: false })
     .order("criado_em", { ascending: false });
   if (error) throw falha("listar", error);
+  // PostgREST corta em 1000 linhas sem avisar: um painel com receita menor que a real é pior que um erro
+  if (data.length >= LIMITE_LINHAS_API) throw new Error("falha ao listar lançamento (limite de linhas)");
   return data.map(linhaParaLancamento);
 }
 
