@@ -66,8 +66,9 @@ describe("reservar_uso_ia: limite do usuário e concorrência", () => {
 describe("reservar_uso_ia: quem pode executar", () => {
   it("usuário comum e anon não executam", async () => {
     const args = { p_user_id: A.id, p_max_usuario: 1, p_max_global: GRANDE };
+    const antes = await chamadasDe(A);
     expect(semPermissao((await A.db.rpc("reservar_uso_ia", args)).error)).toBe(true);
     expect(semPermissao((await anon.rpc("reservar_uso_ia", args)).error)).toBe(true);
-    expect(await chamadasDe(A)).toBe(1); // continua só a reserva legítima do teste global
+    expect(await chamadasDe(A)).toBe(antes); // a tentativa negada não gravou nada
   });
 });

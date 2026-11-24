@@ -95,10 +95,18 @@ describe("exigirAcessoApi: sessão, consentimento, perfil e IA", () => {
 });
 
 describe("exigirAcessoApi: teto diário de IA (ia: true)", () => {
-  it("demo usa o menor teto; usuário comum usa o global", async () => {
+  it("com tetos válidos a IA fica liberada para a demo e para o usuário comum", async () => {
     expect(await exigirAcessoApi(pedido(), { ia: true })).toMatchObject({ demo: true });
     getClaims.mockResolvedValue({ data: { claims: { sub: "usuario", app_metadata: {} } } });
     expect(await exigirAcessoApi(pedido(), { ia: true })).toMatchObject({ demo: false });
+  });
+
+  it("a demo nunca passa do teto global: teto global 0 desativa a IA mesmo com teto de demo alto", async () => {
+    vi.stubEnv("AI_DAILY_BUDGET_CENTS", "5");
+    vi.stubEnv("DEMO_AI_DAILY_BUDGET_CENTS", "50"); // maior que o global: a demo continua limitada pelo global
+    expect(await exigirAcessoApi(pedido(), { ia: true })).toMatchObject({ demo: true });
+    vi.stubEnv("AI_DAILY_BUDGET_CENTS", "0");
+    expect(status(await exigirAcessoApi(pedido(), { ia: true }))).toBe(429);
   });
 
   it.each(["expirado", "0", ""])("teto global %j desativa a IA (429 limite_ia)", async (valor) => {

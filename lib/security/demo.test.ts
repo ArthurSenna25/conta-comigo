@@ -27,6 +27,11 @@ describe("limitesChamadasIa: chamadas por dia, falha fechada", () => {
     expect(limitesChamadasIa(false, { AI_DAILY_CALLS_GLOBAL: valor }).maxGlobal).toBe(0);
   });
 
+  it("valor acima do int do Postgres é limitado, para não estourar o RPC", () => {
+    const grande = { AI_DAILY_CALLS_GLOBAL: "3000000000", AI_DAILY_CALLS_USER: "9007199254740991" };
+    expect(limitesChamadasIa(false, grande)).toEqual({ maxUsuario: 2_147_483_647, maxGlobal: 2_147_483_647 });
+  });
+
   it("limite de usuário inválido volta ao padrão, nunca abre", () => {
     expect(limitesChamadasIa(false, { ...env, AI_DAILY_CALLS_USER: "x" }).maxUsuario).toBe(30);
     expect(limitesChamadasIa(true, { ...env, DEMO_AI_DAILY_CALLS: "x" }).maxUsuario).toBe(15);

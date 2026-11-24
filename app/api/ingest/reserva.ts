@@ -1,5 +1,5 @@
 import { ErroIa } from "@/lib/ai/erro";
-import { reservarUsoIa } from "@/lib/db/uso-ia";
+import { ErroReserva, reservarUsoIa } from "@/lib/db/uso-ia";
 import { limitesChamadasIa } from "@/lib/security/demo";
 
 /**
@@ -18,8 +18,8 @@ export async function reservarTentativa(acesso: { userId: string; demo: boolean 
   try {
     reservou = await reservarUsoIa(acesso.userId, limites);
   } catch (e) {
-    // só o tipo do erro: a mensagem pode carregar dado ou nome de variável
-    console.error("[reserva-ia] falha", e instanceof Error ? e.name : "desconhecido");
+    // só o tipo e, se for nosso, o motivo constante: a mensagem de outros erros pode carregar dado
+    console.error("[reserva-ia] falha", e instanceof ErroReserva ? e.motivo : e instanceof Error ? e.name : "desconhecido");
     throw new ErroIa("controle");
   }
   if (!reservou) throw new ErroIa("cota");

@@ -35,8 +35,10 @@ function centavos(valor: string | undefined): number | null {
 }
 
 /** Chamadas de IA por dia: padrão por usuário e padrão da conta de demo (compartilhada). */
-export const CHAMADAS_IA_USUARIO_PADRAO = 30;
-export const CHAMADAS_IA_DEMO_PADRAO = 15;
+const CHAMADAS_IA_USUARIO_PADRAO = 30;
+const CHAMADAS_IA_DEMO_PADRAO = 15;
+/** Os parâmetros de `reservar_uso_ia` são `int`: valor maior estoura no banco e derrubaria a IA de todos. */
+const INT_MAX_POSTGRES = 2_147_483_647;
 
 /**
  * Limites de CHAMADAS de IA por dia para `reservar_uso_ia`. O global não tem padrão: ausente ou inválido
@@ -47,10 +49,11 @@ export function limitesChamadasIa(
   demo: boolean,
   env: { AI_DAILY_CALLS_USER?: string; DEMO_AI_DAILY_CALLS?: string; AI_DAILY_CALLS_GLOBAL?: string },
 ): { maxUsuario: number; maxGlobal: number } {
-  const maxUsuario = centavos(env.AI_DAILY_CALLS_USER) ?? CHAMADAS_IA_USUARIO_PADRAO;
-  const maxGlobal = centavos(env.AI_DAILY_CALLS_GLOBAL) ?? 0;
+  const limite = (valor: string | undefined, padrao: number) => Math.min(centavos(valor) ?? padrao, INT_MAX_POSTGRES);
+  const maxUsuario = limite(env.AI_DAILY_CALLS_USER, CHAMADAS_IA_USUARIO_PADRAO);
+  const maxGlobal = limite(env.AI_DAILY_CALLS_GLOBAL, 0);
   if (!demo) return { maxUsuario, maxGlobal };
-  return { maxUsuario: Math.min(maxUsuario, centavos(env.DEMO_AI_DAILY_CALLS) ?? CHAMADAS_IA_DEMO_PADRAO), maxGlobal };
+  return { maxUsuario: Math.min(maxUsuario, limite(env.DEMO_AI_DAILY_CALLS, CHAMADAS_IA_DEMO_PADRAO)), maxGlobal };
 }
 
 /**

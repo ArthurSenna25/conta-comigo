@@ -11,7 +11,9 @@ const { autorizar, provider, reservarUsoIa } = vi.hoisted(() => ({
 vi.mock("server-only", () => ({}));
 // O portão (Origin, sessão, consentimento, perfil, envio_ia, teto) é testado em actions/portao-api.test.ts.
 vi.mock("@/actions/portao-api", () => ({ exigirAcessoApi: autorizar }));
-vi.mock("@/lib/db/uso-ia", () => ({ reservarUsoIa }));
+vi.mock("@/lib/db/uso-ia", async (original) => ({
+  ...(await original<typeof import("@/lib/db/uso-ia")>()), reservarUsoIa,
+}));
 vi.mock("@/lib/ai/gemini", async () => ({
   ErroIa: (await import("@/lib/ai/erro")).ErroIa, criarGeminiProvider: provider,
 }));
@@ -86,7 +88,6 @@ describe("/api/ingest", () => {
   });
 
   it("fecha a ingestão autenticada quando a reserva compartilhada está ausente", async () => {
-    autorizar.mockResolvedValue({ mock: false, userId: "id", demo: true, tetoCentavos: 100 });
     const req = pedido(formulario("texto"));
     const resposta = await criarProcessarIngestao()(req, { mock: false, userId: "id", demo: true });
     expect(resposta.status).toBe(503);
@@ -96,8 +97,7 @@ describe("/api/ingest", () => {
   });
 
   it("aguarda a decisão do controle antes de obter rascunhos", async () => {
-    const acesso = { mock: false, userId: "id", demo: true, tetoCentavos: 100 };
-    autorizar.mockResolvedValue(acesso);
+    const acesso = { mock: false, userId: "id", demo: true };
     const tentativa = { modelo: "teste", operacao: "extracao", tentativa: 1 };
     provider.mockImplementation(({ antesDaChamada }) => ({
       extrair: async () => {
@@ -121,7 +121,7 @@ describe("/api/ingest com a reserva atômica de chamadas (reservar_uso_ia)", () 
         return { resultado: { rascunhos: [], perguntasPendentes: ["Qual foi a movimentação?"] } };
       },
     }));
-  const acessoReal = (demo: boolean) => ({ mock: false, userId: "usuario", demo, tetoCentavos: 100 });
+  const acessoReal = (demo: boolean) => ({ mock: false, userId: "usuario", demo });
 
   beforeEach(() => {
     vi.stubEnv("AI_DAILY_CALLS_GLOBAL", "200");

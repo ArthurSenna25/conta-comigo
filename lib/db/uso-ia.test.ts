@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { reservarUsoIa } from "./uso-ia";
+import { ErroReserva, reservarUsoIa } from "./uso-ia";
 
 const { rpc, createClient } = vi.hoisted(() => {
   const rpc = vi.fn();
@@ -38,8 +38,9 @@ describe("reservarUsoIa", () => {
   it("falha fechada: erro do RPC lança sem vazar a mensagem do banco", async () => {
     rpc.mockResolvedValue({ data: null, error: { message: "detalhe interno do banco", code: "XX000" } });
     const falha = await reservarUsoIa("usuario", limites).catch((e: unknown) => e);
-    expect(falha).toBeInstanceOf(Error);
-    expect((falha as Error).message).not.toContain("detalhe interno");
+    expect(falha).toBeInstanceOf(ErroReserva);
+    expect((falha as ErroReserva).motivo).toBe("rpc XX000"); // só o SQLSTATE, nunca o texto do banco
+    expect(JSON.stringify([(falha as Error).message, (falha as ErroReserva).motivo])).not.toContain("detalhe interno");
   });
 
   it.each([null, "true", 1])("falha fechada: resposta %j que não é boolean lança", async (data) => {
@@ -49,7 +50,7 @@ describe("reservarUsoIa", () => {
 
   it("falha fechada: sem SUPABASE_SECRET_KEY não chama nada", async () => {
     vi.stubEnv("SUPABASE_SECRET_KEY", "");
-    await expect(reservarUsoIa("usuario", limites)).rejects.toThrow();
+    await expect(reservarUsoIa("usuario", limites)).rejects.toMatchObject({ motivo: "chave ausente" });
     expect(createClient).not.toHaveBeenCalled();
   });
 });

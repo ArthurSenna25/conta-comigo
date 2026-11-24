@@ -8,8 +8,9 @@ language plpgsql security definer set search_path = '' as $$
 declare
   v_dia date := (now() at time zone 'America/Sao_Paulo')::date;
 begin
-  -- falha fechada: limite ausente/zero/negativo nega
-  if p_max_usuario < 1 or p_max_global < 1 then
+  -- falha fechada: argumento nulo, limite zero ou negativo nega (com NULL, `< 1` dá NULL e o IF não entraria)
+  if p_user_id is null or p_max_usuario is null or p_max_global is null
+     or p_max_usuario < 1 or p_max_global < 1 then
     return false;
   end if;
 
