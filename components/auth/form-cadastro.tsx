@@ -9,7 +9,7 @@ export function FormCadastro() {
   const { estado, aoEnviar, pendente } = useFormularioAcao(cadastrar);
   const erro = estado && !estado.ok ? estado.erro : null;
 
-  // Resposta neutra: vale tanto para "enviamos o link" quanto para "este e-mail já existia".
+  // Só aparece com "Confirm email" LIGADO no Supabase (então a resposta é igual para e-mail novo ou existente).
   if (estado?.ok && estado.dados.confirmarEmail) {
     return (
       <p role="status" className="rounded-lg border border-border bg-muted px-3 py-3 text-sm">

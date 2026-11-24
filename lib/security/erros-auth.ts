@@ -12,8 +12,10 @@ const erro = (codigo: ErroResposta["erro"]["codigo"], mensagem: string, campos?:
 });
 
 /**
- * Traduz o erro do Supabase Auth em mensagem genérica. Contas inexistentes, senha errada, e-mail
- * já cadastrado e e-mail não confirmado produzem a MESMA resposta: não dá para enumerar e-mails.
+ * Traduz o erro do Supabase Auth em mensagem genérica: conta inexistente, senha errada e e-mail não
+ * confirmado têm a MESMA resposta no login; e-mail já cadastrado tem a mesma mensagem de qualquer falha no
+ * cadastro. Limite: com "Confirm email" desligado o cadastro de e-mail novo CRIA a conta e o existente
+ * falha, então a diferença sucesso/falha ainda é observável (risco aceito, docs/AMEACAS.md #14).
  */
 export function erroDeAuth(contexto: "login" | "cadastro", e: ErroSupabase): ErroAuth {
   if (e && (e.status === 429 || (e.code && LIMITE_DE_TAXA.has(e.code)))) {

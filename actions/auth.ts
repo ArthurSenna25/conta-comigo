@@ -51,8 +51,10 @@ export async function cadastrar(
   const { data, error } = await db.auth.signUp({ email: entrada.data.email, password: entrada.data.senha });
   if (error) return erroDeAuth("cadastro", error);
 
-  // Sem sessão = o projeto exige confirmar o e-mail (ou o e-mail já existia: o Supabase responde igual).
-  // Resposta neutra nos dois casos. O consentimento é pedido de novo em /consentimento após o login.
+  // Sem sessão = o projeto exige confirmar o e-mail. SÓ com a confirmação ligada o Supabase responde igual
+  // para e-mail novo e já existente (aqui: resposta neutra). Com ela DESLIGADA (hoje; risco aceito em
+  // docs/AMEACAS.md #14) e-mail existente dá erro e e-mail novo dá sessão: este ramo não é alcançado.
+  // O consentimento é pedido de novo em /consentimento após o primeiro login.
   if (!data.session || !data.user) return { ok: true, dados: { confirmarEmail: true } };
 
   try {
