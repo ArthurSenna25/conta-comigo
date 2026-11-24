@@ -52,6 +52,10 @@ describe("credenciaisDemo: só do servidor, sem as duas variáveis não há demo
     expect(credenciaisDemo(env)).toBeNull();
   });
 
+  it("normaliza o e-mail (apara e minúsculas), igual ao que o Auth grava", () => {
+    expect(credenciaisDemo({ DEMO_EMAIL: "  Demo@Exemplo.TEST ", DEMO_PASSWORD: "x-senha-longa" })?.email).toBe("demo@exemplo.test");
+  });
+
   it("não apara a senha (espaço pode fazer parte dela)", () => {
     expect(credenciaisDemo({ DEMO_EMAIL: "demo@exemplo.test", DEMO_PASSWORD: " abc " })?.senha).toBe(" abc ");
   });

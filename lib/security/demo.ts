@@ -21,7 +21,7 @@ export function credenciaisDemo(env: {
   DEMO_EMAIL?: string;
   DEMO_PASSWORD?: string;
 }): { email: string; senha: string } | null {
-  const email = env.DEMO_EMAIL?.trim();
+  const email = env.DEMO_EMAIL?.trim().toLowerCase();
   const senha = env.DEMO_PASSWORD;
   if (!email || !senha || !senha.trim()) return null;
   return { email, senha };
