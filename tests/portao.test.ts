@@ -47,6 +47,13 @@ function rotas(): string[] {
     .filter(ehRoute);
 }
 
+/**
+ * Rotas com portão PRÓPRIO, fora do exigirAcessoApi. /api/ingest (Gui, PR #10) faz Origin em processar.ts e sessão,
+ * consentimento, perfil e teto de IA em acesso.ts (autorizarIngestao). TODO: extrair a parte comum com exigirAcessoApi
+ * (commit separado) e remover esta exceção.
+ */
+const PORTAO_PROPRIO = new Set(["app/api/ingest/route.ts"]);
+
 const METODO = "(?:GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS)";
 const semComentarios = (fonte: string) => fonte.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/.*$/gm, "$1");
 
@@ -56,6 +63,7 @@ const semComentarios = (fonte: string) => fonte.replace(/\/\*[\s\S]*?\*\//g, "")
  * precisa de `ia: true`. Heurística: não prova que o Response é devolvido; o code review cobre isso.
  */
 function problemaDeRota(arquivo: string, fonte: string): string | null {
+  if (PORTAO_PROPRIO.has(arquivo)) return null;
   const codigo = semComentarios(fonte);
   if (new RegExp(String.raw`export\s+const\s+${METODO}\b|export\s*\{[^}]*\b${METODO}\b`).test(codigo)) {
     return `${arquivo}: use "export async function METODO", nunca const nem reexport`;
