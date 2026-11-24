@@ -26,15 +26,13 @@ export function criarPostIngestao(reservar?: ReservarTentativa) {
         throw new ErroIngestao(403, "proibido", "Envie o formulário a partir do Conta Comigo.");
       }
       const acesso = await autorizarIngestao();
-      const entrada = await lerEntrada(request);
-      let provider;
-      if (acesso.mock) {
-        await validarMidia(entrada);
-        provider = mockAiProvider;
-      } else {
+      let provider = mockAiProvider;
+      if (!acesso.mock) {
         if (!reservar) throw new ErroIa("controle");
         provider = criarGeminiProvider({ antesDaChamada: (t) => reservar(acesso, t) });
       }
+      const entrada = await lerEntrada(request);
+      if (acesso.mock) await validarMidia(entrada);
       const { resultado } = await provider.extrair(entrada, calendario.format(new Date()));
       const saida = IngestResponse.safeParse(resultado);
       if (!saida.success) throw new ErroIa("resposta");

@@ -86,9 +86,11 @@ describe("/api/ingest", () => {
 
   it("fecha a ingestão autenticada quando a reserva compartilhada está ausente", async () => {
     autorizar.mockResolvedValue({ mock: false, userId: "id", demo: true, tetoCentavos: 100 });
-    const resposta = await POST(pedido(formulario("texto")));
+    const req = pedido(formulario("texto"));
+    const resposta = await POST(req);
     expect(resposta.status).toBe(503);
     expect((await resposta.json()).erro.codigo).toBe("ia_indisponivel");
+    expect(req.bodyUsed).toBe(false);
     expect(provider).not.toHaveBeenCalled();
   });
 
