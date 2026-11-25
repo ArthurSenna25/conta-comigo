@@ -14,8 +14,8 @@ function FioDeFundo() {
   const curva = "M88 -10 C 30 110, 18 230, 64 340 S 96 560, 34 690 S 6 900, 58 1010";
   return (
     <svg aria-hidden="true" viewBox="0 0 100 1000" preserveAspectRatio="none" className="lp-fio-fundo" data-movimento="fio-fundo">
-      <path d={curva} strokeWidth={12} style={{ stroke: "oklch(0.80 0.11 240 / 0.16)" }} />
-      <path d={curva} strokeWidth={2} style={{ stroke: "var(--fio-wire)" }} />
+      <path d={curva} pathLength={100} strokeDasharray={100} strokeWidth={12} style={{ stroke: "oklch(0.80 0.11 240 / 0.16)" }} />
+      <path d={curva} pathLength={100} strokeDasharray={100} strokeWidth={2} style={{ stroke: "var(--fio-wire)" }} />
     </svg>
   );
 }

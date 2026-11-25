@@ -297,6 +297,10 @@ html.mv-abrindo [data-movimento~="abertura-celular"] { transition: transform 800
 [data-movimento~="ia-campo"] { transition: opacity 320ms var(--ease-cc), transform 320ms var(--ease-cc); }
 [data-movimento~="ia-campo"][data-vazio] { opacity: 0; transform: translateY(6px); }
 
+/* brilho radial do odômetro na troca de mês: opacity .5→0 em 700ms (06: `glow`). Só existe fora do modo estático. */
+@keyframes cc-glow { from { opacity: 0.5; } to { opacity: 0; } }
+[data-movimento="odometro-brilho"] { opacity: 0; animation: cc-glow 700ms var(--ease-cc) both; }
+
 /* switch "Modo leve": cor instantânea, bolinha por transform (250ms) */
 .lp-switch-trilho {
   display: inline-flex;

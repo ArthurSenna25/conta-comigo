@@ -30,11 +30,20 @@ const PASSOS: { kicker: string; titulo: string; texto: string; tela: TelaCelular
 /** Trilho 300px com 4 pontos; `alcancados` pinta os pontos e o preenchimento em --ok. */
 function Trilho({ alcancados }: { alcancados: number }) {
   const xs = [12, 104, 196, 288];
-  const fim = xs[Math.max(0, alcancados - 1)];
+  const preenchido = (alcancados - 1) / (xs.length - 1);
   return (
     <svg aria-hidden="true" data-movimento="siga-trilho" viewBox="0 0 300 24" className="h-auto w-[min(300px,100%)] overflow-visible">
       <line x1={12} y1={12} x2={288} y2={12} strokeWidth={2} strokeLinecap="round" style={{ stroke: "var(--track)" }} />
-      <line x1={12} y1={12} x2={fim} y2={12} strokeWidth={3} strokeLinecap="round" style={{ stroke: "var(--ok)" }} />
+      <line
+        data-movimento="siga-preenchimento"
+        x1={12}
+        y1={12}
+        x2={288}
+        y2={12}
+        strokeWidth={3}
+        strokeLinecap="round"
+        style={{ stroke: "var(--ok)", transform: `scaleX(${preenchido})`, transformBox: "fill-box", transformOrigin: "0 50%" }}
+      />
       {xs.map((x, i) => (
         <circle key={x} cx={x} cy={12} r={7} style={{ fill: i < alcancados ? "var(--ok)" : "oklch(0.40 0.03 255)" }} />
       ))}
