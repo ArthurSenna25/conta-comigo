@@ -63,7 +63,7 @@ function Painel({ faturado, toast = false }: { faturado: number; toast?: boolean
       <div className="flex items-center justify-between rounded-2xl border border-line bg-card-solid p-4">
         <div className="flex flex-col gap-0.5">
           <span className="text-sm text-t3">Próximo DAS</span>
-          <span className="num text-[22px] font-extrabold">R$ 81,90</span>
+          <span className="num text-[22px] font-extrabold">R$ 82,05</span>
         </div>
         <span className="text-sm text-t2">Vence em 20/12/2026</span>
       </div>

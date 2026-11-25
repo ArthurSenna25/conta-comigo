@@ -82,7 +82,7 @@ function Palco() {
       <CartaoFlutuante
         lado="direita"
         rotulo="Próximo DAS"
-        valor="R$ 81,90"
+        valor="R$ 82,05"
         rodape={<span className="num text-[15px] text-t2">Vence em 20/12/2026</span>}
       />
       <div data-movimento="hero-item abertura-celular" className="relative z-[2]">
