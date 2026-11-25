@@ -18,7 +18,17 @@ export function valorDas(atividade: Atividade, ano: number): number {
   }
 
   const inssCentavos = (SALARIO_MINIMO_2026_CENTAVOS * ALIQUOTA_INSS_PERCENTUAL) / 100;
-  const icmsCentavos = atividade === "servicos" ? 0 : ICMS_CENTAVOS;
-  const issCentavos = atividade === "comercio" ? 0 : ISS_CENTAVOS;
-  return inssCentavos + icmsCentavos + issCentavos;
+  switch (atividade) {
+    case "comercio":
+      return inssCentavos + ICMS_CENTAVOS;
+    case "servicos":
+      return inssCentavos + ISS_CENTAVOS;
+    case "ambos":
+      return inssCentavos + ICMS_CENTAVOS + ISS_CENTAVOS;
+    default: {
+      const atividadeInesperada: never = atividade;
+      void atividadeInesperada;
+      throw new RangeError("Atividade do MEI inválida para o cálculo do DAS");
+    }
+  }
 }

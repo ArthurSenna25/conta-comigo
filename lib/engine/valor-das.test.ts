@@ -13,4 +13,9 @@ describe("valorDas", () => {
   it.each([2025, 2027, 2026.5, NaN, Infinity])("rejeita o ano de competência %s", (ano) => {
     expect(() => valorDas("comercio", ano)).toThrow(RangeError);
   });
+
+  it("rejeita uma atividade inválida em runtime", () => {
+    const atividade = "industria" as Parameters<typeof valorDas>[0];
+    expect(() => valorDas(atividade, 2026)).toThrow(RangeError);
+  });
 });
