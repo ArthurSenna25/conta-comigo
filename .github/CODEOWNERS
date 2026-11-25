@@ -1,6 +1,8 @@
-# Por enquanto so o Arthur. Atribuicao prevista por area (ajustar quando o time aceitar o convite):
-#   Arthur : app/(app)/dashboard, components, actions, supabase/migrations, .github
-#   Gui    : lib/ai, app/api/ingest, app/api/chat, kb/prompts
-#   Murilo : lib/engine, app/(app)/lancamentos, app/(app)/calendario, supabase/seed
-#   Frigeri: app/(marketing), app/(app)/onboarding, app/legal, kb, docs
+# Arthur revisa e faz merge de todos os PRs (decisao do time em 24/11/2026). Donos por area,
+# so para referencia (ver docs/handoff/00-LEIA-PRIMEIRO.md):
+#   Arthur : app/(marketing), app/page.tsx, app/(auth), app/consentimento, components, actions,
+#            lib/contracts, lib/db, lib/security, supabase/migrations, .github
+#   Frigeri: app/(app), app/onboarding, app/legal, kb
+#   Murilo : lib/engine, supabase/seed
+#   Gui    : lib/ai, app/api, kb/prompts, tests/avaliacao-ia
 * @ArthurSenna25
