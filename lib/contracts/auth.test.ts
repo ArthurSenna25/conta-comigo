@@ -4,7 +4,8 @@ import { CadastroInput, ConsentimentoInput, FinalidadeConsentimento, LoginInput,
 const valido = {
   email: "marta@exemplo.com.br",
   senha: "senha-forte-123",
-  aceiteTermos: true,
+  aceiteTermosUso: true,
+  aceitePrivacidade: true,
   aceiteEnvioIa: false,
 };
 
@@ -39,14 +40,15 @@ describe("CadastroInput", () => {
     expect(CadastroInput.safeParse({ ...valido, senha: "😀".repeat(18) }).success).toBe(true); // 72 bytes
   });
 
-  it("exige o aceite dos termos: false e ausente são rejeitados", () => {
-    expect(CadastroInput.safeParse({ ...valido, aceiteTermos: false }).success).toBe(false);
-    const semAceite = { email: valido.email, senha: valido.senha, aceiteEnvioIa: false };
+  it.each(["aceiteTermosUso", "aceitePrivacidade"])("exige %s: false e ausente são rejeitados", (campo) => {
+    expect(CadastroInput.safeParse({ ...valido, [campo]: false }).success).toBe(false);
+    const semAceite = Object.fromEntries(Object.entries(valido).filter(([k]) => k !== campo));
     expect(CadastroInput.safeParse(semAceite).success).toBe(false);
   });
 
   it("não aceita aceite como string (caixa de formulário vem convertida pela action)", () => {
-    expect(CadastroInput.safeParse({ ...valido, aceiteTermos: "on" }).success).toBe(false);
+    expect(CadastroInput.safeParse({ ...valido, aceiteTermosUso: "on" }).success).toBe(false);
+    expect(CadastroInput.safeParse({ ...valido, aceitePrivacidade: "on" }).success).toBe(false);
   });
 
   it("aceita envio à IA marcado", () => {
@@ -55,9 +57,19 @@ describe("CadastroInput", () => {
 });
 
 describe("ConsentimentoInput", () => {
-  it("é a parte de consentimento do cadastro: termos obrigatórios, IA opcional", () => {
-    expect(ConsentimentoInput.safeParse({ aceiteTermos: true, aceiteEnvioIa: false }).success).toBe(true);
-    expect(ConsentimentoInput.safeParse({ aceiteTermos: false, aceiteEnvioIa: true }).success).toBe(false);
+  it("é a parte de consentimento do cadastro: termos e privacidade obrigatórios, IA opcional", () => {
+    const base = { aceiteTermosUso: true, aceitePrivacidade: true, aceiteEnvioIa: false };
+    expect(ConsentimentoInput.safeParse(base).success).toBe(true);
+    expect(ConsentimentoInput.safeParse({ ...base, aceiteTermosUso: false, aceiteEnvioIa: true }).success).toBe(false);
+    expect(ConsentimentoInput.safeParse({ ...base, aceitePrivacidade: false, aceiteEnvioIa: true }).success).toBe(false);
+  });
+
+  it("cada aceite obrigatório tem a sua mensagem em português", () => {
+    const r = ConsentimentoInput.safeParse({ aceiteTermosUso: false, aceitePrivacidade: false, aceiteEnvioIa: false });
+    if (r.success) throw new Error("deveria falhar");
+    const msgs = Object.fromEntries(r.error.issues.map((i) => [i.path.join("."), i.message]));
+    expect(msgs.aceiteTermosUso).toMatch(/Termos de Uso/);
+    expect(msgs.aceitePrivacidade).toMatch(/Política de Privacidade/);
   });
 });
 
@@ -87,7 +99,8 @@ describe("consentimento: finalidades e versão", () => {
     expect(FinalidadeConsentimento.options).toEqual(["termos_uso", "privacidade", "envio_ia"]);
   });
 
-  it("versão do texto é uma data ISO (ex.: 2026-11-24)", () => {
+  it("versão do texto é uma data ISO (ex.: 2026-11-26)", () => {
     expect(VERSAO_CONSENTIMENTO).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(VERSAO_CONSENTIMENTO).toBe("2026-11-26");
   });
 });

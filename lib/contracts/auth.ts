@@ -4,7 +4,7 @@ import { z } from "zod";
  * Versão do texto de Termos, Privacidade e envio à IA que o usuário aceita.
  * Mudou o texto em app/legal = mudar aqui: quem aceitou outra versão precisa aceitar de novo.
  */
-export const VERSAO_CONSENTIMENTO = "2026-11-24";
+export const VERSAO_CONSENTIMENTO = "2026-11-26";
 
 /** Mesmos valores do CHECK de `consentimentos.finalidade` (docs/DADOS.md). */
 export const FinalidadeConsentimento = z.enum(["termos_uso", "privacidade", "envio_ia"]);
@@ -26,9 +26,10 @@ const SenhaNova = z
   .max(200, MSG_BYTES)
   .refine(cabeEm72Bytes, MSG_BYTES);
 
-/** Caixas do formulário (a action converte "on" em boolean). Termos: obrigatório. IA: opcional. */
+/** Caixas do formulário (a action converte "on" em boolean). Termos e privacidade: obrigatórios e independentes. IA: opcional. */
 export const ConsentimentoInput = z.object({
-  aceiteTermos: z.literal(true, "aceite os Termos de Uso e a Política de Privacidade"),
+  aceiteTermosUso: z.literal(true, "aceite os Termos de Uso"),
+  aceitePrivacidade: z.literal(true, "aceite a Política de Privacidade"),
   aceiteEnvioIa: z.boolean(),
 });
 
