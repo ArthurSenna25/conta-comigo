@@ -5,7 +5,6 @@
  */
 import type {
   Alerta,
-  Atividade,
   Lancamento,
   Perfil,
   ResumoMes,
@@ -14,12 +13,7 @@ import type {
 export { statusLimiteMei } from "./status-limite-mei";
 export { projecaoAnual } from "./projecao-anual";
 
-/** DAS-MEI do ano: 5% do salário mínimo + R$ 1 (ICMS) e/ou R$ 5 (ISS). Em centavos. */
-export function valorDas(atividade: Atividade, ano: number): number {
-  void atividade;
-  void ano;
-  throw new Error("not implemented");
-}
+export { valorDas } from "./valor-das";
 
 /** Próximo dia 20 a partir de `hoje` (inclusive). */
 export function proximoVencimentoDas(hoje: string): string {
