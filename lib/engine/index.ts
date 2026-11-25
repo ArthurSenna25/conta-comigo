@@ -16,6 +16,8 @@ export { valorDas } from "./valor-das";
 
 export { proximoVencimentoDas } from "./proximo-vencimento-das";
 
+export { anoDaCompetenciaDas } from "./competencia-das";
+
 export type EntradaLimite = {
   /** Receitas confirmadas do ano + receitaInicialCentavos do perfil. */
   receitasAnoCentavos: number;

@@ -12,7 +12,7 @@ const m = vi.hoisted(() => ({
   projecaoAnual: vi.fn(),
   proximoVencimentoDas: vi.fn(),
   valorDas: vi.fn(),
-  gerarAlertas: vi.fn(),
+  anoDaCompetenciaDas: vi.fn(),
 }));
 vi.mock("server-only", () => ({}));
 vi.mock("./sessao", () => ({ exigirAcesso: m.exigirAcesso }));
@@ -25,13 +25,10 @@ vi.mock("@/lib/engine", () => ({
   projecaoAnual: m.projecaoAnual,
   proximoVencimentoDas: m.proximoVencimentoDas,
   valorDas: m.valorDas,
-  gerarAlertas: m.gerarAlertas,
+  anoDaCompetenciaDas: m.anoDaCompetenciaDas,
 }));
 
-const naoImplementado = () => {
-  throw new Error("not implemented");
-};
-const funcoesDoEngine = [m.resumoMes, m.statusLimiteMei, m.projecaoAnual, m.proximoVencimentoDas, m.valorDas, m.gerarAlertas];
+const funcoesDoEngine = [m.resumoMes, m.statusLimiteMei, m.projecaoAnual, m.proximoVencimentoDas, m.valorDas, m.anoDaCompetenciaDas];
 
 beforeEach(() => {
   vi.resetAllMocks();
@@ -43,14 +40,28 @@ beforeEach(() => {
 });
 
 describe("obterDashboard", () => {
-  it("enquanto o engine não está pronto: devolve um painel vazio e válido, sem quebrar", async () => {
-    for (const f of funcoesDoEngine) f.mockImplementation(naoImplementado);
+  it("sem valor oficial do DAS (valorDas lança RangeError): painel vazio e válido, sem quebrar", async () => {
+    m.proximoVencimentoDas.mockReturnValue("2027-02-22");
+    m.anoDaCompetenciaDas.mockReturnValue(2027);
+    m.valorDas.mockImplementation(() => {
+      throw new RangeError("Ano de competência do DAS não suportado");
+    });
     const r = await obterDashboard("2026-11");
     expect(r.ok).toBe(true);
     if (r.ok) {
       expect(DashboardResponse.safeParse(r.dados).success).toBe(true);
       expect(r.dados).toMatchObject({ resumoMes: { mes: "2026-11", receitaCentavos: 0 }, alertas: [] });
     }
+  });
+
+  it("RangeError de outra função do engine (resumoMes) não é escondido: erro interno", async () => {
+    m.proximoVencimentoDas.mockReturnValue("2026-12-21");
+    m.anoDaCompetenciaDas.mockReturnValue(2026);
+    m.valorDas.mockReturnValue(8_205);
+    m.resumoMes.mockImplementation(() => {
+      throw new RangeError("mês inválido");
+    });
+    expect(await obterDashboard("2026-11")).toMatchObject({ ok: false, erro: { codigo: "interno" } });
   });
 
   it("perfil salvo com data inválida: o engine rejeita e a action devolve erro tratado, sem lançar", async () => {
@@ -65,7 +76,7 @@ describe("obterDashboard", () => {
     m.projecaoAnual.mockReturnValue(123);
     m.proximoVencimentoDas.mockReturnValue("2026-12-20");
     m.valorDas.mockReturnValue(7_190);
-    m.gerarAlertas.mockReturnValue([]);
+    m.anoDaCompetenciaDas.mockReturnValue(2026);
     const r = await obterDashboard("2026-11");
     expect(r).toMatchObject({
       ok: true,

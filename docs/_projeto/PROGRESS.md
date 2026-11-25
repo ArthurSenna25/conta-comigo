@@ -3,6 +3,7 @@
 **Nível:** N2 (segurança e LGPD reforçadas) · **Fase atual:** telas, engine, IA e landing em paralelo (divisão de 24/11) · **Atualizado:** 25/11/2026
 
 ## Feito
+- Gui: `POST /api/chat` com portão e reserva compartilhados, contexto do engine e fontes oficiais em `kb/`. Chat real no Gemini Free restrito à conta demo, com corpus e avaliação em `tests/avaliacao-ia`.
 - Gui: provider Gemini multimodal e rota de rascunho com Zod, modo mock e portão de sessão, consentimento e origem. Suíte real executável em `tests/avaliacao-ia`.
 - Setup: scaffold Next 16 + Tailwind v4 + shadcn, husky/gitleaks, CI, `main` protegida, regras de camadas no ESLint.
 - P3: `lib/contracts` (Zod, mocks, `AiProvider`), stubs de `lib/engine`, `docs/ARQUITETURA.md`, `DADOS.md`, `AMEACAS.md`, `LGPD.md`, ADR-001..004.
@@ -14,6 +15,7 @@
 - Arthur (24/11, `feat/landing-estrutura`): landing estática completa em `app/(marketing)` (sem animação, sem JS obrigatório, ganchos `data-movimento`), celular de exemplo em `components/landing`. Lighthouse mobile: a11y 100, SEO 100, boas práticas 100 (favicon `app/icon.svg`). Fontes conferidas em 24/11/2026: teto (art. 18-A § 1º), regra dos 20% e chip (§ 7º, III, a e b, e § 10). Falta: texto do rodapé, Termos/Privacidade (Frigeri), LCP 3,17 s em 4G lento.
 - Arthur (25/11, `feat/landing-movimento`): camada de movimento em ilhas client (`components/landing/movimento`), gsap+ScrollTrigger e lenis por `import()` (JS inicial +7 KB gzip). Siga o Fio preso ≥900×720, O limite em scrub com nível do engine via `nivelDoFio`, modo leve (localStorage) e reduced motion estáticos, failsafe de 1,5 s. CLS 0 carregando e rolando (390/768/1280).
 - Mergeados em 25/11: #13 reserva atômica de IA · #15 recusa de data de abertura futura · #17 fundação de design · #18 landing estática · #19 `valorDas` (DAS 2026: R$ 82,05 comércio/indústria, R$ 86,05 serviços, R$ 87,05 misto; salário mínimo R$ 1.621; INSS R$ 81,05) · #20 camada de movimento da landing (gsap + lenis). `pnpm check` verde, 450 testes.
+- Mergeados em 25/11 (cont.): #22 vencimento do DAS (Murilo) · #23 landing (DAS de exemplo 82,05 e rodapé) · #24 `resumoMes` (Murilo).
 ## Próximo
 Divisão de 24/11 (ver `docs/handoff/`). Cada um segue o "Falta" do seu handoff, um PR por item; só o Arthur faz merge; plano B em 27/11 12h.
 - **Arthur:** tokens e componentes (primeiro), landing (estrutura › movimento › fio 3D), variáveis da Vercel, demo do júri, revisão de todos os PRs.
