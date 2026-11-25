@@ -50,6 +50,7 @@ lib/contracts ou a assinatura de uma action, pare e me avise. Pronto = pnpm chec
 NEXT_PUBLIC_USE_MOCKS=false verdes, telas conferidas em 390/768/1280 e com reduced-motion.
 ```
 
-## Dúvidas
+## Decisões (24/11)
 - Comentários `TODO(Frigeri)` em `app/page.tsx` e `TODO(Frigeri/Gui)` em `actions/painel.ts` citam donos antigos: corrigir no próximo PR de código dessas pastas.
-- O design marca a faixa de atenção em 80%; o contrato `FaixaLimite` usa `ok/70/90/100` (ver Dúvidas do `MURILO.md`). Decidir antes do PR de componentes (`FioDoLimite`).
+- Limiares do limite: um só conjunto, definido no `lib/engine` pelo Murilo (ver `MURILO.md`). O `FioDoLimite` recebe o nível por props e não recalcula. Mudar o enum `FaixaLimite` é mudança de contrato: PR próprio e aviso ao grupo.
+- Imagem: o texto da mensagem da action ("até 4 MB") e o `IMAGEM_MAX_BYTES` (5 MB) são alinhados por você depois; o cliente da Frigeri já reencoda para menos de 4 MB.

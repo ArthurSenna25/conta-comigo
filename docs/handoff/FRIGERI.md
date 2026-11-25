@@ -55,7 +55,8 @@ ou a assinatura de uma action, pare e me avise. Pronto = pnpm check e build com
 NEXT_PUBLIC_USE_MOCKS=false verdes e tela conferida em 390 px.
 ```
 
-## Dúvidas
-- O design põe a IA como "passo 3 de 3" em `/consentimento`, mas no código o consentimento vem **antes** do onboarding (`/consentimento` é do Arthur). Combinar com o Arthur antes de fazer o stepper.
-- O onboarding do design pede atividade por CNAE e faturamento; o contrato pede também `nomeNegocio`, `ehMei`, `uf`, `municipio` e `dataAbertura`, e `atividade` é só `comercio | servicos | ambos`. A lista de CNAE [REAL] não existe no repositório nem em `kb/`.
-- O schema aceita imagem até 5 MB (`IMAGEM_MAX_BYTES` em `lib/contracts/ingest.ts`), mas a mensagem da action fala em 4 MB e a Vercel corta antes. Mire em menos de 4 MB; o Arthur alinha o número.
+## Decisões (24/11)
+- **Ordem:** o consentimento vem **antes** do onboarding (o código vence o design). O stepper do onboarding não conta o consentimento.
+- **Sem CNAE:** o onboarding usa os campos do contrato `PerfilInput`: `nomeNegocio`, `atividade` (`comercio | servicos | ambos`, com rótulos simples para o MEI), `uf`, `municipio`, `dataAbertura` e `receitaInicialCentavos`. O `ehMei` não é digitado: o produto é só para MEI, então a tela envia `true` (confirmar com o Arthur se o contrato mudar).
+- **Imagem:** o cliente reencoda para **menos de 4 MB** antes de enviar e a tela trata o 413 com mensagem clara. O Arthur alinha o texto da action depois.
+- **Limite:** o `FioDoLimite` e as telas recebem o nível (faixa) por props e **não recalculam** percentual nem limiar; quem decide é o `lib/engine`.

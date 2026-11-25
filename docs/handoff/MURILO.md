@@ -18,12 +18,14 @@ Fechar `lib/engine` (o painel depende dele), o seed e os testes do engine, e faz
 - [ ] **`resumoMes(lancamentos, mes)`**: só lançamentos do mês; formato `ResumoMes` (`lib/contracts/dashboard.ts`).
 - [ ] **`gerarAlertas(estado)`**: DAS (7 e 2 dias antes), limite 70/90/100, despesa atípica, mistura PF/PJ, nota faltando. `chave` determinística (ex.: `"das_vencendo:2026-12"`).
 - [ ] **Remover o marcador** `proximoDas.valorCentavos: 1` de `dashboardVazio` em `actions/dashboard.ts` quando o DAS existir (é pasta do Arthur: PR pequeno com ele revisando).
+- [ ] **Comentar a fonte de `LIMITE_MENSAL_CENTAVOS`**: LC 123/2006 art. 18-A §2º, R$ 6.750/mês, fração conta como mês inteiro, conferido em 24/11/2026.
+- [ ] **Limiares únicos** (80% atenção, 100% estourou) como constante no engine, com testes (ver Decisões).
 - [ ] **Seed** em `supabase/seed`: só dados sintéticos.
 - [ ] **QA em celular real** das telas da Frigeri (390 px), e o calendário e os lançamentos se o plano B mandar.
 
 ## Valores legais
 - Todo número legal (limite, DAS, salário mínimo, datas) tem **fonte oficial e data** no comentário, e foi conferido na fonte oficial (Receita Federal, Portal do Empreendedor, Planalto). Sem fonte: `PENDENTE`.
-- `LIMITE_MENSAL_CENTAVOS = 675_000` em `status-limite-mei.ts` (R$ 81 mil por ano) está **sem fonte no comentário**: acrescentar.
+- `LIMITE_MENSAL_CENTAVOS = 675_000` em `status-limite-mei.ts` (R$ 81 mil por ano): a fonte é LC 123/2006 art. 18-A §2º, R$ 6.750/mês, fração conta como mês inteiro, conferido em 24/11/2026. Falta só comentar isso no código (item da checklist).
 - **LC 238/2026:** há notícia de mudança nas regras do MEI com efeitos **a partir de 2028**. Não muda o cálculo de 2026–2027; **a confirmar no texto oficial** antes de citar em qualquer tela ou comentário.
 
 ## Contratos
@@ -51,6 +53,6 @@ assinaturas de lib/engine/index.ts nem lib/contracts sem me avisar. Pronto = pnp
 nenhum "not implemented" restante.
 ```
 
-## Dúvidas
-- Faixas do limite: o contrato `FaixaLimite` e o engine usam `ok/70/90/100`; o design (`03-COMPONENTES.md`, FioDoLimite) marca atenção em **80%**. Decidir com o Arthur antes do PR de componentes.
+## Decisões (24/11)
+- **Um só conjunto de limiares**, definido no `lib/engine` (sugestão: 80% atenção, 100% estourou), com constante nomeada e testes. Telas e `FioDoLimite` recebem o nível por props. Hoje o engine usa `ok/70/90/100` e o alerta de limite também (70/90/100): ao trocar, alinhar `statusLimiteMei`, `gerarAlertas` e o enum `FaixaLimite` de `lib/contracts`. **Mudar o enum é mudança de contrato: PR próprio e aviso ao Arthur e ao grupo.**
 - `obterDashboard` já soma as receitas confirmadas do ano com `receitaInicialCentavos` antes de chamar o engine: não some de novo dentro do engine.

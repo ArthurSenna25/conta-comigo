@@ -76,6 +76,13 @@ Mocks: com `NEXT_PUBLIC_USE_MOCKS=true` no `.env.local` (só em dev), as actions
 - Calendário e lançamentos vão primeiro para o **Murilo**, depois que o engine estiver pronto.
 - Landing: cortar na ordem de `design/handoff/05-LANDING.md` ("O que cortar primeiro").
 
+## Decisões (24/11)
+1. Consentimento vem antes do onboarding (código vence o design).
+2. Sem CNAE: o onboarding usa os campos do contrato (`nomeNegocio`, `atividade` com rótulos simples, `uf`, `municipio`, `dataAbertura`, `receitaInicialCentavos`).
+3. Imagem: o cliente reencoda para menos de 4 MB e a tela trata 413; o Arthur alinha o texto da action depois.
+4. `LIMITE_MENSAL_CENTAVOS`: o Murilo comenta a fonte (LC 123/2006 art. 18-A §2º, R$ 6.750/mês, fração conta como mês inteiro, conferido em 24/11/2026).
+5. Um só conjunto de limiares, definido no `lib/engine` (sugestão: 80% atenção, 100% estourou), a cargo do Murilo; telas e `FioDoLimite` recebem o nível por props e não recalculam. Mudar o enum `FaixaLimite` é PR de contrato próprio.
+
 ## Dúvidas
 - `kb/prompts`: hoje os prompts estão em `prompts/` na raiz (`prompts/chat.ts`, `prompts/extracao.ts`). Gui decide se move.
 - `design/handoff/svg/` é citado no pacote do design, mas a pasta não está no repositório.
