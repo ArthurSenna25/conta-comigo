@@ -148,6 +148,9 @@ export function ChatComFonte() {
                   Abrir no Planalto <span aria-hidden="true">↗</span>
                   <span className="sr-only">(abre em nova aba)</span>
                 </a>
+                <span className="num block text-sm text-t3">
+                  Consultado em {FONTE_DESENQUADRAMENTO.consultadoEm.split("-").reverse().join("/")}
+                </span>
               </p>
             </details>
             <p className="m-0 border-t border-line pt-2.5 text-sm text-t3">Informativo. Não substitui um contador.</p>
