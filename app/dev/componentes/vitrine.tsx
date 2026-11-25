@@ -4,17 +4,21 @@ import type { ReactNode } from "react";
 import { ChipFonte } from "@/components/chip-fonte";
 import { EstadoErro } from "@/components/estado-erro";
 import { EstadoVazio } from "@/components/estado-vazio";
-import { FioDoLimite, type NivelFio } from "@/components/fio-do-limite";
+import { FioDoLimite } from "@/components/fio-do-limite";
+import { nivelDoFio } from "@/components/nivel-do-fio";
 import { ProximoPasso } from "@/components/proximo-passo";
 import { Skeleton, SkeletonPainel } from "@/components/skeleton";
 import { ValorMoeda } from "@/components/valor-moeda";
+import type { FaixaLimite } from "@/lib/contracts";
 
 // Todos os valores abaixo são EXEMPLO (design/handoff/07). O limite vem do lib/engine nas telas.
 const LIMITE = 8_100_000;
-const FIOS: { nivel: NivelFio; faturado: number }[] = [
-  { nivel: "folga", faturado: 3_402_000 },
-  { nivel: "atencao", faturado: 6_804_000 },
-  { nivel: "estourou", faturado: 8_424_000 },
+// A tela recebe `faixa` do obterDashboard e converte com nivelDoFio(); nunca mapeia por conta própria.
+const FIOS: { faixa: FaixaLimite; faturado: number }[] = [
+  { faixa: "ok", faturado: 3_402_000 },
+  { faixa: "70", faturado: 6_804_000 },
+  { faixa: "90", faturado: 7_614_000 },
+  { faixa: "100", faturado: 8_424_000 },
 ];
 
 export function Vitrine() {
@@ -29,27 +33,27 @@ export function Vitrine() {
         </p>
       </header>
 
-      <Secao titulo="FioDoLimite" nota="nivel vem do lib/engine; o componente não calcula limiar.">
+      <Secao titulo="FioDoLimite" nota="nivel = nivelDoFio(faixa do lib/engine); o componente não calcula limiar.">
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {FIOS.map(({ nivel, faturado }) => (
-            <Cartao key={nivel} legenda={`nivel="${nivel}" · hero`}>
+          {FIOS.map(({ faixa, faturado }) => (
+            <Cartao key={faixa} legenda={`faixa="${faixa}" → nivel="${nivelDoFio(faixa)}" · hero`}>
               <ValorMoeda centavos={faturado} tamanho="hero" contar />
-              <FioDoLimite nivel={nivel} faturadoCentavos={faturado} limiteCentavos={LIMITE} />
+              <FioDoLimite nivel={nivelDoFio(faixa)} faturadoCentavos={faturado} limiteCentavos={LIMITE} />
             </Cartao>
           ))}
           <Cartao legenda="vazio · hero">
-            <FioDoLimite nivel="folga" faturadoCentavos={0} limiteCentavos={LIMITE} vazio />
+            <FioDoLimite nivel={nivelDoFio("ok")} faturadoCentavos={0} limiteCentavos={LIMITE} vazio />
             <p className="text-[15px] text-t2">Assim que entrar o primeiro valor, o fio começa a andar.</p>
           </Cartao>
           <Cartao legenda="compacto · 120% (bolinha para no fim)">
-            <FioDoLimite nivel="estourou" faturadoCentavos={9_720_000} limiteCentavos={LIMITE} variante="compacto" />
+            <FioDoLimite nivel={nivelDoFio("100")} faturadoCentavos={9_720_000} limiteCentavos={LIMITE} variante="compacto" />
           </Cartao>
           <Cartao legenda="onboarding (sem entrada, 400ms ao mudar)">
-            <FioDoLimite nivel="folga" faturadoCentavos={2_000_000} limiteCentavos={LIMITE} variante="onboarding" />
+            <FioDoLimite nivel={nivelDoFio("ok")} faturadoCentavos={2_000_000} limiteCentavos={LIMITE} variante="onboarding" />
           </Cartao>
           <Cartao legenda="mini (chat, chips)">
-            {FIOS.map(({ nivel, faturado }) => (
-              <FioDoLimite key={nivel} nivel={nivel} faturadoCentavos={faturado} limiteCentavos={LIMITE} variante="mini" />
+            {FIOS.map(({ faixa, faturado }) => (
+              <FioDoLimite key={faixa} nivel={nivelDoFio(faixa)} faturadoCentavos={faturado} limiteCentavos={LIMITE} variante="mini" />
             ))}
           </Cartao>
         </div>
