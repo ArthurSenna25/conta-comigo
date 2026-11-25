@@ -1,12 +1,12 @@
 "use server";
 
-import { DashboardResponse, MesISO, type Resultado } from "@/lib/contracts";
+import { type Atividade, DashboardResponse, MesISO, type Resultado } from "@/lib/contracts";
 import { mockDashboard } from "@/lib/contracts/mocks";
 import { criarClienteServidor } from "@/lib/db/cliente-servidor";
 import { listarLancamentos } from "@/lib/db/lancamento";
 import { lerPerfil } from "@/lib/db/perfil";
 import {
-  gerarAlertas,
+  anoDaCompetenciaDas,
   projecaoAnual,
   proximoVencimentoDas,
   resumoMes,
@@ -18,8 +18,15 @@ import { modoMock } from "@/lib/security/modo-mock";
 import { erro, interno, invalido } from "./resultado";
 import { exigirAcesso } from "./sessao";
 
-/** Os stubs do engine (Murilo) lançam exatamente isto. Só este erro vira painel vazio; qualquer outro é bug de verdade. */
-const ehNaoImplementado = (e: unknown) => e instanceof Error && e.message === "not implemented";
+/** `valorDas` lança RangeError para competência sem tabela oficial; só esse caso vira null. */
+function valorDasOuNulo(atividade: Atividade, ano: number): number | null {
+  try {
+    return valorDas(atividade, ano);
+  } catch (e) {
+    if (e instanceof RangeError) return null;
+    throw e;
+  }
+}
 
 /** Dia 20 seguinte (inclusive) a `hoje`. Só para o painel vazio: o DAS real vem do engine. */
 function proximoDia20(hoje: string): string {
@@ -29,9 +36,9 @@ function proximoDia20(hoje: string): string {
 }
 
 /**
- * Painel vazio e válido, usado só enquanto lib/engine não está implementado. `valorCentavos: 1` é marcador: o
- * contrato exige DAS positivo e a IA/action nunca inventa imposto; a tela não deve exibir esse valor como real.
- * TODO(Murilo): remover quando o engine existir (ou o contrato aceitar `proximoDas` nulo, em PR próprio).
+ * Painel vazio e válido, usado só quando não há valor oficial do DAS (competência sem tabela, a partir de 01/2027).
+ * `valorCentavos: 1` é marcador: o contrato exige DAS positivo e a action nunca inventa imposto; a tela não deve
+ * exibir esse valor como real. TODO: remover quando o contrato aceitar `proximoDas` nulo (PR próprio) ou a tabela 2027.
  */
 function dashboardVazio(mes: string, hoje: string): DashboardResponse {
   return {
@@ -66,22 +73,22 @@ export async function obterDashboard(mes?: unknown): Promise<Resultado<Dashboard
       ate: `${Math.max(ano, anoDoMes) + 1}-01-01`,
     });
 
-    try {
-      const receitasAno = lancamentos
-        .filter((l) => l.tipo === "receita" && l.data.startsWith(String(ano)))
-        .reduce((soma, l) => soma + l.valorCentavos, 0);
-      const entrada = { receitasAnoCentavos: receitasAno + perfil.receitaInicialCentavos, dataAbertura: perfil.dataAbertura, hoje };
-      const resposta: DashboardResponse = {
-        resumoMes: resumoMes(lancamentos, parsed.data),
-        limiteMei: { ...statusLimiteMei(entrada), projecaoAnualCentavos: projecaoAnual(entrada) },
-        proximoDas: { vencimento: proximoVencimentoDas(hoje), valorCentavos: valorDas(perfil.atividade, ano) },
-        alertas: gerarAlertas({ perfil, lancamentos, hoje }),
-      };
-      return { ok: true, dados: DashboardResponse.parse(resposta) };
-    } catch (e) {
-      if (ehNaoImplementado(e)) return { ok: true, dados: dashboardVazio(parsed.data, hoje) };
-      throw e;
-    }
+    const receitasAno = lancamentos
+      .filter((l) => l.tipo === "receita" && l.data.startsWith(String(ano)))
+      .reduce((soma, l) => soma + l.valorCentavos, 0);
+    const entrada = { receitasAnoCentavos: receitasAno + perfil.receitaInicialCentavos, dataAbertura: perfil.dataAbertura, hoje };
+    const vencimento = proximoVencimentoDas(hoje);
+    const valorDoDas = valorDasOuNulo(perfil.atividade, anoDaCompetenciaDas(vencimento));
+    // sem valor oficial para a competência: painel vazio (só este RangeError; os demais seguem como erro interno)
+    if (valorDoDas === null) return { ok: true, dados: dashboardVazio(parsed.data, hoje) };
+    const resposta: DashboardResponse = {
+      resumoMes: resumoMes(lancamentos, parsed.data),
+      limiteMei: { ...statusLimiteMei(entrada), projecaoAnualCentavos: projecaoAnual(entrada) },
+      proximoDas: { vencimento, valorCentavos: valorDoDas },
+      // TODO gerarAlertas (Murilo, até 26/11)
+      alertas: [],
+    };
+    return { ok: true, dados: DashboardResponse.parse(resposta) };
   } catch (e) {
     return interno("obterDashboard", e);
   }
