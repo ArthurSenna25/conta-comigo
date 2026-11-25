@@ -116,8 +116,13 @@ async function montar(): Promise<() => void> {
     if (c.mouse) paradas.push(inclinar(gsap), holofote());
     return () => paradas.forEach((p) => p());
   });
-  ScrollTrigger.sort();
-  ScrollTrigger.refresh();
+  try {
+    ScrollTrigger.sort();
+    ScrollTrigger.refresh();
+  } catch (erro) {
+    mm.revert(); // não deixa triggers órfãos: a landing volta ao estático
+    throw erro;
+  }
   void document.fonts.ready.then(() => ScrollTrigger.refresh());
   return () => mm.revert();
 }

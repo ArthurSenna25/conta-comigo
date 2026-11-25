@@ -18,7 +18,7 @@ export function ligarLenis(Lenis: typeof LenisT, gsap: typeof Gsap, ScrollTrigge
     if (!alvo) return;
     e.preventDefault();
     lenis.scrollTo(alvo); // o Lenis já desconta o scroll-margin-top da seção
-    history.pushState(null, "", `#${alvo.id}`);
+    if (location.hash !== `#${alvo.id}`) history.pushState(null, "", `#${alvo.id}`);
     if (!alvo.hasAttribute("tabindex")) alvo.setAttribute("tabindex", "-1");
     alvo.focus({ preventScroll: true });
   };
@@ -36,5 +36,10 @@ function alvoDaAncora(e: MouseEvent): HTMLElement | null {
   if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return null;
   const link = e.target instanceof Element ? e.target.closest("a[href^='#']") : null;
   const hash = link?.getAttribute("href") ?? "";
-  return hash.length > 1 ? document.getElementById(decodeURIComponent(hash.slice(1))) : null;
+  if (hash.length < 2) return null;
+  try {
+    return document.getElementById(decodeURIComponent(hash.slice(1)));
+  } catch {
+    return null; // hash malformado: deixa o navegador seguir o link
+  }
 }

@@ -55,7 +55,8 @@ export function prenderSigaOFio(ScrollTrigger: typeof ST): () => void {
     atual = i;
     passos.forEach((p, j) => {
       p.dataset.estado = j < i ? "antes" : j === i ? "ativo" : "depois";
-      p.toggleAttribute("aria-hidden", j !== i);
+      if (j === i) p.removeAttribute("aria-hidden");
+      else p.setAttribute("aria-hidden", "true"); // "" não esconde nada (ARIA)
     });
   };
 

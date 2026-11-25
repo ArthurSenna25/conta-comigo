@@ -39,7 +39,7 @@ export function LimiteVivo({ barras }: { barras: readonly BarraExemplo[] }) {
     if (estatico || !el) return;
     let ativo = true;
     let desligar = () => {};
-    void Promise.all([import("gsap"), import("gsap/ScrollTrigger")]).then(([{ gsap }, { ScrollTrigger }]) => {
+    Promise.all([import("gsap"), import("gsap/ScrollTrigger")]).then(([{ gsap }, { ScrollTrigger }]) => {
       if (!ativo) return;
       gsap.registerPlugin(ScrollTrigger);
       const desenho = ligarDesenho(el, barras);
@@ -61,7 +61,7 @@ export function LimiteVivo({ barras }: { barras: readonly BarraExemplo[] }) {
         gatilho.kill();
         desenho.limpar();
       };
-    });
+    }).catch((erro: unknown) => console.warn("[movimento] O limite segue estático.", erro));
     return () => {
       ativo = false;
       desligar();
