@@ -34,14 +34,15 @@ export function respostaErro(codigo: CodigoErro): Response {
 const METODOS_DE_LEITURA = new Set(["GET", "HEAD"]);
 
 /**
- * Origem pública da requisição. Atrás de proxy (Vercel) `req.url` pode trazer host interno; a plataforma
- * sobrescreve `x-forwarded-host/proto`, então valem primeiro. Sem eles, cai na URL da requisição.
+ * Origem esperada da requisição: esquema da `req.url` + o cabeçalho `Host` que o cliente realmente usou
+ * (o Next normaliza `req.url` para localhost, então o host da URL não serve). `x-forwarded-host/proto` NÃO
+ * são lidos: valem só se o proxy sobrescrever o que o cliente mandou, e o `Host` dispensa essa premissa.
+ * Se um dia o `Host` chegar interno, o Origin do navegador deixa de bater e a escrita falha FECHADA (403).
+ * Regra única de todo `app/api/*` (AMEACAS #16): confirmar com um POST real no preview da Vercel.
  */
-export function origemDaRequisicao(url: string, forwardedHost: string | null, forwardedProto: string | null): string {
-  const host = forwardedHost?.split(",")[0]?.trim();
-  if (!host) return new URL(url).origin;
-  const proto = forwardedProto?.split(",")[0]?.trim() || new URL(url).protocol.replace(":", "");
-  return `${proto}://${host}`;
+export function origemDaRequisicao(url: string, host: string | null): string {
+  const u = new URL(url);
+  return `${u.protocol}//${host?.trim() || u.host}`;
 }
 
 /**

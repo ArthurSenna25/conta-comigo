@@ -2,30 +2,24 @@ import { IngestResponse, type ErroResposta } from "@/lib/contracts";
 import { mockAiProvider } from "@/lib/contracts/mocks";
 import { criarGeminiProvider, ErroIa, type TentativaIa } from "@/lib/ai/gemini";
 import { validarMidia } from "@/lib/ai/midia";
-import { autorizarIngestao, type AcessoIngestao } from "./acesso";
+import type { AcessoApi } from "@/actions/portao-api";
 import { ErroIngestao, lerEntrada } from "./entrada";
 
-type AcessoReal = Extract<AcessoIngestao, { mock: false }>;
-/** Implementado pela integração compartilhada de Arthur. Deve reservar UMA
- * chamada por tentativa, inclusive em concorrência e quando o custo é zero. */
-export type ReservarTentativa = (acesso: AcessoReal, tentativa: TentativaIa) => Promise<void>;
+/** Reserva UMA chamada por tentativa (ver `reserva.ts`), inclusive em concorrência e com custo zero. */
+export type ReservarTentativa = (acesso: AcessoApi, tentativa: TentativaIa) => Promise<void>;
 
 const cabecalhos = { "Cache-Control": "private, no-store" };
 const calendario = new Intl.DateTimeFormat("en-CA", {
   timeZone: "America/Sao_Paulo", year: "numeric", month: "2-digit", day: "2-digit",
 });
 
-export function criarPostIngestao(reservar?: ReservarTentativa) {
-  return async function post(request: Request): Promise<Response> {
+/**
+ * Corpo da rota depois do portão (`exigirAcessoApi(req, { ia: true })` em route.ts: Origin, sessão,
+ * consentimento, perfil, envio_ia e teto diário). Aqui só: ler a entrada, reservar a chamada e extrair.
+ */
+export function criarProcessarIngestao(reservar?: ReservarTentativa) {
+  return async function processar(request: Request, acesso: AcessoApi): Promise<Response> {
     try {
-      const url = new URL(request.url);
-      // O Next pode normalizar a URL interna para localhost. Compare com a
-      // autoridade que o cliente usou, sem usar X-Forwarded-Host do pedido.
-      const host = request.headers.get("host") ?? url.host;
-      if (request.headers.get("origin") !== `${url.protocol}//${host}`) {
-        throw new ErroIngestao(403, "proibido", "Envie o formulário a partir do Conta Comigo.");
-      }
-      const acesso = await autorizarIngestao();
       let provider = mockAiProvider;
       if (!acesso.mock) {
         if (!reservar) throw new ErroIa("controle");

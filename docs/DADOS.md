@@ -70,7 +70,7 @@ erDiagram
 | revogado_em | timestamptz NULL | |
 | | | UNIQUE (user_id, finalidade, versao) |
 
-**ai_usage** — teto diário de custo de IA por usuário
+**ai_usage** — contador diário de chamadas (e custo) de IA por usuário
 | coluna | tipo | regra |
 |---|---|---|
 | user_id | uuid | FK, PK composta |
@@ -89,8 +89,8 @@ erDiagram
 - `perfis`, `lancamentos`: select/insert/update/delete com `user_id = (select auth.uid())`.
 - `documentos`: select/insert/**delete** do próprio usuário; sem update. O delete é necessário: a action apaga a linha ao excluir o último lançamento que a usa.
 - `consentimentos`: select/insert do próprio usuário; o único update é de `revogado_em` (GRANT por coluna). Sem `check` entre `revogado_em` e `aceito_em`: compararia horário do app com `now()` do banco e quebra com skew de relógio.
-- `ai_usage`: **só select** para o usuário. Escrita só no servidor via `registrar_uso_ia(p_user_id, p_custo_centavos)` (`security definer`, EXECUTE só para `service_role`), senão o usuário zeraria o próprio contador.
-- **GRANT explícito:** o projeto tem acesso automático a novas tabelas desligado. Cada tabela recebe `GRANT` só para `authenticated` (anon: nada). `service_role` **não** tem GRANT de tabela (menor privilégio): o servidor usa o client do usuário; a secret key só faz Storage, `auth.admin` e `registrar_uso_ia`.
+- `ai_usage`: **só select** para o usuário. Escrita só no servidor, por funções `security definer` com EXECUTE só para `service_role` (senão o usuário zeraria o próprio contador): `registrar_uso_ia(p_user_id, p_custo_centavos)` (soma custo, uso pago futuro) e `reservar_uso_ia(p_user_id, p_max_usuario, p_max_global) returns boolean` (migration `20261124140000`). A reserva é atômica: um `pg_advisory_xact_lock` serializa, nega se a soma de `chamadas` do dia (America/Sao_Paulo) já atingiu o global, e só incrementa a linha do usuário se `chamadas < p_max_usuario` (um upsert condicional). Limite `< 1` nega. Cada tentativa à IA reserva uma chamada, mesmo com custo zero.
+- **GRANT explícito:** o projeto tem acesso automático a novas tabelas desligado. Cada tabela recebe `GRANT` só para `authenticated` (anon: nada). `service_role` **não** tem GRANT de tabela (menor privilégio): o servidor usa o client do usuário; a secret key só faz Storage, `auth.admin`, `registrar_uso_ia` e `reservar_uso_ia` (`lib/db/uso-ia.ts`).
 - Storage: bucket **privado** `documentos`; policy em `storage.objects` exige `(storage.foldername(name))[1] = auth.uid()::text`. Leitura por URL assinada curta.
 
 ## Exclusão de conta (LGPD)
@@ -106,6 +106,6 @@ Action no servidor, nesta ordem: (1) listar e apagar os arquivos de `documentos/
 | 3 | Resumo do mês + despesas por categoria (M6): mesmos filtros, agregação no `lib/engine` | mesmo |
 | 4 | Últimos 3 meses para alertas (M7) | mesmo |
 | 5 | Perfil do usuário | PK |
-| 6 | Uso de IA de hoje (antes de cada chamada) | PK (user_id, dia) |
+| 6 | Reserva de IA (antes de cada tentativa): soma de `chamadas` do dia + linha do usuário | PK (user_id, dia) para o usuário; a soma por `dia` varre a tabela (usuários × dias, pequena). Se passar de alguns milhares de linhas, índice em `dia` |
 
 Mais: `documentos (user_id)` (exportar/excluir) e `lancamentos (documento_id, user_id)` (FK composta; o índice parcial não conta para o linter do Supabase). Volume por usuário é pequeno (centenas de linhas/ano): nada de particionamento nem paginação keyset; lista do mês sem paginação.

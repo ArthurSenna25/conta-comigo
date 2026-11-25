@@ -29,13 +29,20 @@ describe("origemConfere", () => {
 });
 
 describe("origemDaRequisicao", () => {
-  it("sem x-forwarded usa a URL da requisição", () => {
-    expect(origemDaRequisicao("http://localhost:3000/api/x", null, null)).toBe("http://localhost:3000");
+  it("sem Host usa o host da URL da requisição", () => {
+    expect(origemDaRequisicao("http://localhost:3000/api/x", null)).toBe("http://localhost:3000");
+    expect(origemDaRequisicao("http://localhost:3000/api/x", " ")).toBe("http://localhost:3000");
   });
 
-  it("atrás de proxy vale o host público, não o interno", () => {
-    expect(origemDaRequisicao("http://interno:3000/api/x", "app.example.com", "https")).toBe("https://app.example.com");
-    expect(origemDaRequisicao("http://interno:3000/api/x", "app.example.com, outro", null)).toBe("http://app.example.com");
+  it("vale o Host que o cliente usou, não o host interno da URL, com o esquema da URL", () => {
+    expect(origemDaRequisicao("http://localhost:3000/api/x", "127.0.0.1:3000")).toBe("http://127.0.0.1:3000");
+    expect(origemDaRequisicao("https://interno/api/x", "app.example.com")).toBe("https://app.example.com");
+  });
+
+  it("Host com lixo ou vírgula nunca vira uma origem que outro site consiga enviar", () => {
+    const esperada = origemDaRequisicao("https://interno/x", "evil.com, app.example.com");
+    expect(origemConfere("POST", "https://app.example.com", esperada)).toBe(false);
+    expect(origemConfere("POST", "https://evil.com", esperada)).toBe(false);
   });
 });
 

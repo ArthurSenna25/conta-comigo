@@ -4,9 +4,39 @@ import {
   credenciaisDemo,
   decidirSeed,
   ehContaDemo,
+  limitesChamadasIa,
   TETO_IA_DEMO_PADRAO_CENTAVOS,
   tetoDiarioIaCentavos,
 } from "./demo";
+
+describe("limitesChamadasIa: chamadas por dia, falha fechada", () => {
+  const env = { AI_DAILY_CALLS_GLOBAL: "200" };
+
+  it("padrões: 30 por usuário, 15 na demo, global vem do ambiente", () => {
+    expect(limitesChamadasIa(false, env)).toEqual({ maxUsuario: 30, maxGlobal: 200 });
+    expect(limitesChamadasIa(true, env)).toEqual({ maxUsuario: 15, maxGlobal: 200 });
+  });
+
+  it("usa os valores do ambiente; a demo nunca passa do limite do usuário", () => {
+    expect(limitesChamadasIa(false, { ...env, AI_DAILY_CALLS_USER: "50" }).maxUsuario).toBe(50);
+    expect(limitesChamadasIa(true, { ...env, DEMO_AI_DAILY_CALLS: "5" }).maxUsuario).toBe(5);
+    expect(limitesChamadasIa(true, { ...env, DEMO_AI_DAILY_CALLS: "99", AI_DAILY_CALLS_USER: "8" }).maxUsuario).toBe(8);
+  });
+
+  it.each([undefined, "", "abc", "-1", "2.5", "1e9", "0"])("global %j nega (maxGlobal 0)", (valor) => {
+    expect(limitesChamadasIa(false, { AI_DAILY_CALLS_GLOBAL: valor }).maxGlobal).toBe(0);
+  });
+
+  it("valor acima do int do Postgres é limitado, para não estourar o RPC", () => {
+    const grande = { AI_DAILY_CALLS_GLOBAL: "3000000000", AI_DAILY_CALLS_USER: "9007199254740991" };
+    expect(limitesChamadasIa(false, grande)).toEqual({ maxUsuario: 2_147_483_647, maxGlobal: 2_147_483_647 });
+  });
+
+  it("limite de usuário inválido volta ao padrão, nunca abre", () => {
+    expect(limitesChamadasIa(false, { ...env, AI_DAILY_CALLS_USER: "x" }).maxUsuario).toBe(30);
+    expect(limitesChamadasIa(true, { ...env, DEMO_AI_DAILY_CALLS: "x" }).maxUsuario).toBe(15);
+  });
+});
 
 describe("ehContaDemo: só app_metadata.demo === true (escrita só pela API admin)", () => {
   it("true só com o booleano true", () => {
