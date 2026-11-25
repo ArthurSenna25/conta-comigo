@@ -53,6 +53,10 @@ export function barrasExemplo(): BarraExemplo[] {
 
 export const TOTAL_EXEMPLO_CENTAVOS = MESES_EXEMPLO.reduce((soma, m) => soma + m.centavos, 0);
 
+/** Janela de scroll da seção (ScrollTrigger "top 85%" → "bottom 70%"), em % da altura da tela. */
+export const LIMITE_INICIO_PCT = 85;
+export const LIMITE_FIM_PCT = 70;
+
 /** Scroll (0..1) → barra i preenche clamp(progresso × n − i, 0, 1) (05-LANDING.md, "Mecânica"). */
 export function preenchimento(progresso: number, i: number, n: number): number {
   return Math.min(1, Math.max(0, progresso * n - i));

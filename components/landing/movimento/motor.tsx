@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { linhaDoCta, parallax, prenderSigaOFio, revelar } from "./cenas";
+import { ligarFioEstatico, ligarFioScrub } from "./fio-fundo";
 import { holofote, inclinar } from "./ponteiro";
 import { aplicarClasse, useEstatico } from "./preferencias";
 import { ligarLenis } from "./rolagem";
@@ -41,7 +42,7 @@ export function MotorMovimento() {
   }, []);
 
   useEffect(() => {
-    if (estatico) return;
+    if (estatico) return ligarFioEstatico(); // 05 L160/L166: o Fio SVG segue o scroll, sem GSAP
     let desmontar: (() => void) | null = null;
     let ativo = true;
     montar().then(
@@ -107,7 +108,7 @@ async function montar(): Promise<() => void> {
   mm.add(CONDICOES, (ctx) => {
     const c = ctx.conditions ?? {};
     if (c.reduzido) return; // sem scrub, parallax, tilt nem abertura: tudo estático e visível
-    const paradas: (() => void)[] = [];
+    const paradas: (() => void)[] = [ligarFioScrub(gsap, ScrollTrigger)];
     if (c.desktop && c.mouse) paradas.push(ligarLenis(Lenis, gsap, ScrollTrigger));
     if (c.preso) paradas.push(prenderSigaOFio(ScrollTrigger));
     revelar(gsap, c.md ? 40 : 18);

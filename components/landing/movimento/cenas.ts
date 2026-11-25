@@ -44,11 +44,25 @@ export function passoAtual(progresso: number, total: number): number {
   return Math.max(0, Math.min(total - 1, Math.floor(progresso * total)));
 }
 
+/**
+ * Fração do trilho preenchida (0..1). O ponto i é alcançado quando o passo i começa (progresso i/total),
+ * então o último ponto chega em (total−1)/total.
+ */
+export function preenchimentoDoTrilho(progresso: number, total: number): number {
+  return Math.min(1, Math.max(0, progresso / ((total - 1) / total)));
+}
+
 /** Siga o Fio preso ao scroll (≥900×720): os passos se sobrepõem e o CSS troca pelo data-estado. */
 export function prenderSigaOFio(ScrollTrigger: typeof ST): () => void {
   const secao = document.querySelector<HTMLElement>('[data-movimento="siga-o-fio"]');
   if (!secao) return () => {};
   const passos = todos('[data-movimento="siga-passo"]', secao);
+  const fios = Array.from(secao.querySelectorAll<SVGElement>('[data-movimento="siga-preenchimento"]'));
+  const transformsOriginais = fios.map((f) => f.style.transform);
+  const preencher = (progresso: number) => {
+    const escala = `scaleX(${preenchimentoDoTrilho(progresso, passos.length)})`;
+    for (const f of fios) f.style.transform = escala;
+  };
   let atual = -1;
   const marcar = (i: number) => {
     if (i === atual) return;
@@ -62,17 +76,22 @@ export function prenderSigaOFio(ScrollTrigger: typeof ST): () => void {
 
   secao.classList.add("lp-siga-preso");
   marcar(0);
+  preencher(0);
   const gatilho = ScrollTrigger.create({
     trigger: secao,
     start: "top top",
     end: `+=${(passos.length - 1) * 100}%`,
     pin: true,
     anticipatePin: 1,
-    onUpdate: (s) => marcar(passoAtual(s.progress, passos.length)),
+    onUpdate: (s) => {
+      marcar(passoAtual(s.progress, passos.length));
+      preencher(s.progress);
+    },
   });
 
   return () => {
     gatilho.kill();
+    fios.forEach((f, i) => (f.style.transform = transformsOriginais[i]));
     secao.classList.remove("lp-siga-preso");
     for (const p of passos) {
       delete p.dataset.estado;

@@ -7,6 +7,8 @@ import {
   mesesCheios,
   nivelExemplo,
   preenchimento,
+  LIMITE_FIM_PCT,
+  LIMITE_INICIO_PCT,
   TETO_EXEMPLO_CENTAVOS,
   totalNoProgresso,
   type BarraExemplo,
@@ -49,8 +51,8 @@ export function LimiteVivo({ barras }: { barras: readonly BarraExemplo[] }) {
       };
       const gatilho = ScrollTrigger.create({
         trigger: el,
-        start: "top 85%",
-        end: "bottom 70%",
+        start: `top ${LIMITE_INICIO_PCT}%`,
+        end: `bottom ${LIMITE_FIM_PCT}%`,
         onUpdate: (s) => aplicar(s.progress),
         onRefresh: (s) => aplicar(s.progress),
       });
@@ -77,12 +79,20 @@ export function LimiteVivo({ barras }: { barras: readonly BarraExemplo[] }) {
   const classeNumero = "tracking-[-0.04em]";
 
   return (
-    <div ref={raiz} className="flex flex-col gap-[clamp(12px,2.2vh,24px)]">
+    <div ref={raiz} data-movimento="limite-vivo" className="flex flex-col gap-[clamp(12px,2.2vh,24px)]">
       <div
         aria-hidden="true"
         data-movimento="odometro"
-        className="num flex items-baseline gap-[clamp(8px,1vw,16px)] text-[clamp(44px,8vw,124px)] leading-none font-extrabold tracking-[-0.04em]"
+        className="num relative isolate flex items-baseline gap-[clamp(8px,1vw,16px)] text-[clamp(44px,8vw,124px)] leading-none font-extrabold tracking-[-0.04em]"
       >
+        {vivo && (
+          <span
+            key={cheios}
+            data-movimento="odometro-brilho"
+            className="pointer-events-none absolute -inset-x-[6%] -inset-y-[35%] -z-10"
+            style={{ background: `radial-gradient(closest-side, color-mix(in oklch, ${cor} 55%, transparent), transparent)` }}
+          />
+        )}
         <span className="text-[0.42em] tracking-[-0.02em] text-t3">R$</span>
         {vivo ? (
           <ContadorMoeda centavos={acumulado} className={classeNumero} semSimbolo />
