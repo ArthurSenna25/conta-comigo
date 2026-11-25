@@ -5,12 +5,22 @@ import { formatarCentavos } from "./moeda";
 
 const DURACAO_MS = 1100;
 const easeOutQuart = (t: number) => 1 - (1 - t) ** 4;
+const semCifrao = (texto: string) => texto.replace(/^R\$\s/, "");
 
 /**
  * Conta do valor anterior (0 na primeira vez) até o novo. O HTML do servidor já traz o valor final,
  * então sem JS ou com reduced motion o número aparece pronto.
  */
-export function ContadorMoeda({ centavos, className }: { centavos: number; className: string }) {
+export function ContadorMoeda({
+  centavos,
+  className,
+  semSimbolo = false,
+}: {
+  centavos: number;
+  className: string;
+  /** Sem o "R$ " (quem chama desenha o símbolo à parte, como o odômetro da landing). */
+  semSimbolo?: boolean;
+}) {
   const [exibido, setExibido] = useState(centavos);
   const anterior = useRef(0);
 
@@ -35,7 +45,7 @@ export function ContadorMoeda({ centavos, className }: { centavos: number; class
   return (
     <span className={className}>
       {/* leitor de tela ouve só o valor final, não cada quadro */}
-      <span aria-hidden="true">{formatarCentavos(exibido)}</span>
+      <span aria-hidden="true">{semSimbolo ? semCifrao(formatarCentavos(exibido)) : formatarCentavos(exibido)}</span>
       <span className="sr-only">{formatarCentavos(centavos)}</span>
     </span>
   );
