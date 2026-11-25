@@ -1,4 +1,5 @@
 import type { ConfirmarResponse, Resultado } from "@/lib/contracts";
+import type { Aviso } from "@/app/(app)/fluxo-lancamento";
 
 export const MSG_AMBIGUA = "Não sabemos se o lançamento foi salvo. Confira em Lançamentos antes de confirmar de novo.";
 
@@ -24,4 +25,15 @@ export function criarTrava() {
       ocupada = false;
     },
   };
+}
+
+export const MSG_TENTAR_DE_NOVO = "Já conferi e não está lá, tentar de novo";
+
+/**
+ * Aviso ao descartar. "Nada foi salvo" só vale se nenhuma confirmação ficou incerta; senão manda conferir.
+ * Manual sem incerteza não avisa nada (a pessoa só cancelou o formulário).
+ */
+export function avisoDoDescarte(manual: boolean, incerto: boolean): Aviso | null {
+  if (incerto) return { titulo: "Rascunho descartado", sub: "Confira em Lançamentos se o lançamento chegou a ser salvo" };
+  return manual ? null : { titulo: "Rascunho descartado", sub: "Nada foi salvo" };
 }

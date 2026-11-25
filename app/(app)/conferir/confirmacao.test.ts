@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { mockLancamentos } from "@/lib/contracts/mocks";
-import { criarTrava, desfechoDaConfirmacao } from "./confirmacao";
+import { avisoDoDescarte, criarTrava, desfechoDaConfirmacao } from "./confirmacao";
 
 const falha = (codigo: "invalido" | "interno" | "nao_autenticado", mensagem = "msg") => ({ ok: false as const, erro: { codigo, mensagem } });
 
@@ -31,5 +31,19 @@ describe("criarTrava", () => {
     expect(t.pegar()).toBe(false);
     t.soltar();
     expect(t.pegar()).toBe(true);
+  });
+});
+
+describe("avisoDoDescarte", () => {
+  const INCERTO = { titulo: "Rascunho descartado", sub: "Confira em Lançamentos se o lançamento chegou a ser salvo" };
+
+  it("nunca enviado: IA diz que nada foi salvo; manual não avisa", () => {
+    expect(avisoDoDescarte(false, false)).toEqual({ titulo: "Rascunho descartado", sub: "Nada foi salvo" });
+    expect(avisoDoDescarte(true, false)).toBeNull();
+  });
+
+  it("confirmação ambígua nunca diz 'Nada foi salvo', em IA ou manual", () => {
+    expect(avisoDoDescarte(false, true)).toEqual(INCERTO);
+    expect(avisoDoDescarte(true, true)).toEqual(INCERTO);
   });
 });

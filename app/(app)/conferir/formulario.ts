@@ -1,12 +1,11 @@
-import { LancamentoInput, type Categoria, type FormaPgto, type Origem, type Rascunho, type TipoLancamento } from "@/lib/contracts";
+import { formatarCentavos } from "@/components/moeda";
+import { LancamentoInput, VALOR_MAX_CENTAVOS, type Categoria, type FormaPgto, type Origem, type Rascunho, type TipoLancamento } from "@/lib/contracts";
 
 /**
  * Abaixo desta confiança o campo lido pela IA aparece em âmbar ("· confira"). PREMISSA: o handoff não define
  * o corte; a camada de IA já zera a confiança de campo não lido (lib/ai/saidas.ts).
  */
 export const CONFIANCA_MIN = 0.7;
-/** InputMoeda (03): "centavos entram primeiro", no máximo 9 dígitos (R$ 9.999.999,99). */
-export const MAX_DIGITOS_VALOR = 9;
 
 /** Um lançamento em edição na tela. Valor em centavos inteiros; 0 = vazio. Data "" = vazia. */
 export type Formulario = {
@@ -41,10 +40,15 @@ export const ORDEM_CATEGORIAS: readonly Categoria[] = [
   "retirada",
 ];
 
-/** Só dígitos, sem zeros à esquerda, até 9 dígitos. Tudo o mais é ignorado. */
+/** Só dígitos, sem zeros à esquerda e SEM corte: o que passa do teto do contrato é recusado por `erroDoValor`. */
 export function centavosDigitados(entrada: string): number {
-  const digitos = entrada.replace(/\D/g, "").replace(/^0+/, "").slice(0, MAX_DIGITOS_VALOR);
+  const digitos = entrada.replace(/\D/g, "").replace(/^0+/, "");
   return digitos ? Number(digitos) : 0;
+}
+
+/** Valor acima do teto do contrato: a tela mantém o que a pessoa digitou e mostra este erro. */
+export function erroDoValor(centavos: number): string | undefined {
+  return centavos > VALOR_MAX_CENTAVOS ? `Valor acima do limite permitido (${formatarCentavos(VALOR_MAX_CENTAVOS)})` : undefined;
 }
 
 /** Campo que a IA não leu (null) fica vazio e marcado para conferir. */
@@ -84,6 +88,10 @@ const CAMPO_DO_CONTRATO: Partial<Record<string, CampoComErro>> = { valorCentavos
 export function validar(f: Formulario, hoje: string): { ok: true; lancamento: LancamentoInput } | { ok: false; erros: Erros } {
   const erros: Erros = {};
   if (f.valorCentavos <= 0) erros.valor = "Digite um valor maior que zero";
+  else {
+    const acima = erroDoValor(f.valorCentavos);
+    if (acima) erros.valor = acima;
+  }
   if (!f.data) erros.data = "Informe a data";
   else if (f.data > hoje) erros.data = "A data não pode ser no futuro";
   if (!f.descricao.trim()) erros.descricao = "Descreva o lançamento";

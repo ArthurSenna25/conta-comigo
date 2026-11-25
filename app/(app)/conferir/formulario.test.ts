@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { LancamentoInput, type Rascunho } from "@/lib/contracts";
+import { LancamentoInput, VALOR_MAX_CENTAVOS, type Rascunho } from "@/lib/contracts";
+import { centavosDoTextoColado } from "@/components/moeda";
 import { mockIngest } from "@/lib/contracts/mocks";
 import {
   centavosDigitados,
+  erroDoValor,
   formDataDoLote,
   formularioDoRascunho,
   formularioManual,
@@ -28,9 +30,47 @@ describe("centavosDigitados (centavos entram primeiro)", () => {
     expect(centavosDigitados("abc")).toBe(0);
   });
 
-  it("corta em 9 dígitos e ignora zeros à esquerda", () => {
+  it("ignora zeros à esquerda e NÃO corta dígitos", () => {
     expect(centavosDigitados("0012")).toBe(12);
-    expect(centavosDigitados("1234567890")).toBe(123_456_789);
+    expect(centavosDigitados("1234567890")).toBe(1_234_567_890);
+    expect(centavosDigitados("10.000.000,00")).toBe(1_000_000_000);
+  });
+});
+
+describe("centavosDoTextoColado (nunca altera o valor em silêncio)", () => {
+  it.each([
+    ["10.000.000,00", 1_000_000_000],
+    ["10000000,00", 1_000_000_000],
+    ["10000000.00", 1_000_000_000],
+    ["1.000.000,00", 100_000_000],
+    ["1,000,000.00", 100_000_000],
+    ["1.234,56", 123_456],
+    ["1,234.56", 123_456],
+    ["10,5", 1_050],
+    ["10.5", 1_050],
+    ["R$ 34.020,00", 3_402_000],
+    ["1.000", 100_000],
+    ["12", 1_200],
+    ["99999999,99", 9_999_999_999],
+    ["", 0],
+  ])("%s → %i centavos", (texto, esperado) => {
+    expect(centavosDoTextoColado(texto)).toBe(esperado);
+  });
+});
+
+describe("teto do valor (contrato)", () => {
+  const form = (valorCentavos: number) => ({ ...formularioManual(HOJE), valorCentavos, descricao: "x" });
+
+  it("R$ 10.000.000,00 (o teto) é aceito", () => {
+    expect(validar(form(VALOR_MAX_CENTAVOS), HOJE).ok).toBe(true);
+    expect(erroDoValor(VALOR_MAX_CENTAVOS)).toBeUndefined();
+  });
+
+  it("acima do teto mantém o valor e bloqueia com erro claro citando o limite", () => {
+    const r = validar(form(VALOR_MAX_CENTAVOS + 1), HOJE);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.erros.valor).toMatch(/^Valor acima do limite permitido \(R\$\s10\.000\.000,00\)$/);
+    expect(centavosDigitados("10.000.000,01")).toBe(VALOR_MAX_CENTAVOS + 1);
   });
 });
 

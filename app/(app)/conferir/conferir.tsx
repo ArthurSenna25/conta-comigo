@@ -7,11 +7,12 @@ import { startTransition, useEffect, useRef, useState, type FormEvent, type Reac
 import { confirmarLancamento } from "@/actions/lancamentos";
 import { BOTAO } from "@/components/botao";
 import { ROTULO_CATEGORIA } from "@/components/categoria";
-import { formatarSemSimbolo } from "@/components/moeda";
-import { criarTrava, desfechoDaConfirmacao, MSG_AMBIGUA } from "./confirmacao";
+import { centavosDoTextoColado, formatarSemSimbolo } from "@/components/moeda";
+import { avisoDoDescarte, criarTrava, desfechoDaConfirmacao, MSG_AMBIGUA, MSG_TENTAR_DE_NOVO } from "./confirmacao";
 import { RODAPE_FLUXO, useFluxo } from "@/app/(app)/fluxo-lancamento";
 import {
   centavosDigitados,
+  erroDoValor,
   formDataDoLote,
   formularioDoRascunho,
   formularioManual,
@@ -41,6 +42,7 @@ export function Conferir({ manual, hoje }: ConferirProps) {
   const [pendente, setPendente] = useState(false);
   const [tentativa, setTentativa] = useState(0); // só a confirmação recusada move o foco, não cada tecla
   const trava = useRef(criarTrava());
+  const incerto = useRef(false); // alguma confirmação ficou ambígua: pode ter gravado, mesmo que a próxima seja recusada
   const formulario = useRef<HTMLFormElement>(null);
 
   // refresh apaga a memória do cliente: sem rascunho não há o que conferir
@@ -74,7 +76,7 @@ export function Conferir({ manual, hoje }: ConferirProps) {
   }
 
   function descartar() {
-    despachar({ tipo: "concluir", aviso: manual ? null : { titulo: "Rascunho descartado", sub: "Nada foi salvo" } });
+    despachar({ tipo: "concluir", aviso: avisoDoDescarte(manual, incerto.current) });
     router.push("/painel");
   }
 
@@ -90,13 +92,28 @@ export function Conferir({ manual, hoje }: ConferirProps) {
       return recusar(lote.erros);
     }
 
+    enviar(lote.lancamentos);
+  }
+
+  /** Reenvio manual depois de falha ambígua: só por ação explícita, nunca automático. */
+  function tentarDeNovo() {
+    if (!forms) return;
+    const lote = validarLote(forms, hoje);
+    if (!lote.ok) {
+      setIndice(lote.indice);
+      return recusar(lote.erros);
+    }
+    enviar(lote.lancamentos);
+  }
+
+  function enviar(lancamentos: Parameters<typeof formDataDoLote>[0]) {
     if (!trava.current.pegar()) return; // um envio por vez, mesmo com clique duplo
     setPendente(true);
     setFalha(null);
     startTransition(async () => {
       let desfecho = desfechoDaConfirmacao("excecao");
       try {
-        desfecho = desfechoDaConfirmacao(await confirmarLancamento(formDataDoLote(lote.lancamentos)));
+        desfecho = desfechoDaConfirmacao(await confirmarLancamento(formDataDoLote(lancamentos)));
       } catch {
         // mantém "ambiguo": a resposta pode ter se perdido depois de gravar
       }
@@ -108,6 +125,7 @@ export function Conferir({ manual, hoje }: ConferirProps) {
         return;
       }
       // sem nova tentativa automática; o rascunho fica na tela
+      if (desfecho.tipo === "ambiguo") incerto.current = true;
       setFalha(desfecho.tipo === "ambiguo" ? { mensagem: MSG_AMBIGUA, ambigua: true } : { mensagem: desfecho.mensagem, ambigua: false });
       trava.current.soltar();
       setPendente(false);
@@ -145,7 +163,7 @@ export function Conferir({ manual, hoje }: ConferirProps) {
           <CampoValor
             centavos={atual.valorCentavos}
             duvidoso={atual.valorDuvidoso}
-            erro={erros.valor}
+            erro={erros.valor ?? erroDoValor(atual.valorCentavos)}
             onChange={(c) => mudar({ valorCentavos: c, valorDuvidoso: false }, "valor")}
           />
 
@@ -230,27 +248,30 @@ export function Conferir({ manual, hoje }: ConferirProps) {
           {falha && (
             <p role="alert" className="text-[15px] font-semibold text-err text-pretty">
               {falha.mensagem}
-              {falha.ambigua && (
-                <>
-                  {" "}
-                  <Link href="/lancamentos" className="underline">
-                    Abrir Lançamentos
-                  </Link>
-                </>
-              )}
             </p>
           )}
           <div className="grid grid-cols-[1fr_1.5fr] gap-2">
             <button type="button" onClick={descartar} disabled={pendente} className={`${BOTAO.fantasma} px-2 disabled:text-t3`}>
               {manual ? "Cancelar" : "Descartar rascunho"}
             </button>
-            <button type="submit" aria-disabled={pendente} className={`${BOTAO.primario} px-2 aria-disabled:opacity-70`}>
-              {pendente && (
-                <span aria-hidden="true" className="size-4 rounded-full border-2 border-current border-r-transparent" style={{ animation: "cc-spin .8s linear infinite" }} />
-              )}
-              {pendente ? "Salvando" : rotuloConfirmar}
-            </button>
+            {falha?.ambigua && !pendente ? (
+              <Link href="/lancamentos" className={`${BOTAO.primario} px-2`}>
+                Conferir em Lançamentos
+              </Link>
+            ) : (
+              <button type="submit" aria-disabled={pendente} className={`${BOTAO.primario} px-2 aria-disabled:opacity-70`}>
+                {pendente && (
+                  <span aria-hidden="true" className="size-4 rounded-full border-2 border-current border-r-transparent" style={{ animation: "cc-spin .8s linear infinite" }} />
+                )}
+                {pendente ? "Salvando" : rotuloConfirmar}
+              </button>
+            )}
           </div>
+          {falha?.ambigua && !pendente && (
+            <button type="button" onClick={tentarDeNovo} className={`${BOTAO.secundario} px-2`}>
+              {MSG_TENTAR_DE_NOVO}
+            </button>
+          )}
         </footer>
       </form>
     </main>
@@ -301,6 +322,11 @@ function CampoValor({ centavos, duvidoso, erro, onChange }: { centavos: number; 
           placeholder="0,00"
           value={centavos ? formatarSemSimbolo(centavos) : ""}
           onChange={(e) => onChange(centavosDigitados(e.target.value))}
+          onPaste={(e) => {
+            // colar lê vírgula/ponto como decimal ou milhar; sem isso "10.5" viraria R$ 1,05
+            e.preventDefault();
+            onChange(centavosDoTextoColado(e.clipboardData.getData("text")));
+          }}
           {...aria("valor", erro)}
           className="num w-full min-w-0 bg-transparent text-[28px] font-extrabold text-t1 tabular-nums placeholder:text-t3 focus:outline-none"
         />
