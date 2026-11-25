@@ -49,7 +49,7 @@ export function FormCadastro() {
         dica="Mínimo de 8 caracteres."
         erro={erro?.campos?.senha}
       />
-      <CaixasConsentimento erroTermos={erro?.campos?.aceiteTermos} />
+      <CaixasConsentimento erros={erro?.campos} />
       {erro && <Aviso alerta={!erro.campos}>{erro.mensagem}</Aviso>}
       <BotaoEnviar pendente={pendente}>Criar conta</BotaoEnviar>
     </form>
