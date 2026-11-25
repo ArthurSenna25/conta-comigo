@@ -7,7 +7,6 @@ import type {
   Alerta,
   Lancamento,
   Perfil,
-  ResumoMes,
 } from "@/lib/contracts";
 
 export { statusLimiteMei } from "./status-limite-mei";
@@ -25,12 +24,7 @@ export type EntradaLimite = {
   hoje: string;
 };
 
-/** `mes` = "YYYY-MM". Só lançamentos do mês entram. */
-export function resumoMes(lancamentos: readonly Lancamento[], mes: string): ResumoMes {
-  void lancamentos;
-  void mes;
-  throw new Error("not implemented");
-}
+export { resumoMes } from "./resumo-mes";
 
 export type EstadoAlertas = {
   perfil: Perfil;
