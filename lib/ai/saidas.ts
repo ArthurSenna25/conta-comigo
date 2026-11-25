@@ -69,7 +69,7 @@ const TERMOS_CHAT = new Set((
   "faturamento faturar faturei registrei registrado despesas gastei gastos saldo mes mensal ano anos atual este " +
   "abri abriu abertura inicio atividade atividades comeco primeiro ultimo dia janeiro fevereiro marco abril maio junho julho " +
   "agosto setembro outubro novembro dezembro integral incompleto conta inteiro seguinte retroage retroativo " +
-  "mei comum caminhoneiro transportador excesso exceder excedi ultrapassar ultrapassei passei acima abaixo ate mais menos vinte " +
+  "mei comum caminhoneiro transportador excesso exceder excedi ultrapassar ultrapassei passei acima abaixo ate mais menos vinte cento " +
   "desenquadramento desenquadrar efeitos desenquadrado das guia valor valores custa pagar pago vencimento vence vencera prazo " +
   "feriado expediente bancario comercio industria servico servicos mista misto inss icms iss salario minimo arrecadacao " +
   "calcule calcular simule simular hipotetico outro terceiro funcionario empregado contratar salario 2026"
