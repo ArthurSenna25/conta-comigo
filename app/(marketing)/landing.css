@@ -1,5 +1,5 @@
-/* Landing (design/handoff/05-LANDING.md). Estática: só transições de hover/foco/pressão em transform.
-   Os ganchos da etapa de movimento ficam em [data-movimento] no HTML (06-MOVIMENTO.md). */
+/* Landing (design/handoff/05-LANDING.md). A base é estática e completa sem JS; o bloco "Movimento"
+   no fim liga os ganchos [data-movimento] do HTML (06-MOVIMENTO.md). */
 @layer components {
   .lp {
     position: relative;
@@ -224,3 +224,99 @@
   .lp-chip[open] .lp-chip-menos { display: inline; }
   .lp-chip[open] > summary { border-color: var(--acc-a40); }
 }
+
+/* ======================================================================
+   Movimento (06-MOVIMENTO.md). Fora de @layer para vencer as utilities.
+   Nada aqui esconde conteúdo sem JS: as classes no <html> vêm do script
+   inicial (mv, mv-estatico, mv-abertura) e do motor (mv-pronto, mv-abrindo).
+   Só transform, opacity, clip-path e stroke-dashoffset animam; cor é instantânea.
+   ====================================================================== */
+
+/* barra de progresso de leitura: scaleX pelo scroll (invisível sem JS) */
+.lp-progresso {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: var(--z-progress);
+  height: 2px;
+  background: var(--ok);
+  box-shadow: 0 0 10px var(--ok);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  pointer-events: none;
+}
+
+/* nav: transparente no topo, vidro ao rolar (só a opacity da camada ::before anima) */
+html.mv .lp-nav:not([data-rolada])::before { opacity: 0; }
+
+/* borda cônica do "Comece agora" girando por transform */
+html.mv:not(.mv-estatico) .lp-borda-conica::before { animation: cc-spin 3200ms linear infinite; }
+
+/* controles que só funcionam com JS: ocupam o espaço (sem CLS), mas somem sem JS */
+html:not(.mv) [data-so-js],
+html.mv-estatico [data-movimento~="ler-de-novo"] { visibility: hidden; }
+
+/* abertura: só decoração do herói. O texto (LCP) nunca é escondido. */
+html.mv-abertura [data-movimento~="abertura"] { opacity: 0; }
+html.mv-abertura [data-movimento~="abertura-celular"] { transform: translateY(60px) scale(0.94); }
+html.mv-abrindo [data-movimento~="abertura"] { transition: opacity 800ms var(--ease-cc) 80ms; }
+html.mv-abrindo [data-movimento~="abertura-celular"] { transition: transform 800ms var(--ease-cc); }
+
+/* Siga o Fio preso ao scroll (≥900×720, classe posta pelo JS) */
+.lp-secao.lp-siga-preso {
+  display: flex;
+  align-items: center;
+  min-height: 100vh;
+  padding-block: 88px 24px;
+}
+.lp-siga-preso > .lp-contido { gap: 28px; }
+.lp-siga-preso ol { display: grid; }
+.lp-siga-preso [data-movimento="siga-passo"] { grid-area: 1 / 1; }
+.lp-siga-preso [data-movimento="siga-texto"],
+.lp-siga-preso [data-movimento="siga-trilho"] {
+  transition: opacity 500ms var(--ease-cc), transform 500ms var(--ease-cc);
+}
+.lp-siga-preso [data-movimento="siga-celular"] {
+  transition: opacity 550ms var(--ease-cc), transform 550ms var(--ease-cc);
+}
+.lp-siga-preso [data-estado="antes"] [data-movimento="siga-texto"] { opacity: 0; transform: translateY(-24px); }
+.lp-siga-preso [data-estado="depois"] [data-movimento="siga-texto"] { opacity: 0; transform: translateY(24px); }
+.lp-siga-preso [data-estado="antes"] [data-movimento="siga-celular"] { opacity: 0; transform: translateY(-40px) scale(0.94); }
+.lp-siga-preso [data-estado="depois"] [data-movimento="siga-celular"] { opacity: 0; transform: translateY(60px) scale(0.94); }
+.lp-siga-preso [data-estado]:not([data-estado="ativo"]) [data-movimento="siga-trilho"] { opacity: 0; }
+
+/* cartão IA: varredura e campos que se preenchem */
+[data-movimento~="ia-varredura"] { position: relative; overflow: hidden; }
+[data-movimento~="ia-varredura"][data-lendo]::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, oklch(0.85 0.1 235 / 0.28), transparent);
+  animation: cc-scan 1600ms cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+[data-movimento~="ia-campo"] { transition: opacity 320ms var(--ease-cc), transform 320ms var(--ease-cc); }
+[data-movimento~="ia-campo"][data-vazio] { opacity: 0; transform: translateY(6px); }
+
+/* switch "Modo leve": cor instantânea, bolinha por transform (250ms) */
+.lp-switch-trilho {
+  display: inline-flex;
+  align-items: center;
+  width: 40px;
+  height: 24px;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--track);
+  border: 1px solid var(--line-strong);
+}
+.lp-switch[aria-checked="true"] .lp-switch-trilho { background: var(--ok); border-color: var(--ok); }
+.lp-switch-bola {
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--t1);
+  transition: transform 250ms var(--ease-cc);
+}
+.lp-switch[aria-checked="true"] .lp-switch-bola { transform: translateX(16px); background: var(--bg); }
+
+/* Lenis (só ≥1280 com mouse) */
+html.lenis, html.lenis body { height: auto; }

@@ -6,6 +6,8 @@ import { Limite } from "./limite";
 import { Nav } from "./nav";
 import { Perguntas, Seguranca } from "./seguranca-e-perguntas";
 import { SigaOFio } from "./siga-o-fio";
+import { MotorMovimento } from "@/components/landing/movimento/motor";
+import { SCRIPT_INICIAL } from "@/components/landing/movimento/script-inicial";
 
 /** Fio de fundo em SVG (svg/fio-fallback-landing.svg). Estático; a etapa de movimento liga ao scroll. */
 function FioDeFundo() {
@@ -19,12 +21,14 @@ function FioDeFundo() {
 }
 
 /**
- * Landing completa, sem animação (Landing 1 · estrutura). Server Component; só o menu mobile e o
- * botão da demo são client. Ganchos para a etapa de movimento: atributos data-movimento (lista no PR).
+ * Landing. Server Component e estática: todo o conteúdo é visível sem JS. O movimento entra por ilhas
+ * client pequenas (components/landing/movimento) ligadas aos atributos data-movimento. O script inicial
+ * só marca o <html> antes da primeira pintura (abertura, modo leve) e tem failsafe de 1,5 s.
  */
 export function Landing() {
   return (
     <div className="lp">
+      <script dangerouslySetInnerHTML={{ __html: SCRIPT_INICIAL }} />
       <a
         href="#conteudo"
         className="fixed top-3 left-3 z-[var(--z-modal)] -translate-y-[200%] rounded-md bg-cta px-4 py-3 font-bold text-cta-fg focus-visible:translate-y-0"
@@ -35,6 +39,7 @@ export function Landing() {
       <div aria-hidden="true" className="lp-estrelas" />
       <FioDeFundo />
       <div aria-hidden="true" className="lp-grao" />
+      <div aria-hidden="true" className="lp-progresso" data-movimento="progresso" />
       <Nav />
       <main id="conteudo">
         <Hero />
@@ -47,6 +52,7 @@ export function Landing() {
         <CtaFinal />
       </main>
       <Rodape />
+      <MotorMovimento />
     </div>
   );
 }
