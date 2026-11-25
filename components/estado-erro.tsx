@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { BOTAO } from "./botao";
 
@@ -13,7 +14,14 @@ export type EstadoErroProps =
       /** Garantia mostrada na caixa ✓. Depende do que o usuário mandou. */
       garantia?: string;
     }
-  | { tipo: "429"; hrefManual: string; hrefPainel?: string };
+  | { tipo: "429"; hrefManual: string; hrefPainel?: string }
+  | {
+      tipo: "rede";
+      /** Mensagem segura que a action devolveu (Resultado.erro.mensagem). */
+      mensagem: string;
+    };
+
+type TelaCheiaProps = Exclude<EstadoErroProps, { tipo: "rede" }>;
 
 const TEXTO = {
   "503": {
@@ -30,8 +38,36 @@ const TEXTO = {
   },
 } as const;
 
-/** Tela cheia de falha da IA em /adicionar. O foco vai para o título ao montar. */
+/** 503/429: tela cheia de falha da IA em /adicionar. "rede": banner no topo do painel. */
 export function EstadoErro(props: EstadoErroProps) {
+  return props.tipo === "rede" ? <BannerRede mensagem={props.mensagem} /> : <TelaCheia {...props} />;
+}
+
+/**
+ * Banner "rede" (03-COMPONENTES.md § EstadoErro). O texto do handoff ("Sem internet · Mostrando o último painel
+ * salvo") pressupõe cache, que não existe: o título é a mensagem da action. Texto próprio do banner: PENDENTE.
+ */
+function BannerRede({ mensagem }: { mensagem: string }) {
+  const router = useRouter();
+  return (
+    <section
+      role="alert"
+      className="flex flex-col gap-3 rounded-2xl border px-4 py-3.5"
+      style={{
+        background: "color-mix(in oklch, var(--err) 13%, var(--s1))",
+        borderColor: "color-mix(in oklch, var(--err) 55%, transparent)",
+      }}
+    >
+      <p className="text-[15px] font-bold text-err text-pretty">{mensagem}</p>
+      <button type="button" onClick={() => router.refresh()} className={`${BOTAO.secundario} self-start`}>
+        Tentar de novo
+      </button>
+    </section>
+  );
+}
+
+/** O foco vai para o título ao montar. */
+function TelaCheia(props: TelaCheiaProps) {
   const titulo = useRef<HTMLHeadingElement>(null);
   useEffect(() => titulo.current?.focus({ preventScroll: true }), []);
 

@@ -69,6 +69,9 @@
   --shadow-modal: 0 40px 90px -30px oklch(0 0 0 / 0.9);
   --shadow-tour: 0 24px 50px -20px oklch(0 0 0 / 0.8);
 
+  /* tab bar do app: do fundo da tela ao topo da barra (14 + 6 + 58 + 6 + 2 de borda), mais a safe-area do iPhone */
+  --abas-h: calc(86px + env(safe-area-inset-bottom));
+
   /* z-index */
   --z-bg: 0; --z-content: 1; --z-fab: 3; --z-tabbar: 4; --z-toast: 6; --z-sheet: 7; --z-tour: 9;
   --z-grain: 45; --z-menu: 49; --z-nav: 50; --z-progress: 60; --z-modal: 80; --z-intro: 100;

@@ -51,6 +51,7 @@ NEXT_PUBLIC_USE_MOCKS=false verdes, telas conferidas em 390/768/1280 e com reduc
 ```
 
 ## Decisões (24/11)
-- Comentários `TODO(Frigeri)` em `app/page.tsx` e `TODO(Frigeri/Gui)` em `actions/painel.ts` citam donos antigos: corrigir no próximo PR de código dessas pastas.
+- Comentário `TODO(Frigeri)` em `app/page.tsx` cita dono antigo: corrigir no próximo PR de código dessa pasta. (`actions/painel.ts` foi removido no PR da casca, 26/11.)
+- Casca do app (26/11): `app/(app)/layout.tsx` + tab bar de 4 abas e FAB Adicionar (handoff 03, sem barra lateral). Destinos em `components/app/navegacao.ts`: cada dono liga o seu com `ativo: true` no PR da tela. Espaço da barra: token `--abas-h` (inclui safe-area; `viewportFit: "cover"` só no layout do app). `EstadoErro` ganhou `tipo: "rede"` (texto próprio PENDENTE).
 - Limiares do limite: um só conjunto, definido no `lib/engine` pelo Murilo (ver `MURILO.md`). O `FioDoLimite` recebe o nível por props e não recalcula. Mudar o enum `FaixaLimite` é mudança de contrato: PR próprio e aviso ao grupo.
 - Imagem: o texto da mensagem da action ("até 4 MB") e o `IMAGEM_MAX_BYTES` (5 MB) são alinhados por você depois; o cliente da Frigeri já reencoda para menos de 4 MB.

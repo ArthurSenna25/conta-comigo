@@ -39,3 +39,6 @@ next-env.d.ts
 
 # MCP local (contem project_ref)
 .mcp.json
+
+# cache local do vitest
+.vitest/
