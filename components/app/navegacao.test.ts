@@ -6,9 +6,9 @@ describe("lista de navegação do app", () => {
     expect(ABAS.map((a) => a.href)).toEqual(["/painel", "/lancamentos", "/chat", "/perfil"]);
   });
 
-  it("liga só as telas que já existem: painel, lançamentos e chat", () => {
+  it("liga só as telas que já existem: painel, lançamentos, chat e o FAB Adicionar", () => {
     expect(ABAS.filter((a) => a.ativo).map((a) => a.href)).toEqual(["/painel", "/lancamentos", "/chat"]);
-    expect(ADICIONAR).toMatchObject({ href: "/adicionar", ativo: false });
+    expect(ADICIONAR).toMatchObject({ href: "/adicionar", ativo: true });
   });
 
   it("acha a aba da rota atual, inclusive em subrotas", () => {
@@ -22,10 +22,11 @@ describe("lista de navegação do app", () => {
     expect(abaAtual("/")).toBeNull();
   });
 
-  it("mostra a barra nas abas, mas não no chat (tela cheia, desvio registrado)", () => {
+  it("mostra a barra nas abas, mas não no chat nem nas telas de fluxo", () => {
     expect(mostrarAbas("/painel")).toBe(true);
     expect(mostrarAbas("/lancamentos")).toBe(true);
     expect(mostrarAbas("/chat")).toBe(false);
     expect(mostrarAbas("/adicionar")).toBe(false);
+    expect(mostrarAbas("/conferir")).toBe(false);
   });
 });

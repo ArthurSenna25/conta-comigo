@@ -16,7 +16,7 @@ export const ABAS: readonly Destino[] = [
 ];
 
 /** Adicionar não é aba: é o FAB, só no painel. */
-export const ADICIONAR: Destino = { href: "/adicionar", rotulo: "Adicionar", ativo: false };
+export const ADICIONAR: Destino = { href: "/adicionar", rotulo: "Adicionar", ativo: true };
 
 const contem = (pathname: string, href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
