@@ -23,9 +23,9 @@ Comandos: `pnpm lint` · `pnpm typecheck` · `pnpm test` · `pnpm check` (tudo) 
 ## Pastas e donos
 | Pasta | Dono | Papel |
 |---|---|---|
-| `app/(marketing)`, `app/legal`, `kb` | Frigeri | landing, termos/LGPD, base de conhecimento |
-| `app/(app)` | Arthur · Murilo · Frigeri | telas autenticadas (dashboard · lançamentos e calendário · onboarding) |
-| `app/api` | Gui | ingestão e chat |
+| `app/(marketing)`, `app/page.tsx` | Arthur | landing |
+| `app/(app)`, `app/onboarding`, `app/legal`, `kb` | Frigeri | telas autenticadas, termos/LGPD, base de conhecimento |
+| `app/api`, `kb/prompts` | Gui | ingestão e chat |
 | `actions`, `components`, `lib/db`, `lib/security`, `lib/supabase`, `supabase/migrations` | Arthur | mutações, UI, dados, segurança |
 | `lib/engine`, `supabase/seed` | Murilo | cálculo fiscal e financeiro (puro) |
 | `lib/ai` | Gui | provedor de IA |
