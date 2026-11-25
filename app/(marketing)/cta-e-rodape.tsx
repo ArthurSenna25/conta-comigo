@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BotaoDemo } from "@/components/auth/botao-demo";
+import { SwitchModoLeve } from "@/components/landing/movimento/switch-modo-leve";
 import { Marca } from "@/components/landing/simbolos";
 
 export function CtaFinal() {
@@ -80,6 +81,9 @@ export function Rodape() {
             <Link href="/legal/privacidade" className="lp-nav-link rounded-full px-3">
               Privacidade
             </Link>
+          </li>
+          <li>
+            <SwitchModoLeve />
           </li>
         </ul>
       </div>
