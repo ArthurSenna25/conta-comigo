@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;background:oklch(0.13 0.006 250);-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:underline;text-underline-offset:3px}a:hover{opacity:.8}
+@keyframes cc-spin{to{transform:rotate(360deg)}}
+@keyframes cc-pulse{0%,100%{opacity:.55}50%{opacity:1}}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+</helmet>
+
+<div style="min-height:100vh;font-family:Figtree,system-ui,sans-serif;color:oklch(0.96 0.005 250)">
+
+  <header style="display:flex;flex-wrap:wrap;gap:20px;align-items:center;justify-content:space-between;padding:28px clamp(20px,4vw,48px);border-bottom:1px solid oklch(1 0 0 / 0.08)">
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div style="font:700 22px/1.1 Manrope,sans-serif;letter-spacing:-0.01em">Conta Comigo · Design system</div>
+      <div style="font-size:15px;color:oklch(0.78 0.01 250);max-width:620px;text-wrap:pretty">Tokens, componentes e o Fio do Limite nas duas paletas. Troque o modo para ver a versão clara de cada uma.</div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+      <div style="display:flex;gap:4px;padding:4px;border-radius:14px;background:oklch(0.2 0.008 250);border:1px solid oklch(1 0 0 / 0.08)">
+        <sc-for list="{{ modeOpts }}" as="o" hint-placeholder-count="2">
+          <button onClick="{{ o.pick }}" style="min-height:44px;padding:0 16px;border-radius:10px;border:0;cursor:pointer;font:600 15px Figtree,sans-serif;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button>
+        </sc-for>
+      </div>
+      <div style="display:flex;gap:4px;padding:4px;border-radius:14px;background:oklch(0.2 0.008 250);border:1px solid oklch(1 0 0 / 0.08)">
+        <sc-for list="{{ viewOpts }}" as="o" hint-placeholder-count="3">
+          <button onClick="{{ o.pick }}" style="min-height:44px;padding:0 16px;border-radius:10px;border:0;cursor:pointer;font:600 15px Figtree,sans-serif;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button>
+        </sc-for>
+      </div>
+      <button onClick="{{ replay }}" style="min-height:44px;padding:0 18px;border-radius:12px;border:1px solid oklch(1 0 0 / 0.16);background:transparent;color:oklch(0.96 0.005 250);font:600 15px Figtree,sans-serif;cursor:pointer" style-hover="background:oklch(1 0 0 / 0.06)">Rever animação</button>
+    </div>
+  </header>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr))">
+  <sc-for list="{{ palettes }}" as="p" hint-placeholder-count="2">
+    <div data-palette="{{ p.id }}" data-screen-label="{{ p.name }}" style="{{ p.vars }}">
+    <div style="min-height:100%;background-color:var(--bg);background-image:var(--noise),radial-gradient(110% 50% at 30% -8%,var(--glow),transparent 62%),radial-gradient(70% 40% at 105% 40%,var(--glow2),transparent 70%);color:var(--t1);padding:40px clamp(20px,3.4vw,44px) 64px;display:flex;flex-direction:column;gap:48px;border-right:1px solid var(--line)">
+
+      <!-- Identidade -->
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <svg width="36" height="36" viewBox="0 0 36 36" style="flex:none"><rect x="0.5" y="0.5" width="35" height="35" rx="10" style="fill:var(--s2);stroke:var(--line)"></rect><line x1="8" y1="18" x2="28" y2="18" style="stroke:var(--t3);stroke-width:1.5;stroke-linecap:round;opacity:.5"></line><line x1="8" y1="18" x2="21" y2="18" style="stroke:var(--ok);stroke-width:2;stroke-linecap:round"></line><circle cx="21" cy="18" r="3" style="fill:var(--ok)"></circle></svg>
+          <div style="font:700 20px/1 Manrope,sans-serif;letter-spacing:-0.01em">Conta Comigo</div>
+          <div style="margin-left:auto;font:600 14px Figtree,sans-serif;padding:6px 12px;border-radius:999px;background:var(--s2);border:1px solid var(--line);color:var(--t2)">{{ p.modeLabel }}</div>
+        </div>
+        <div style="font:800 34px/1.05 Manrope,sans-serif;letter-spacing:-0.02em">{{ p.name }}</div>
+        <div style="font-size:16px;line-height:1.5;color:var(--t2);max-width:440px;text-wrap:pretty">{{ p.desc }}</div>
+      </div>
+
+      <!-- Fio do Limite herói -->
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div style="font:600 14px Figtree,sans-serif;letter-spacing:0.06em;text-transform:uppercase;color:var(--t3)">Elemento-assinatura · Fio do Limite</div>
+        <div onPointerMove="{{ spot }}" style="position:relative;overflow:hidden;border-radius:24px;border:1px solid var(--line);background:radial-gradient(420px circle at var(--x,30%) var(--y,0%),var(--spot),transparent 60%),color-mix(in oklch,var(--s1) 78%,transparent);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:inset 0 1px 0 var(--hi),0 24px 60px -30px var(--shadow);padding:24px 22px 22px;display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+            <div style="font-size:15px;color:var(--t2)">Faturado em 2026</div>
+            <div style="font:600 14px Figtree,sans-serif;color:var(--t3);border:1px dashed var(--line-strong);border-radius:8px;padding:3px 8px">exemplo</div>
+          </div>
+          <div style="font:800 clamp(44px,9vw,60px)/1 Manrope,sans-serif;letter-spacing:-0.03em;font-variant-numeric:tabular-nums">{{ heroCount }}</div>
+          <div style="font-size:16px;color:var(--t2)">de R$ 81.000,00 · teto anual do MEI</div>
+          <div style="position:relative;padding-top:10px">
+            <svg viewBox="0 0 320 28" style="width:100%;height:auto;display:block;overflow:visible">
+              <line x1="0" y1="14" x2="290.9" y2="14" style="stroke:var(--track);stroke-width:2;stroke-linecap:round"></line>
+              <line x1="232.7" y1="6" x2="232.7" y2="22" style="stroke:var(--t3);stroke-width:1"></line>
+              <line x1="290.9" y1="2" x2="290.9" y2="26" style="stroke:var(--t2);stroke-width:1.5"></line>
+              <path d="{{ hero.d }}" pathLength="100" stroke-dasharray="100" style="fill:none;stroke:{{ hero.color }};stroke-width:3;stroke-linecap:round;stroke-dashoffset:{{ off }};transition:{{ trDash }};filter:drop-shadow(0 0 6px {{ hero.color }})"></path>
+              <circle cx="0" cy="14" r="5" style="fill:{{ hero.color }};transform:translateX({{ hero.dx }}px);transition:{{ trDot }};filter:drop-shadow(0 0 8px {{ hero.color }})"></circle>
+            </svg>
+            <div style="position:relative;height:22px;margin-top:8px;font:600 14px Manrope,sans-serif;color:var(--t3);font-variant-numeric:tabular-nums">
+              <span style="position:absolute;left:0">R$ 0</span>
+              <span style="position:absolute;left:72.7%;transform:translateX(-50%)">80%</span>
+              <span style="position:absolute;right:9.1%;transform:translateX(50%);color:var(--t2)">R$ 81 mil</span>
+            </div>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px">
+            <span style="display:inline-flex;align-items:center;gap:8px;min-height:32px;padding:0 12px;border-radius:999px;background:color-mix(in oklch,var(--ok) 16%,transparent);color:var(--ok);font:700 14px Figtree,sans-serif"><span style="width:8px;height:8px;border-radius:50%;background:var(--ok)"></span>Com folga</span>
+            <span style="font:700 18px Manrope,sans-serif;font-variant-numeric:tabular-nums">Faltam {{ heroLeft }}</span>
+          </div>
+          <div style="font-size:15px;line-height:1.5;color:var(--t2);text-wrap:pretty">No ritmo atual, você fecha o ano perto de R$ 61.000,00. Ainda cabe no MEI.</div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:12px">
+          <sc-for list="{{ fios }}" as="f" hint-placeholder-count="3">
+            <div style="border-radius:18px;border:1px solid var(--line);background:color-mix(in oklch,var(--s1) 80%,transparent);padding:16px;display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+                <span style="font:700 14px Figtree,sans-serif;color:{{ f.color }}">{{ f.titulo }}</span>
+                <span style="font:700 15px Manrope,sans-serif;font-variant-numeric:tabular-nums;color:var(--t2)">{{ f.pct }}</span>
+              </div>
+              <svg viewBox="0 0 320 28" style="width:100%;height:auto;display:block;overflow:visible">
+                <line x1="0" y1="14" x2="290.9" y2="14" style="stroke:var(--track);stroke-width:3;stroke-linecap:round"></line>
+                <line x1="232.7" y1="6" x2="232.7" y2="22" style="stroke:var(--t3);stroke-width:1.5"></line>
+                <line x1="290.9" y1="2" x2="290.9" y2="26" style="stroke:var(--t2);stroke-width:2"></line>
+                <path d="{{ f.d }}" pathLength="100" stroke-dasharray="100" style="fill:none;stroke:{{ f.color }};stroke-width:5;stroke-linecap:round;stroke-dashoffset:{{ off }};transition:{{ trDash }}"></path>
+                <circle cx="0" cy="14" r="7" style="fill:{{ f.color }};transform:translateX({{ f.dx }}px);transition:{{ trDot }}"></circle>
+              </svg>
+              <div style="font:600 15px/1.35 Figtree,sans-serif;font-variant-numeric:tabular-nums">{{ f.msg }}</div>
+              <div style="font-size:14px;line-height:1.4;color:var(--t3)">{{ f.hint }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <!-- Tokens -->
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div style="font:600 14px Figtree,sans-serif;letter-spacing:0.06em;text-transform:uppercase;color:var(--t3)">Cores</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px">
+          <sc-for list="{{ p.sw }}" as="s" hint-placeholder-count="14">
+            <div style="display:flex;flex-direction:column;gap:8px;padding:8px;border-radius:14px;border:1px solid var(--line);background:color-mix(in oklch,var(--s1) 70%,transparent)">
+              <div style="height:48px;border-radius:9px;border:1px solid var(--line);background:var({{ s.v }})"></div>
+              <div style="font:600 14px Figtree,sans-serif">{{ s.n }}</div>
+              <div style="font:500 14px/1.3 ui-monospace,Menlo,monospace;color:var(--t3);word-break:break-all">{{ s.v }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <!-- Tipografia -->
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div style="font:600 14px Figtree,sans-serif;letter-spacing:0.06em;text-transform:uppercase;color:var(--t3)">Tipografia · Figtree (interface) + Manrope (números, tabular-nums)</div>
+        <div style="display:flex;flex-direction:column;gap:14px;border-radius:20px;border:1px solid var(--line);background:color-mix(in oklch,var(--s1) 70%,transparent);padding:20px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap"><span style="font:800 56px/1 Manrope,sans-serif;letter-spacing:-0.03em;font-variant-numeric:tabular-nums">R$ 1.234,56</span><span style="font-size:14px;color:var(--t3)">Número-herói 48–64</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap"><span style="font:700 28px/1.15 Manrope,sans-serif;letter-spacing:-0.015em">Seu DAS vence dia 20</span><span style="font-size:14px;color:var(--t3)">Título 28</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap"><span style="font:600 20px/1.25 Figtree,sans-serif">Últimos lançamentos</span><span style="font-size:14px;color:var(--t3)">Subtítulo 20</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap"><span style="font:400 16px/1.5 Figtree,sans-serif;max-width:300px">Mande uma foto do recibo. A gente monta o rascunho e você confere.</span><span style="font-size:14px;color:var(--t3)">Corpo 16</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap"><span style="font:500 14px/1.4 Figtree,sans-serif;color:var(--t2)">Atualizado agora · nada salvo sem você confirmar</span><span style="font-size:14px;color:var(--t3)">Apoio 14 (mínimo)</span></div>
+        </div>
+      </div>
+
+      <!-- Botões -->
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div style="font:600 14px Figtree,sans-serif;letter-spacing:0.06em;text-transform:uppercase;color:var(--t3)">Botões · padrão, hover, pressionado, foco, desabilitado, carregando</div>
+        <div style="display:flex;flex-direction:column;gap:18px;border-radius:20px;border:1px solid var(--line);background:color-mix(in oklch,var(--s1) 70%,transparent);padding:20px">
+          <div style="font:600 15px Figtree,sans-serif;color:var(--t2)">Primário · um por tela</div>
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 10px">
+            <div style="display:flex;flex-direction:column;gap:6px"><button style="height:48px;border-radius:14px;border:0;background:var(--acc);color:var(--on-acc);font:700 16px Figtree,sans-serif;cursor:pointer;transition:transform .15s,filter .15s" style-hover="filter:brightness(1.08)" style-active="transform:scale(.97)" style-focus="outline:2px solid var(--ring);outline-offset:3px">Confirmar</button><span style="font-size:14px;color:var(--t3)">padrão</span></div>
+            <div style="display:flex;flex-direction:column;gap:6px"><button style="height:48px;border-radius:14px;border:0;background:var(--acc);color:var(--on-acc);font:700 16px Figtree,sans-serif;filter:brightness(1.08);box-shadow:0 0 0 4px color-mix(in oklch,var(--acc) 22%,transparent)">Confirmar</button><span style="font-size:14px;color:var(--t3)">hover</span></div>
+            <div style="display:flex;flex-direction:column;gap:6px"><button style="height:48px;border-radius:14px;border:0;background:var(--acc);color:var(--on-acc);font:700 16px Figtree,sans-serif;transform:scale(.97);filter:brightness(.92)">Confirmar</button><span style="font-size:14px;color:var(--t3)">pressionado</span></div>
+            <div style="display:flex;flex-direction:column;gap:6px"><button style="height:48px;border-radius:14px;border:0;background:var(--acc);color:var(--on-acc);font:700 16px Figtree,sans-serif;outline:2px solid var(--ring);outline-offset:3px">Confirmar</button><span style="font-size:14px;color:var(--t3)">foco</span></div>
+            <div style="display:flex;flex-direction:column;gap:6px"><button disabled="" style="height:48px;border-radius:14px;border:0;background:var(--s3);color:var(--t3);font:700 16px Figtree,sans-serif;cursor:not-allowed">Confirmar</button><span style="font-size:14px;color:var(--t3)">desabilitado</span></div>
+            <div style="display:flex;flex-direction:column;gap:6px"><button style="height:48px;border-radius:14px;border:0;background:var(--acc);color:var(--on-acc);font:700 16px Figtree,sans-serif;display:flex;align-items:center;justify-content:center;gap:8px"><span style="width:16px;height:16px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:cc-spin .8s linear infinite"></span>Salvando</button><span style="font-size:14px;color:var(--t3)">carregando</span></div>
+          </div>
+          <div style="font:600 15px Figtree,sans-serif;color:var(--t2)">Secundário</div>
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 10px">
+            <div style="display:flex;flex-direction:column;gap:6px"><button style="height:48px;border-radius:14px;border:1px solid var(--line-strong);background:var(--s2);color:var(--t1);font:600 16px Figtree,sans-serif;cursor:pointer" style-hover="background:var(--s3)" style-active="transform:scale(.97)" style-focus="outline:2px solid var(--ring);outline-offset:3px">Criar conta</button><span style="font-size:14px;color:var(--t3)">padrão</span></div>
+            <div style="display:flex;flex-direction:column;gap:6px"><button style="height:48px;border-radius:14px;border:1px solid var(--line-strong);background:var(--s3);color:var(--t1);font:600 16px Figtree,sans-serif">Criar conta</button><span style="font-size:14px;color:var(--t3)">hover</span></div>
+            <div style="display:flex;flex-direction:column;gap:6px"><button style="height:48px;border-radius:14px;border:1px solid var(--line-strong);background:var(--s3);color:var(--t1);font:600 16px Figtree,sans-serif;transform:scale(.97)">Criar conta</button><span style="font-size:14px;color:var(--t3)">pressionado</span></div>
+            <div style="display:flex;flex-direction:column;gap:6px"><button style="height:48px;border-radius:14px;border:1px solid var(--line-strong);background:var(--s2);color:var(--t1);font:600 16px Figtree,sans-serif;outline:2px solid var(--ring);outline-offset:3px">Criar conta</button><span style="font-size:14px;color:var(--t3)">foco</span></div>
+            <div style="display:flex;flex-direction:column;gap:6px"><button disabled="" style="height:48px;border-radius:14px;border:1px solid var(--line);background:transparent;color:var(--t3);font:600 16px Figtree,sans-serif;cursor:not-allowed">Criar conta</button><span style="font-size:14px;color:var(--t3)">desabilitado</span></div>
+            <div style="display:flex;flex-direction:column;gap:6px"><button style="height:48px;border-radius:14px;border:1px solid var(--line-strong);background:var(--s2);color:var(--t1);font:600 16px Figtree,sans-serif;display:flex;align-items:center;justify-content:center;gap:8px"><span style="width:16px;height:16px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:cc-spin .8s linear infinite"></span>Enviando</button><span style="font-size:14px;color:var(--t3)">carregando</span></div>
+          </div>
+          <div style="font:600 15px Figtree,sans-serif;color:var(--t2)">Fantasma</div>
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 10px">
+            <div style="display:flex;flex-direction:column;gap:6px"><button style="height:48px;border-radius:14px;border:0;background:transparent;color:var(--acc-ink);font:600 16px Figtree,sans-serif;cursor:pointer" style-hover="background:color-mix(in oklch,var(--acc) 12%,transparent)" style-active="transform:scale(.97)" style-focus="outline:2px solid var(--ring);outline-offset:3px">Descartar</button><span style="font-size:14px;color:var(--t3)">padrão</span></div>
+            <div style="display:flex;flex-direction:column;gap:6px"><button style="height:48px;border-radius:14px;border:0;background:color-mix(in oklch,var(--acc) 12%,transparent);color:var(--acc-ink);font:600 16px Figtree,sans-serif">Descartar</button><span style="font-size:14px;color:var(--t3)">hover</span></div>
+            <div style="display:flex;flex-direction:column;gap:6px"><button style="height:48px;border-radius:14px;border:0;background:color-mix(in oklch,var(--acc) 20%,transparent);color:var(--acc-ink);font:600 16px Figtree,sans-serif;transform:scale(.97)">Descartar</button><span style="font-size:14px;color:var(--t3)">pressionado</span></div>
+            <div style="display:flex;flex-direction:column;gap:6px"><button style="height:48px;border-radius:14px;border:0;background:transparent;color:var(--acc-ink);font:600 16px Figtree,sans-serif;outline:2px solid var(--ring);outline-offset:3px">Descartar</button><span style="font-size:14px;color:var(--t3)">foco</span></div>
+            <div style="display:flex;flex-direction:column;gap:6px"><button disabled="" style="height:48px;border-radius:14px;border:0;background:transparent;color:var(--t3);font:600 16px Figtree,sans-serif;cursor:not-allowed;opacity:.7">Descartar</button><span style="font-size:14px;color:var(--t3)">desabilitado</span></div>
+            <div style="display:flex;flex-direction:column;gap:6px"><button style="height:48px;border-radius:14px;border:0;background:transparent;color:var(--acc-ink);font:600 16px Figtree,sans-serif;display:flex;align-items:center;justify-content:center;gap:8px"><span style="width:16px;height:16px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:cc-spin .8s linear infinite"></span>Aguarde</button><span style="font-size:14px;color:var(--t3)">carregando</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Campo de valor -->
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div style="font:600 14px Figtree,sans-serif;letter-spacing:0.06em;text-transform:uppercase;color:var(--t3)">Campo de valor em R$</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:16px;border-radius:20px;border:1px solid var(--line);background:color-mix(in oklch,var(--s1) 70%,transparent);padding:20px">
+          <label style="display:flex;flex-direction:column;gap:8px">
+            <span style="font:600 15px Figtree,sans-serif;color:var(--t2)">Valor · digite aqui</span>
+            <span style="display:flex;align-items:center;gap:8px;height:56px;padding:0 16px;border-radius:14px;background:var(--s2);border:1px solid var(--line-strong)">
+              <span style="font:700 18px Manrope,sans-serif;color:var(--t3)">R$</span>
+              <input inputMode="numeric" value="{{ valorFmt }}" onChange="{{ onValor }}" style="flex:1;min-width:0;border:0;outline:0;background:transparent;color:var(--t1);font:700 22px Manrope,sans-serif;font-variant-numeric:tabular-nums" style-focus="color:var(--t1)"></input>
+            </span>
+            <span style="font-size:14px;color:var(--t3)">Centavos entram primeiro</span>
+          </label>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <span style="font:600 15px Figtree,sans-serif;color:var(--t2)">Foco</span>
+            <span style="display:flex;align-items:center;gap:8px;height:56px;padding:0 16px;border-radius:14px;background:var(--s2);border:1px solid var(--ring);box-shadow:0 0 0 4px color-mix(in oklch,var(--ring) 22%,transparent)"><span style="font:700 18px Manrope,sans-serif;color:var(--t3)">R$</span><span style="font:700 22px Manrope,sans-serif;font-variant-numeric:tabular-nums">350,00</span><span style="width:2px;height:24px;background:var(--ring)"></span></span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <span style="font:600 15px Figtree,sans-serif;color:var(--t2)">Erro</span>
+            <span style="display:flex;align-items:center;gap:8px;height:56px;padding:0 16px;border-radius:14px;background:color-mix(in oklch,var(--err) 8%,var(--s2));border:1px solid var(--err)"><span style="font:700 18px Manrope,sans-serif;color:var(--t3)">R$</span><span style="font:700 22px Manrope,sans-serif;font-variant-numeric:tabular-nums">0,00</span></span>
+            <span style="font:600 14px Figtree,sans-serif;color:var(--err)">Digite um valor maior que zero</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <span style="font:600 15px Figtree,sans-serif;color:var(--t3)">Desabilitado</span>
+            <span style="display:flex;align-items:center;gap:8px;height:56px;padding:0 16px;border-radius:14px;background:transparent;border:1px dashed var(--line-strong);color:var(--t3)"><span style="font:700 18px Manrope,sans-serif">R$</span><span style="font:700 22px Manrope,sans-serif;font-variant-numeric:tabular-nums">1.234,56</span></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vidro + chip -->
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div style="font:600 14px Figtree,sans-serif;letter-spacing:0.06em;text-transform:uppercase;color:var(--t3)">Cartão de vidro · spotlight segue o dedo · chip de fonte legal</div>
+        <div onPointerMove="{{ spot }}" style="position:relative;border-radius:22px;border:1px solid var(--line);background:radial-gradient(360px circle at var(--x,80%) var(--y,0%),var(--spot),transparent 60%),color-mix(in oklch,var(--s1) 72%,transparent);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:inset 0 1px 0 var(--hi);padding:20px;display:flex;flex-direction:column;gap:14px">
+          <div style="font:600 14px Figtree,sans-serif;color:var(--t3)">Você perguntou</div>
+          <div style="font:600 17px/1.4 Figtree,sans-serif">Qual é o limite de faturamento do MEI?</div>
+          <div style="display:flex;gap:12px;align-items:flex-start">
+            <svg width="44" height="12" viewBox="0 0 44 12" style="flex:none;margin-top:7px"><line x1="1" y1="6" x2="43" y2="6" style="stroke:var(--track);stroke-width:2;stroke-linecap:round"></line><line x1="1" y1="6" x2="18" y2="6" style="stroke:var(--ok);stroke-width:2.5;stroke-linecap:round"></line><circle cx="18" cy="6" r="3" style="fill:var(--ok)"></circle></svg>
+            <div style="font-size:16px;line-height:1.5;color:var(--t2);text-wrap:pretty">R$ 81.000,00 por ano. Se começou no meio do ano, o teto é proporcional aos meses ativos.</div>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            <button style="display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border-radius:12px;border:1px solid var(--line-strong);background:var(--s2);color:var(--t1);font:600 14px Figtree,sans-serif;cursor:pointer" style-hover="background:var(--s3)" style-active="transform:scale(.97)" style-focus="outline:2px solid var(--ring);outline-offset:2px"><span style="width:6px;height:6px;border-radius:50%;background:var(--acc)"></span>LC 123/2006, art. 18-A, § 1º<span style="color:var(--t3)">↗</span></button>
+            <button style="display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border-radius:12px;border:1px solid var(--line-strong);background:var(--s2);color:var(--t1);font:600 14px Figtree,sans-serif;cursor:pointer" style-hover="background:var(--s3)" style-active="transform:scale(.97)" style-focus="outline:2px solid var(--ring);outline-offset:2px"><span style="width:6px;height:6px;border-radius:50%;background:var(--acc)"></span>Resolução CGSN 140/2018<span style="color:var(--t3)">↗</span></button>
+          </div>
+          <div style="font-size:14px;line-height:1.45;color:var(--t3);border-top:1px solid var(--line);padding-top:12px">Resposta informativa. Não substitui um contador.</div>
+        </div>
+      </div>
+
+      <!-- Cartão de lançamento -->
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div style="font:600 14px Figtree,sans-serif;letter-spacing:0.06em;text-transform:uppercase;color:var(--t3)">Cartão de lançamento · rascunho da IA</div>
+        <div style="border-radius:22px;border:1px solid var(--line);background:color-mix(in oklch,var(--s1) 85%,transparent);padding:20px;display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+            <div style="display:flex;flex-direction:column;gap:4px"><span style="font:700 18px Figtree,sans-serif">Rascunho</span><span style="font-size:14px;color:var(--t3)">Lido de uma foto · 14:32</span></div>
+            <span style="font:600 14px Figtree,sans-serif;color:var(--t3);border:1px dashed var(--line-strong);border-radius:8px;padding:3px 8px">exemplo</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+            <label style="display:flex;flex-direction:column;gap:6px;grid-column:1/-1"><span style="font:600 14px Figtree,sans-serif;color:var(--t2)">Valor</span><span style="display:flex;align-items:center;gap:8px;height:52px;padding:0 14px;border-radius:12px;background:var(--s2);border:1px solid var(--line-strong)"><span style="font:700 16px Manrope,sans-serif;color:var(--t3)">R$</span><input defaultValue="350,00" style="flex:1;min-width:0;border:0;outline:0;background:transparent;color:var(--t1);font:700 20px Manrope,sans-serif;font-variant-numeric:tabular-nums"></input></span></label>
+            <label style="display:flex;flex-direction:column;gap:6px"><span style="font:600 14px Figtree,sans-serif;color:var(--warn)">Data · confira</span><span style="display:flex;align-items:center;height:52px;padding:0 14px;border-radius:12px;background:color-mix(in oklch,var(--warn) 10%,var(--s2));border:1px solid var(--warn)"><input defaultValue="22/11/2026" style="width:100%;border:0;outline:0;background:transparent;color:var(--t1);font:600 16px Manrope,sans-serif;font-variant-numeric:tabular-nums"></input></span></label>
+            <label style="display:flex;flex-direction:column;gap:6px"><span style="font:600 14px Figtree,sans-serif;color:var(--t2)">Tipo</span><span style="display:flex;height:52px;padding:4px;border-radius:12px;background:var(--s2);border:1px solid var(--line-strong);gap:4px"><span style="flex:1;display:flex;align-items:center;justify-content:center;border-radius:9px;background:var(--s3);font:600 15px Figtree,sans-serif">Entrada</span><span style="flex:1;display:flex;align-items:center;justify-content:center;border-radius:9px;font:600 15px Figtree,sans-serif;color:var(--t3)">Saída</span></span></label>
+            <label style="display:flex;flex-direction:column;gap:6px;grid-column:1/-1"><span style="font:600 14px Figtree,sans-serif;color:var(--t2)">Categoria</span><span style="display:flex;align-items:center;height:52px;padding:0 14px;border-radius:12px;background:var(--s2);border:1px solid var(--line-strong)"><input defaultValue="Serviço prestado" style="width:100%;border:0;outline:0;background:transparent;color:var(--t1);font:500 16px Figtree,sans-serif"></input></span></label>
+          </div>
+          <div style="font-size:14px;line-height:1.45;color:var(--warn)">A data na foto estava cortada. Confira antes de salvar.</div>
+          <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;background:var(--s2);font-size:14px;line-height:1.4;color:var(--t2)"><span style="width:8px;height:8px;border-radius:50%;background:var(--t3);flex:none"></span>Nada foi salvo. Só entra no seu fio quando você confirmar.</div>
+          <div style="display:grid;grid-template-columns:1fr 2fr;gap:10px">
+            <button style="height:52px;border-radius:14px;border:0;background:transparent;color:var(--acc-ink);font:600 16px Figtree,sans-serif;cursor:pointer" style-hover="background:color-mix(in oklch,var(--acc) 12%,transparent)" style-focus="outline:2px solid var(--ring);outline-offset:3px">Descartar</button>
+            <button style="height:52px;border-radius:14px;border:0;background:var(--acc);color:var(--on-acc);font:700 16px Figtree,sans-serif;cursor:pointer" style-hover="filter:brightness(1.08)" style-active="transform:scale(.97)" style-focus="outline:2px solid var(--ring);outline-offset:3px">Confirmar lançamento</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feedback -->
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div style="font:600 14px Figtree,sans-serif;letter-spacing:0.06em;text-transform:uppercase;color:var(--t3)">Faixa demo · toast · erro com ação</div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:10px;min-height:40px;padding:8px 14px;border-radius:12px;background:repeating-linear-gradient(135deg,var(--s2) 0 10px,var(--s3) 10px 20px);border:1px solid var(--line-strong);font:600 14px Figtree,sans-serif;text-align:center"><span style="width:8px;height:8px;border-radius:50%;background:var(--warn);flex:none"></span>Modo demonstração · dados de exemplo</div>
+        <div style="display:flex;align-items:center;gap:12px;padding:14px 14px 14px 16px;border-radius:16px;background:var(--s3);border:1px solid var(--line-strong);box-shadow:0 18px 40px -20px var(--shadow)">
+          <span style="width:22px;height:22px;border-radius:50%;background:var(--ok);flex:none;display:flex;align-items:center;justify-content:center;color:var(--on-ok);font:800 14px Figtree,sans-serif">✓</span>
+          <div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font:600 15px Figtree,sans-serif">Lançamento salvo</span><span style="font-size:14px;color:var(--t2);font-variant-numeric:tabular-nums">Faltam R$ 46.630,00 no fio</span></div>
+          <button style="min-height:44px;padding:0 12px;border-radius:10px;border:0;background:transparent;color:var(--acc-ink);font:700 15px Figtree,sans-serif;cursor:pointer" style-hover="background:color-mix(in oklch,var(--acc) 12%,transparent)">Desfazer</button>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:16px;border-radius:16px;background:color-mix(in oklch,var(--err) 12%,var(--s1));border:1px solid color-mix(in oklch,var(--err) 55%,transparent)">
+          <div style="flex:1 1 200px;display:flex;flex-direction:column;gap:4px"><span style="font:700 15px Figtree,sans-serif;color:var(--err)">Sem conexão</span><span style="font-size:15px;line-height:1.45;color:var(--t2)">Seu rascunho ficou guardado neste aparelho.</span></div>
+          <button style="min-height:44px;padding:0 16px;border-radius:12px;border:1px solid var(--line-strong);background:var(--s2);color:var(--t1);font:600 15px Figtree,sans-serif;cursor:pointer" style-hover="background:var(--s3)">Tentar de novo</button>
+        </div>
+      </div>
+
+      <!-- Vazio + esqueleto -->
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div style="font:600 14px Figtree,sans-serif;letter-spacing:0.06em;text-transform:uppercase;color:var(--t3)">Estado vazio · esqueleto de carregamento</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:12px">
+          <div style="border-radius:20px;border:1px dashed var(--line-strong);padding:22px 18px;display:flex;flex-direction:column;gap:14px;align-items:flex-start">
+            <svg viewBox="0 0 200 16" style="width:100%;height:auto;overflow:visible"><line x1="6" y1="8" x2="194" y2="8" style="stroke:var(--track);stroke-width:2;stroke-linecap:round;stroke-dasharray:2 6"></line><circle cx="6" cy="8" r="5" style="fill:var(--ok)"></circle></svg>
+            <div style="font:700 17px/1.3 Figtree,sans-serif">Seu fio começa no primeiro lançamento</div>
+            <div style="font-size:15px;line-height:1.45;color:var(--t2)">Mande uma foto, um áudio ou escreva.</div>
+            <button style="min-height:44px;padding:0 16px;border-radius:12px;border:1px solid var(--line-strong);background:var(--s2);color:var(--t1);font:600 15px Figtree,sans-serif;cursor:pointer" style-hover="background:var(--s3)">Adicionar lançamento</button>
+          </div>
+          <div aria-busy="true" style="border-radius:20px;border:1px solid var(--line);background:color-mix(in oklch,var(--s1) 70%,transparent);padding:22px 18px;display:flex;flex-direction:column;gap:14px">
+            <div style="height:14px;width:45%;border-radius:7px;background:var(--s3);animation:cc-pulse 1.4s ease-in-out infinite"></div>
+            <div style="height:40px;width:80%;border-radius:10px;background:var(--s3);animation:cc-pulse 1.4s ease-in-out infinite .15s"></div>
+            <div style="height:4px;width:100%;border-radius:2px;background:var(--s3);animation:cc-pulse 1.4s ease-in-out infinite .3s"></div>
+            <div style="height:14px;width:60%;border-radius:7px;background:var(--s3);animation:cc-pulse 1.4s ease-in-out infinite .45s"></div>
+            <div style="font-size:14px;color:var(--t3)">Carregando seu painel…</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navegação inferior -->
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div style="font:600 14px Figtree,sans-serif;letter-spacing:0.06em;text-transform:uppercase;color:var(--t3)">Navegação inferior · 4 itens</div>
+        <nav style="display:grid;grid-template-columns:repeat(4,1fr);padding:8px;border-radius:24px;border:1px solid var(--line);background:color-mix(in oklch,var(--s1) 75%,transparent);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:inset 0 1px 0 var(--hi),0 20px 40px -24px var(--shadow)">
+          <button style="min-height:60px;border:0;border-radius:16px;background:color-mix(in oklch,var(--acc) 14%,transparent);color:var(--acc-ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font:700 14px Figtree,sans-serif;cursor:pointer"><svg width="24" height="24" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12" style="stroke:currentColor;stroke-width:1.5;opacity:.4;stroke-linecap:round"></line><line x1="3" y1="12" x2="14" y2="12" style="stroke:currentColor;stroke-width:2.2;stroke-linecap:round"></line><circle cx="14" cy="12" r="3" style="fill:currentColor"></circle></svg>Painel</button>
+          <button style="min-height:60px;border:0;border-radius:16px;background:transparent;color:var(--t2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font:600 14px Figtree,sans-serif;cursor:pointer" style-hover="background:var(--s2)"><svg width="24" height="24" viewBox="0 0 24 24"><line x1="5" y1="7" x2="19" y2="7" style="stroke:currentColor;stroke-width:2;stroke-linecap:round"></line><line x1="5" y1="12" x2="19" y2="12" style="stroke:currentColor;stroke-width:2;stroke-linecap:round"></line><line x1="5" y1="17" x2="14" y2="17" style="stroke:currentColor;stroke-width:2;stroke-linecap:round"></line></svg>Lançamentos</button>
+          <button style="min-height:60px;border:0;border-radius:16px;background:transparent;color:var(--t2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font:600 14px Figtree,sans-serif;cursor:pointer" style-hover="background:var(--s2)"><svg width="24" height="24" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="12" rx="4" style="fill:none;stroke:currentColor;stroke-width:2"></rect><line x1="8" y1="20" x2="11" y2="17" style="stroke:currentColor;stroke-width:2;stroke-linecap:round"></line></svg>Chat</button>
+          <button style="min-height:60px;border:0;border-radius:16px;background:transparent;color:var(--t2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font:600 14px Figtree,sans-serif;cursor:pointer" style-hover="background:var(--s2)"><svg width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="9" r="4" style="fill:none;stroke:currentColor;stroke-width:2"></circle><path d="M5 20c1.5-3.5 4-5 7-5s5.5 1.5 7 5" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round"></path></svg>Perfil</button>
+        </nav>
+      </div>
+
+      <!-- Tokens CSS -->
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+          <div style="font:600 14px Figtree,sans-serif;letter-spacing:0.06em;text-transform:uppercase;color:var(--t3)">Tokens · shadcn + Tailwind v4</div>
+          <button onClick="{{ p.copy }}" style="min-height:44px;padding:0 14px;border-radius:12px;border:1px solid var(--line-strong);background:var(--s2);color:var(--t1);font:600 14px Figtree,sans-serif;cursor:pointer" style-hover="background:var(--s3)">{{ p.copyLabel }}</button>
+        </div>
+        <pre style="margin:0;max-height:340px;overflow:auto;padding:16px;border-radius:16px;background:var(--s1);border:1px solid var(--line);font:500 14px/1.55 ui-monospace,Menlo,monospace;color:var(--t2);white-space:pre">{{ p.css }}</pre>
+      </div>
+
+    </div>
+    </div>
+  </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;mode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;escuro&quot;,&quot;claro&quot;],&quot;default&quot;:&quot;escuro&quot;,&quot;tsType&quot;:&quot;'escuro'|'claro'&quot;},&quot;foco&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;A e B&quot;,&quot;Só A&quot;,&quot;Só B&quot;],&quot;default&quot;:&quot;Só B&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+const NOISE = `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .5 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='.09'/></svg>")`;
+
+const PAL = {
+  floresta: {
+    name: 'A · Floresta',
+    desc: 'Preto-esverdeado profundo. Esmeralda é a cor de vida (sobra folga), âmbar é atenção, vermelho só quando estoura.',
+    dark: { bg:'oklch(0.155 0.016 165)', s1:'oklch(0.195 0.02 165)', s2:'oklch(0.235 0.022 165)', s3:'oklch(0.29 0.025 165)', t1:'oklch(0.97 0.008 165)', t2:'oklch(0.84 0.015 165)', t3:'oklch(0.71 0.02 165)', line:'oklch(0.97 0.02 165 / 0.12)', lineStrong:'oklch(0.97 0.02 165 / 0.22)', acc:'oklch(0.80 0.15 160)', accInk:'oklch(0.82 0.14 160)', onAcc:'oklch(0.18 0.03 165)', ring:'oklch(0.82 0.14 160)', ok:'oklch(0.82 0.14 160)', onOk:'oklch(0.18 0.03 165)', warn:'oklch(0.83 0.14 78)', err:'oklch(0.71 0.18 25)', track:'oklch(0.97 0.02 165 / 0.16)', glow:'oklch(0.62 0.13 160 / 0.26)', glow2:'oklch(0.45 0.08 180 / 0.24)', spot:'oklch(0.80 0.15 160 / 0.14)', hi:'oklch(1 0 0 / 0.07)', shadow:'oklch(0 0 0 / 0.7)' },
+    light: { bg:'oklch(0.975 0.006 150)', s1:'oklch(0.995 0.003 150)', s2:'oklch(0.955 0.009 155)', s3:'oklch(0.915 0.013 160)', t1:'oklch(0.21 0.025 165)', t2:'oklch(0.37 0.025 165)', t3:'oklch(0.48 0.025 165)', line:'oklch(0.21 0.025 165 / 0.11)', lineStrong:'oklch(0.21 0.025 165 / 0.22)', acc:'oklch(0.45 0.11 160)', accInk:'oklch(0.42 0.10 160)', onAcc:'oklch(0.99 0.005 160)', ring:'oklch(0.52 0.12 160)', ok:'oklch(0.45 0.11 160)', onOk:'oklch(0.99 0.005 160)', warn:'oklch(0.52 0.12 62)', err:'oklch(0.52 0.19 25)', track:'oklch(0.21 0.025 165 / 0.14)', glow:'oklch(0.88 0.08 160 / 0.55)', glow2:'oklch(0.92 0.04 120 / 0.5)', spot:'oklch(0.80 0.10 160 / 0.18)', hi:'oklch(1 0 0 / 0.8)', shadow:'oklch(0.3 0.03 165 / 0.25)' }
+  },
+  azul: {
+    name: 'B · Azul-noite',
+    desc: 'Azul-noite profundo como alternativa. As regras de estado do fio são as mesmas: verde, âmbar, vermelho.',
+    dark: { bg:'oklch(0.16 0.025 255)', s1:'oklch(0.20 0.03 255)', s2:'oklch(0.245 0.035 255)', s3:'oklch(0.30 0.04 255)', t1:'oklch(0.97 0.008 255)', t2:'oklch(0.85 0.02 255)', t3:'oklch(0.72 0.025 255)', line:'oklch(0.97 0.02 255 / 0.12)', lineStrong:'oklch(0.97 0.02 255 / 0.22)', acc:'oklch(0.78 0.12 240)', accInk:'oklch(0.80 0.11 240)', onAcc:'oklch(0.17 0.04 255)', ring:'oklch(0.80 0.11 240)', ok:'oklch(0.84 0.13 160)', onOk:'oklch(0.20 0.03 180)', warn:'oklch(0.83 0.14 78)', err:'oklch(0.71 0.18 25)', track:'oklch(0.97 0.02 255 / 0.16)', glow:'oklch(0.55 0.13 245 / 0.28)', glow2:'oklch(0.50 0.09 215 / 0.20)', spot:'oklch(0.78 0.12 240 / 0.15)', hi:'oklch(1 0 0 / 0.07)', shadow:'oklch(0 0 0 / 0.7)' },
+    light: { bg:'oklch(0.975 0.006 250)', s1:'oklch(0.995 0.003 250)', s2:'oklch(0.955 0.01 250)', s3:'oklch(0.915 0.015 250)', t1:'oklch(0.22 0.03 255)', t2:'oklch(0.38 0.03 255)', t3:'oklch(0.49 0.03 255)', line:'oklch(0.22 0.03 255 / 0.11)', lineStrong:'oklch(0.22 0.03 255 / 0.22)', acc:'oklch(0.48 0.14 250)', accInk:'oklch(0.45 0.13 250)', onAcc:'oklch(0.99 0.005 250)', ring:'oklch(0.54 0.14 250)', ok:'oklch(0.47 0.10 160)', onOk:'oklch(0.99 0.005 160)', warn:'oklch(0.52 0.12 62)', err:'oklch(0.52 0.19 25)', track:'oklch(0.22 0.03 255 / 0.14)', glow:'oklch(0.86 0.07 245 / 0.55)', glow2:'oklch(0.90 0.04 210 / 0.5)', spot:'oklch(0.75 0.10 245 / 0.18)', hi:'oklch(1 0 0 / 0.8)', shadow:'oklch(0.3 0.04 255 / 0.25)' }
+  }
+};
+
+const KEYMAP = { bg:'--bg', s1:'--s1', s2:'--s2', s3:'--s3', t1:'--t1', t2:'--t2', t3:'--t3', line:'--line', lineStrong:'--line-strong', acc:'--acc', accInk:'--acc-ink', onAcc:'--on-acc', ring:'--ring', ok:'--ok', onOk:'--on-ok', warn:'--warn', err:'--err', track:'--track', glow:'--glow', glow2:'--glow2', spot:'--spot', hi:'--hi', shadow:'--shadow' };
+const SW = [['--bg','Superfície 0'],['--s1','Superfície 1'],['--s2','Superfície 2'],['--s3','Superfície 3'],['--t1','Texto 1'],['--t2','Texto 2'],['--t3','Texto 3'],['--line-strong','Borda'],['--ring','Foco'],['--acc','Primária'],['--ok','Sucesso · folga'],['--warn','Atenção · 80%'],['--err','Erro · estourou']];
+
+const brl = n => 'R$ ' + n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const LIMIT = 81000, W = 320, SCALE = 110;
+const xOf = pct => Math.min(pct, SCALE) / SCALE * W;
+
+function cssFor(id, pal) {
+  const map = t => [
+    ['--background', t.bg], ['--foreground', t.t1], ['--card', t.s1], ['--card-foreground', t.t1], ['--popover', t.s2], ['--popover-foreground', t.t1],
+    ['--primary', t.acc], ['--primary-foreground', t.onAcc], ['--secondary', t.s2], ['--secondary-foreground', t.t1], ['--muted', t.s2], ['--muted-foreground', t.t3],
+    ['--accent', t.s3], ['--accent-foreground', t.t1], ['--destructive', t.err], ['--border', t.lineStrong], ['--input', t.lineStrong], ['--ring', t.ring],
+    ['--surface-1', t.s1], ['--surface-2', t.s2], ['--surface-3', t.s3], ['--text-2', t.t2], ['--text-3', t.t3],
+    ['--success', t.ok], ['--warning', t.warn], ['--fio-folga', t.ok], ['--fio-atencao', t.warn], ['--fio-estourou', t.err], ['--fio-track', t.track]
+  ].map(([k, v]) => `  ${k}: ${v};`).join('\n');
+  return `:root[data-palette="${id}"] {\n${map(pal.light)}\n}\n:root[data-palette="${id}"].dark {\n${map(pal.dark)}\n}\n\n@theme inline {\n  --font-sans: "Figtree", system-ui, sans-serif;\n  --font-num: "Manrope", system-ui, sans-serif;\n  --color-background: var(--background);\n  --color-foreground: var(--foreground);\n  --color-primary: var(--primary);\n  --color-success: var(--success);\n  --color-warning: var(--warning);\n  --color-destructive: var(--destructive);\n  --radius: 14px;\n}`;
+}
+
+class Component extends DCLogic {
+  state = { mode: null, view: null, drawn: false, instant: false, t: 0, digits: '35000', copied: null };
+  dur = 900;
+
+  componentDidMount() {
+    this.reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.play();
+    this.syncHtml();
+  }
+  componentDidUpdate() { this.syncHtml(); }
+  componentWillUnmount() { cancelAnimationFrame(this.raf); clearTimeout(this.to); }
+
+  mode() { return this.state.mode ?? (this.props.mode === 'claro' ? 'light' : 'dark'); }
+  view() { return this.state.view ?? ({ 'Só A': 'floresta', 'Só B': 'azul', 'A e B': 'both' }[this.props.foco] || 'azul'); }
+
+  syncHtml() {
+    const v = this.view(), el = document.documentElement;
+    el.dataset.palette = v === 'both' ? 'floresta' : v;
+    el.classList.toggle('dark', this.mode() === 'dark');
+  }
+
+  play() {
+    cancelAnimationFrame(this.raf);
+    if (this.reduced) { this.setState({ drawn: true, t: 1, instant: true }); return; }
+    this.setState({ drawn: false, t: 0, instant: true }, () => {
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        this.setState({ drawn: true, instant: false });
+        const t0 = performance.now();
+        const step = now => {
+          const k = Math.min(1, (now - t0) / this.dur);
+          this.setState({ t: 1 - Math.pow(1 - k, 3) });
+          if (k < 1) this.raf = requestAnimationFrame(step);
+        };
+        this.raf = requestAnimationFrame(step);
+      }));
+    });
+  }
+
+  renderVals() {
+    const mode = this.mode(), view = this.view();
+    const { drawn, instant, t } = this.state;
+    const ease = 'cubic-bezier(.2,.7,.2,1)';
+    const fioData = [
+      { titulo: 'Com folga', pct: 42, color: 'var(--ok)', hint: 'Menta enquanto sobra espaço.' },
+      { titulo: 'Atenção', pct: 84, color: 'var(--warn)', hint: 'Âmbar a partir de 80% do teto.' },
+      { titulo: 'Estourou', pct: 104, color: 'var(--err)', hint: 'Vermelho só acima de R$ 81.000. O painel mostra o que fazer.' }
+    ];
+    const fios = fioData.map(f => {
+      const fat = Math.round(LIMIT * f.pct / 100), x = xOf(f.pct);
+      return { ...f, pct: f.pct + '%', d: `M0 14 H${x.toFixed(1)}`, dx: drawn ? x.toFixed(1) : 0,
+        msg: f.pct > 100 ? `Passou ${brl(fat - LIMIT)} do limite` : `Faltam ${brl(LIMIT - fat)}` };
+    });
+    const heroVal = 34020;
+    const pick = (k, v) => () => this.setState({ [k]: v });
+    const sel = on => ({ bg: on ? 'oklch(0.96 0.005 250)' : 'transparent', fg: on ? 'oklch(0.18 0.01 250)' : 'oklch(0.84 0.01 250)' });
+    const ids = view === 'both' ? ['floresta', 'azul'] : [view];
+
+    return {
+      modeOpts: [['dark', 'Escuro'], ['light', 'Claro']].map(([v, label]) => ({ label, pick: pick('mode', v), ...sel(mode === v) })),
+      viewOpts: [['both', 'A e B'], ['floresta', 'Só A'], ['azul', 'Só B']].map(([v, label]) => ({ label, pick: pick('view', v), ...sel(view === v) })),
+      replay: () => this.play(),
+      off: drawn ? 0 : 100,
+      trDash: instant ? 'none' : `stroke-dashoffset ${this.dur}ms ${ease}`,
+      trDot: instant ? 'none' : `transform ${this.dur}ms ${ease}`,
+      hero: { d: `M0 14 H${xOf(42).toFixed(1)}`, color: 'var(--ok)', dx: drawn ? xOf(42).toFixed(1) : 0 },
+      heroCount: brl(Math.round(heroVal * t * 100) / 100),
+      heroLeft: brl(LIMIT - heroVal),
+      fios,
+      valorFmt: (parseInt(this.state.digits || '0', 10) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 }),
+      onValor: e => this.setState({ digits: e.target.value.replace(/\D/g, '').replace(/^0+/, '').slice(0, 11) }),
+      spot: e => {
+        const el = e.currentTarget, r = el.getBoundingClientRect();
+        el.style.setProperty('--x', (e.clientX - r.left) + 'px');
+        el.style.setProperty('--y', (e.clientY - r.top) + 'px');
+      },
+      palettes: ids.map(id => {
+        const pal = PAL[id], tk = pal[mode];
+        const vars = { '--noise': NOISE, colorScheme: mode };
+        Object.entries(KEYMAP).forEach(([k, v]) => { vars[v] = tk[k]; });
+        const css = cssFor(id, pal);
+        return {
+          id, name: pal.name, desc: pal.desc, vars, css,
+          modeLabel: mode === 'dark' ? 'Escuro' : 'Claro',
+          sw: SW.map(([v, n]) => ({ v, n })),
+          copyLabel: this.state.copied === id ? 'Copiado' : 'Copiar CSS',
+          copy: () => { navigator.clipboard?.writeText(css); this.setState({ copied: id }); clearTimeout(this.to); this.to = setTimeout(() => this.setState({ copied: null }), 1600); }
+        };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

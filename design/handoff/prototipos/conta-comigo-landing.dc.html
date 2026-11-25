@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<style>
+html{scroll-behavior:smooth}
+html,body{margin:0;background:oklch(0.16 0.025 255);-webkit-font-smoothing:antialiased}
+a{color:oklch(0.80 0.11 240)}a:hover{opacity:.85}
+input,button{font-family:inherit}
+@property --ang{syntax:'<angle>';inherits:false;initial-value:0deg}
+@keyframes cc-ang{to{--ang:360deg}}
+@keyframes cc-pulse{0%,100%{opacity:.45}50%{opacity:1}}
+@keyframes cc-scany{from{transform:translateY(-10%)}to{transform:translateY(160%)}}
+button:focus-visible,a:focus-visible{outline:2px solid oklch(0.80 0.11 240);outline-offset:3px}
+html.lenis,html.lenis body{height:auto}.lenis.lenis-smooth{scroll-behavior:auto!important}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+</style>
+</helmet>
+
+<div style="--bg:oklch(0.16 0.025 255);--s1:oklch(0.20 0.03 255);--s2:oklch(0.245 0.035 255);--s3:oklch(0.30 0.04 255);--t1:oklch(0.97 0.008 255);--t2:oklch(0.85 0.02 255);--t3:oklch(0.72 0.025 255);--line:oklch(0.97 0.02 255 / 0.12);--line-strong:oklch(0.97 0.02 255 / 0.22);--acc:oklch(0.78 0.12 240);--acc-ink:oklch(0.80 0.11 240);--on-acc:oklch(0.17 0.04 255);--ring:oklch(0.80 0.11 240);--ok:oklch(0.84 0.13 160);--on-ok:oklch(0.20 0.03 180);--warn:oklch(0.83 0.14 78);--err:oklch(0.71 0.18 25);--track:oklch(0.97 0.02 255 / 0.16);--spot:oklch(0.78 0.12 240 / 0.14);--hi:oklch(1 0 0 / 0.07);position:relative;min-height:100vh;background:var(--bg);color:var(--t1);font-family:Figtree,system-ui,sans-serif;font-size:17px;overflow-x:clip">
+
+  <div aria-hidden="true" style="position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(120% 70% at 50% -10%,oklch(0.24 0.06 245),transparent 60%),radial-gradient(80% 60% at 100% 100%,oklch(0.20 0.045 235 / 0.7),transparent 70%),linear-gradient(180deg,oklch(0.155 0.026 255),oklch(0.13 0.022 255))"></div>
+  <div aria-hidden="true" style="position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.28;background-image:radial-gradient(1px 1px at 23px 37px,oklch(0.95 0.02 240),transparent),radial-gradient(1px 1px at 141px 83px,oklch(0.95 0.02 240),transparent),radial-gradient(1.5px 1.5px at 211px 191px,oklch(0.95 0.02 240),transparent),radial-gradient(1px 1px at 77px 229px,oklch(0.95 0.02 240),transparent),radial-gradient(1px 1px at 251px 13px,oklch(0.95 0.02 240),transparent);background-size:270px 270px"></div>
+  <canvas ref="{{ glRef }}" aria-hidden="true" style="position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:0;transition:opacity .6s"></canvas>
+  <svg ref="{{ svgFioRef }}" aria-hidden="true" viewBox="0 0 100 1000" preserveAspectRatio="none" style="position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;display:{{ svgDisplay }};transition:opacity .6s">
+    <path data-fiosvg="" d="M88 -10 C 30 110, 18 230, 64 340 S 96 560, 34 690 S 6 900, 58 1010" pathLength="100" stroke-dasharray="100" style="fill:none;stroke:oklch(0.80 0.11 240 / 0.16);stroke-width:12;stroke-linecap:round;stroke-dashoffset:100;vector-effect:non-scaling-stroke"></path>
+    <path data-fiosvg="" d="M88 -10 C 30 110, 18 230, 64 340 S 96 560, 34 690 S 6 900, 58 1010" pathLength="100" stroke-dasharray="100" style="fill:none;stroke:oklch(0.86 0.08 232);stroke-width:2;stroke-linecap:round;stroke-dashoffset:100;vector-effect:non-scaling-stroke"></path>
+  </svg>
+  <div style="position:fixed;inset:0;pointer-events:none;z-index:45;background-image:{{ noise }}"></div>
+  <sc-if value="{{ intro }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;z-index:100;pointer-events:none;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;opacity:{{ introO }};transition:opacity .55s ease">
+      <svg viewBox="0 0 420 20" style="width:min(420px,70vw);height:auto;overflow:visible">
+        <line x1="8" y1="10" x2="412" y2="10" style="stroke:var(--track);stroke-width:2;stroke-linecap:round"></line>
+        <path d="M8 10 H412" pathLength="100" stroke-dasharray="100" style="fill:none;stroke:oklch(0.88 0.08 232);stroke-width:3;stroke-linecap:round;stroke-dashoffset:{{ introOff }};transition:stroke-dashoffset 1.2s cubic-bezier(.65,0,.35,1);filter:drop-shadow(0 0 8px oklch(0.78 0.12 240))"></path>
+        <circle cx="8" cy="10" r="6" style="fill:oklch(0.95 0.04 232);transform:translateX({{ introDx }}px);transition:transform 1.2s cubic-bezier(.65,0,.35,1);filter:drop-shadow(0 0 10px oklch(0.78 0.12 240))"></circle>
+      </svg>
+      <span style="font:800 30px Manrope,sans-serif;letter-spacing:-0.02em;opacity:{{ introLogoO }};transition:opacity .5s .45s">Conta Comigo</span>
+      <button onClick="{{ skipIntro }}" style="pointer-events:auto;position:absolute;right:24px;bottom:24px;min-height:44px;padding:0 18px;border-radius:999px;border:1px solid var(--line-strong);background:var(--s1);color:var(--t1);font:600 15px Figtree,sans-serif;cursor:pointer">Pular abertura</button>
+    </div>
+  </sc-if>
+  <div ref="{{ progRef }}" style="position:fixed;top:0;left:0;right:0;height:2px;z-index:60;transform-origin:0 50%;transform:scaleX(0);background:var(--ok);box-shadow:0 0 10px var(--ok)"></div>
+
+  <nav ref="{{ navRef }}" style="position:fixed;top:14px;left:50%;transform:translateX(-50%);width:min(1180px,calc(100% - 24px));z-index:50;display:flex;align-items:center;gap:8px;padding:8px 8px 8px 18px;box-sizing:border-box;border-radius:999px;border:1px solid transparent;background:transparent;transition:background .4s cubic-bezier(.2,.7,.2,1),border-color .4s,box-shadow .4s">
+    <a href="#topo" style="display:flex;align-items:center;gap:10px;color:var(--t1);text-decoration:none;min-height:44px"><svg width="30" height="30" viewBox="0 0 36 36"><rect x="0.5" y="0.5" width="35" height="35" rx="10" style="fill:var(--s2);stroke:var(--line)"></rect><line x1="8" y1="18" x2="28" y2="18" style="stroke:var(--t3);stroke-width:1.5;stroke-linecap:round;opacity:.5"></line><line x1="8" y1="18" x2="21" y2="18" style="stroke:var(--ok);stroke-width:2;stroke-linecap:round"></line><circle cx="21" cy="18" r="3" style="fill:var(--ok)"></circle></svg><span style="font:800 18px Manrope,sans-serif;letter-spacing:-0.01em">Conta Comigo</span></a>
+    <sc-if value="{{ wide }}" hint-placeholder-val="{{ true }}">
+      <div style="flex:1;display:flex;justify-content:center;gap:2px">
+        <sc-for list="{{ links }}" as="l" hint-placeholder-count="4"><a href="{{ l.href }}" style="display:flex;align-items:center;min-height:44px;padding:0 14px;border-radius:12px;color:var(--t2);text-decoration:none;font:600 15px Figtree,sans-serif" style-hover="color:var(--t1);background:oklch(1 0 0 / 0.05)">{{ l.label }}</a></sc-for>
+      </div>
+      <button onClick="{{ openLogin }}" style="min-height:44px;padding:0 16px;border-radius:12px;border:0;background:transparent;color:var(--t1);font:600 15px Figtree,sans-serif;cursor:pointer" style-hover="background:oklch(1 0 0 / 0.06)">Entrar</button>
+      <button data-magnet="" onClick="{{ openSignup }}" style="min-height:44px;padding:0 20px;border-radius:999px;border:0;background:oklch(0.97 0.01 240);color:oklch(0.18 0.04 255);font:700 15px Figtree,sans-serif;cursor:pointer;box-shadow:0 8px 24px -8px oklch(0.78 0.12 240 / 0.7)">Comece agora</button>
+    </sc-if>
+    <sc-if value="{{ narrow }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1"></div>
+      <button onClick="{{ toggleMenu }}" style="min-height:44px;padding:0 16px;border-radius:12px;border:1px solid var(--line-strong);background:var(--s2);color:var(--t1);font:600 15px Figtree,sans-serif;cursor:pointer">{{ menuLabel }}</button>
+    </sc-if>
+  </nav>
+  <sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;top:82px;left:12px;right:12px;z-index:49;padding:10px;border-radius:20px;border:1px solid var(--line-strong);background:oklch(0.20 0.03 255 / 0.94);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);display:flex;flex-direction:column;gap:4px">
+      <sc-for list="{{ links }}" as="l" hint-placeholder-count="4"><a href="{{ l.href }}" onClick="{{ closeMenu }}" style="display:flex;align-items:center;min-height:52px;padding:0 14px;border-radius:12px;color:var(--t1);text-decoration:none;font:600 17px Figtree,sans-serif">{{ l.label }}</a></sc-for>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding-top:8px;border-top:1px solid var(--line)">
+        <button onClick="{{ openLogin }}" style="min-height:52px;border-radius:14px;border:1px solid var(--line-strong);background:var(--s2);color:var(--t1);font:600 16px Figtree,sans-serif;cursor:pointer">Entrar</button>
+        <button onClick="{{ openSignup }}" style="min-height:52px;border-radius:14px;border:0;background:var(--acc);color:var(--on-acc);font:700 16px Figtree,sans-serif;cursor:pointer">Comece agora</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- HERO -->
+  <section id="topo" data-fio="1" data-screen-label="Hero" style="position:relative;z-index:2;min-height:100vh;padding:clamp(124px,17vh,176px) 0 0;box-sizing:border-box;overflow-x:clip;display:flex;flex-direction:column;align-items:center">
+    <div data-speed="0.3" aria-hidden="true" style="position:absolute;inset:0 0 25% 0;pointer-events:none;opacity:0.75;-webkit-mask-image:linear-gradient(180deg,#000 55%,transparent);mask-image:linear-gradient(180deg,#000 55%,transparent)">
+      <div style="position:absolute;top:-30%;left:-25%;width:75%;height:130%;background:conic-gradient(from 135deg at 100% 0%,transparent 0deg,oklch(0.72 0.12 238 / 0.14) 14deg,transparent 34deg);filter:blur(12px)"></div>
+      <div style="position:absolute;top:-30%;right:-25%;width:75%;height:130%;background:conic-gradient(from 191deg at 0% 0%,transparent 0deg,oklch(0.72 0.12 238 / 0.14) 20deg,transparent 34deg);filter:blur(12px)"></div>
+      <div style="position:absolute;top:-12%;left:50%;width:min(760px,95vw);height:80%;translate:-50% 0;background:radial-gradient(50% 55% at 50% 0%,oklch(0.68 0.14 240 / 0.32),transparent 72%);filter:blur(24px)"></div>
+      <div style="position:absolute;top:0;left:50%;width:1.5px;height:50%;translate:-50% 0;background:linear-gradient(180deg,oklch(0.98 0.02 230 / 0.9),oklch(0.86 0.09 235 / 0.3) 55%,transparent);box-shadow:0 0 18px 3px oklch(0.78 0.12 240 / 0.4),0 0 90px 20px oklch(0.62 0.14 245 / 0.2)"></div>
+    </div>
+    <div aria-hidden="true" style="position:absolute;left:0;right:0;bottom:-140px;height:560px;pointer-events:none">
+      <div style="position:absolute;left:50%;top:40px;width:min(150vw,2100px);height:360px;translate:-50% 0;background:radial-gradient(50% 50% at 50% 55%,oklch(0.55 0.13 242 / 0.28),transparent 72%);filter:blur(14px)"></div>
+      <div style="position:absolute;left:50%;top:220px;width:min(190vw,2700px);aspect-ratio:1;translate:-50% 0;border-radius:50%;background:radial-gradient(closest-side,oklch(0.14 0.024 255) 97%,oklch(0.48 0.11 242 / 0.5) 99.4%,transparent 100%);filter:blur(3px);-webkit-mask-image:linear-gradient(180deg,#000 0,#000 1.5%,transparent 8%);mask-image:linear-gradient(180deg,#000 0,#000 1.5%,transparent 8%)"></div>
+    </div>
+
+    <div style="position:relative;z-index:2;width:min(1180px,calc(100% - 40px));display:flex;flex-direction:column;align-items:center;text-align:center;gap:26px">
+      <div aria-hidden="true" style="position:absolute;inset:-16% -4%;z-index:-1;pointer-events:none;background:radial-gradient(closest-side,oklch(0.13 0.025 255 / 0.78),transparent)"></div>
+      <div data-hero="" style="display:flex;align-items:center;gap:10px;min-height:36px;padding:0 16px;border-radius:999px;background:linear-gradient(180deg,oklch(0.25 0.035 255 / 0.66),oklch(0.18 0.03 255 / 0.66));border:1px solid oklch(0.97 0.02 255 / 0.12);box-shadow:inset 0 1px 0 oklch(1 0 0 / 0.09),0 1px 2px oklch(0 0 0 / 0.35),0 14px 34px -14px oklch(0 0 0 / 0.55),0 44px 90px -44px oklch(0 0 0 / 0.75);backdrop-filter:blur(18px) saturate(1.2);-webkit-backdrop-filter:blur(18px) saturate(1.2);font:600 14px Figtree,sans-serif;color:var(--t2)"><svg width="30" height="8" viewBox="0 0 30 8"><line x1="1" y1="4" x2="29" y2="4" style="stroke:var(--track);stroke-width:2;stroke-linecap:round"></line><line x1="1" y1="4" x2="14" y2="4" style="stroke:var(--ok);stroke-width:2.5;stroke-linecap:round"></line><circle cx="14" cy="4" r="3" style="fill:var(--ok)"></circle></svg>Assistente de papelada para MEI</div>
+      <h1 data-hero-lines="" style="margin:0;max-width:12ch;font:800 clamp(52px,9.2vw,150px)/0.92 Manrope,sans-serif;letter-spacing:-0.055em;text-wrap:balance">Mande a foto. A gente cuida do resto.</h1>
+      <p data-hero="" style="margin:0;font-size:18px;line-height:1.55;color:var(--t2);text-wrap:pretty;max-width:560px;font-size:clamp(17px,1.4vw,20px)">A IA lê seu recibo, áudio ou print e monta o rascunho. Você confere, e o app calcula seu limite anual e o DAS.</p>
+      <div data-hero="" style="display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:12px">
+        <span style="display:inline-flex;padding:1.5px;border-radius:999px;background:conic-gradient(from var(--ang),oklch(1 0 0 / 0) 0deg,oklch(1 0 0 / 0) 280deg,oklch(0.85 0.10 235) 330deg,oklch(1 0 0 / 0) 360deg);animation:cc-ang 3.2s linear infinite"><button data-magnet="" onClick="{{ openSignup }}" style="min-height:58px;padding:0 32px;border-radius:999px;border:0;background:oklch(0.97 0.01 240);color:oklch(0.18 0.04 255);font:700 18px Figtree,sans-serif;cursor:pointer;box-shadow:inset 0 -2px 0 oklch(0.82 0.03 240),0 14px 44px -10px oklch(0.75 0.13 240 / 0.8);transition:transform .2s cubic-bezier(.2,.7,.2,1),background .2s" style-hover="background:oklch(1 0 0)" style-active="transform:scale(.97)">Comece agora</button></span>
+        <a href="#como" style="display:inline-flex;align-items:center;gap:10px;min-height:58px;padding:0 26px;border-radius:999px;border:1px solid var(--line-strong);background:oklch(0.20 0.03 255 / 0.55);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:var(--t1);font:600 18px Figtree,sans-serif;cursor:pointer;transition:background .2s,border-color .2s,transform .2s cubic-bezier(.2,.7,.2,1);text-decoration:none" style-hover="background:oklch(0.26 0.035 255 / 0.8);border-color:oklch(0.97 0.02 255 / 0.3)" style-active="transform:scale(.97)">Ver o app funcionando<span style="color:var(--t3)">↓</span></a>
+      </div>
+      <div data-hero="" style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px 22px;font-size:15px;color:var(--t2)"><span>Nada é salvo sem você confirmar</span><span>IA opcional</span><span>Você apaga quando quiser</span></div>
+    </div>
+
+    <div ref="{{ heroStageRef }}" style="position:relative;z-index:1;margin-top:clamp(36px,5vh,64px);padding-top:30px;box-sizing:content-box;width:min(1180px,100%);height:{{ stageH }}px;perspective:1400px;display:flex;justify-content:center;will-change:transform,opacity;-webkit-mask-image:linear-gradient(180deg,#000 55%,transparent 98%);mask-image:linear-gradient(180deg,#000 55%,transparent 98%)">
+      <sc-if value="{{ wide }}" hint-placeholder-val="{{ true }}">
+        <div data-speed="0.18" style="position:absolute;left:5%;top:96px;transform:rotateY(22deg) rotateZ(-4deg);transform-style:preserve-3d">
+          <div data-hero="">
+            <div data-tilt="" data-spot="" style="width:280px;padding:20px;box-sizing:border-box;border-radius:24px;background:radial-gradient(360px circle at var(--x,50%) var(--y,0%),oklch(0.78 0.12 240 / 0.12),transparent 62%),linear-gradient(180deg,oklch(0.25 0.035 255 / 0.66),oklch(0.18 0.03 255 / 0.66));border:1px solid oklch(0.97 0.02 255 / 0.12);box-shadow:inset 0 1px 0 oklch(1 0 0 / 0.09),0 1px 2px oklch(0 0 0 / 0.35),0 14px 34px -14px oklch(0 0 0 / 0.55),0 44px 90px -44px oklch(0 0 0 / 0.75);backdrop-filter:blur(18px) saturate(1.2);-webkit-backdrop-filter:blur(18px) saturate(1.2);transition:border-color .3s;display:flex;flex-direction:column;gap:10px;text-align:left">
+              <div style="display:flex;justify-content:space-between;font-size:14px;color:var(--t2)"><span>Faturado em 2026</span><span style="color:var(--t3)">exemplo</span></div>
+              <span style="font:800 30px Manrope,sans-serif;letter-spacing:-0.02em;font-variant-numeric:tabular-nums">R$ 34.020,00</span>
+              <svg viewBox="0 0 240 12" style="width:100%;height:auto"><line x1="2" y1="6" x2="218" y2="6" style="stroke:var(--track);stroke-width:2;stroke-linecap:round"></line><line x1="2" y1="6" x2="92" y2="6" style="stroke:var(--ok);stroke-width:3;stroke-linecap:round"></line><circle cx="92" cy="6" r="4.5" style="fill:var(--ok)"></circle><line x1="218" y1="0" x2="218" y2="12" style="stroke:var(--t2);stroke-width:1.5"></line></svg>
+              <span style="font:700 15px Manrope,sans-serif;color:var(--ok);font-variant-numeric:tabular-nums">Faltam R$ 46.980,00</span>
+            </div>
+          </div>
+        </div>
+        <div data-speed="0.24" style="position:absolute;right:5%;top:170px;transform:rotateY(-22deg) rotateZ(4deg);transform-style:preserve-3d">
+          <div data-hero="">
+            <div data-tilt="" data-spot="" style="width:260px;padding:20px;box-sizing:border-box;border-radius:24px;background:radial-gradient(360px circle at var(--x,50%) var(--y,0%),oklch(0.78 0.12 240 / 0.12),transparent 62%),linear-gradient(180deg,oklch(0.25 0.035 255 / 0.66),oklch(0.18 0.03 255 / 0.66));border:1px solid oklch(0.97 0.02 255 / 0.12);box-shadow:inset 0 1px 0 oklch(1 0 0 / 0.09),0 1px 2px oklch(0 0 0 / 0.35),0 14px 34px -14px oklch(0 0 0 / 0.55),0 44px 90px -44px oklch(0 0 0 / 0.75);backdrop-filter:blur(18px) saturate(1.2);-webkit-backdrop-filter:blur(18px) saturate(1.2);transition:border-color .3s;display:flex;flex-direction:column;gap:8px;text-align:left">
+              <div style="display:flex;justify-content:space-between;font-size:14px;color:var(--t2)"><span>Próximo DAS</span><span style="color:var(--t3)">exemplo</span></div>
+              <span style="font:800 30px Manrope,sans-serif;letter-spacing:-0.02em;font-variant-numeric:tabular-nums">R$ 81,90</span>
+              <span style="font-size:15px;color:var(--t2);font-variant-numeric:tabular-nums">Vence em 20/12/2026</span>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+      <div data-hero="" style="position:relative;z-index:2">
+        <div data-float="">
+          <div data-tilt="" style="width:{{ heroPh.w }}px;height:{{ heroPh.h }}px;position:relative;border-radius:{{ heroPh.r }}px;box-shadow:0 0 0 1px oklch(0.85 0.08 235 / 0.3),0 0 90px -12px oklch(0.65 0.14 242 / 0.55),0 40px 80px -30px oklch(0 0 0 / 0.8)">
+            <div style="position:absolute;left:0;top:0;transform:scale({{ heroPh.s }});transform-origin:0 0"><dc-import name="conta-comigo-app" start="painel" still="{{ true }}" hint-size="390px,844px"></dc-import></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SIGA O FIO -->
+  <section id="como" ref="{{ sigaRef }}" data-fio="1" data-screen-label="Siga o Fio" style="position:relative;z-index:1;height:{{ sigaH }};margin-top:-6vh">
+    <div style="position:sticky;top:0;height:100vh;display:flex;align-items:center;-webkit-mask-image:linear-gradient(180deg,transparent 0%,#000 15%,#000 85%,transparent 100%);mask-image:linear-gradient(180deg,transparent 0%,#000 15%,#000 85%,transparent 100%)">
+      <div style="width:min(1240px,calc(100% - 40px));margin:0 auto;display:grid;grid-template-columns:{{ twoCols }};gap:{{ sigaGap }};align-items:center">
+        <div style="position:relative;display:flex;flex-direction:column;gap:18px">
+          <div aria-hidden="true" style="position:absolute;inset:-25% -15%;z-index:-1;pointer-events:none;background:radial-gradient(closest-side,oklch(0.13 0.025 255 / 0.8),transparent)"></div>
+          <div style="font:600 14px Figtree,sans-serif;letter-spacing:0.08em;text-transform:uppercase;color:var(--acc-ink)">Siga o fio · o app funcionando</div>
+          <svg viewBox="0 0 300 24" style="width:min(300px,100%);height:auto;overflow:visible">
+            <line x1="12" y1="12" x2="288" y2="12" style="stroke:var(--track);stroke-width:2;stroke-linecap:round"></line>
+            <path ref="{{ sigaFillRef }}" d="M12 12 H288" pathLength="100" stroke-dasharray="100" style="fill:none;stroke:var(--ok);stroke-width:3;stroke-linecap:round;stroke-dashoffset:100"></path>
+            <circle cx="12" cy="12" r="7" style="fill:{{ dot1 }};transition:fill .3s"></circle>
+            <circle cx="104" cy="12" r="7" style="fill:{{ dot2 }};transition:fill .3s"></circle>
+            <circle cx="196" cy="12" r="7" style="fill:{{ dot3 }};transition:fill .3s"></circle>
+            <circle cx="288" cy="12" r="7" style="fill:{{ dot4 }};transition:fill .3s"></circle>
+          </svg>
+          <div style="display:grid">
+            <sc-for list="{{ steps }}" as="s" hint-placeholder-count="4">
+              <div aria-hidden="{{ s.hidden }}" style="grid-area:1 / 1;display:flex;flex-direction:column;gap:14px;opacity:{{ s.o }};transform:translateY({{ s.y }}px);transition:opacity .5s cubic-bezier(.2,.7,.2,1),transform .5s cubic-bezier(.2,.7,.2,1)">
+                <span style="font:700 16px Figtree,sans-serif;color:var(--ok)">{{ s.kicker }}</span>
+                <span style="font:800 clamp(30px,3.8vw,58px)/1.02 Manrope,sans-serif;letter-spacing:-0.04em;text-wrap:balance">{{ s.title }}</span>
+                <span style="margin:0;font-size:18px;line-height:1.55;color:var(--t2);text-wrap:pretty;max-width:460px">{{ s.body }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="position:relative;justify-self:center;width:{{ sigaPh.w }}px;height:{{ sigaPh.h }}px;perspective:1200px">
+          <div aria-hidden="true" style="position:absolute;width:170%;aspect-ratio:1;top:50%;left:50%;translate:-50% -50%;border-radius:50%;background:radial-gradient(closest-side,oklch(0.60 0.14 240 / 0.28),transparent);pointer-events:none"></div>
+          <div data-tilt="" style="position:absolute;inset:0;transform-style:preserve-3d">
+            <sc-for list="{{ steps }}" as="s" hint-placeholder-count="4">
+              <div style="position:absolute;inset:0;opacity:{{ s.o }};transform:translateY({{ s.py }}px) scale({{ s.sc }});transition:opacity .55s cubic-bezier(.2,.7,.2,1),transform .55s cubic-bezier(.2,.7,.2,1);border-radius:{{ sigaPh.r }}px;box-shadow:0 0 0 1px oklch(0.85 0.08 235 / 0.3),0 30px 80px -30px oklch(0 0 0 / 0.9)">
+                <div style="position:absolute;left:0;top:0;transform:scale({{ sigaPh.s }});transform-origin:0 0"><dc-import name="conta-comigo-app" start="{{ s.screen }}" still="{{ true }}" hint-size="390px,844px"></dc-import></div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LIMITE -->
+  <section id="recursos" ref="{{ limRef }}" data-fio="1" data-screen-label="O limite" style="position:relative;z-index:1;height:{{ limH }}">
+    <div style="position:sticky;top:0;height:100vh;display:flex;align-items:center;-webkit-mask-image:linear-gradient(180deg,transparent 0%,#000 9%,#000 91%,transparent 100%);mask-image:linear-gradient(180deg,transparent 0%,#000 9%,#000 91%,transparent 100%)">
+      <div style="position:relative;width:min(1240px,calc(100% - 40px));margin:0 auto;padding-top:clamp(64px,9vh,88px);box-sizing:border-box;display:flex;flex-direction:column;gap:clamp(12px,2.2vh,24px)">
+        <div aria-hidden="true" style="position:absolute;inset:-10% -8%;z-index:-1;pointer-events:none;background:radial-gradient(closest-side,oklch(0.13 0.025 255 / 0.82),transparent)"></div>
+        <div style="font:600 14px Figtree,sans-serif;letter-spacing:0.08em;text-transform:uppercase;color:var(--acc-ink)">O Fio do Limite</div>
+        <h2 data-skew="" style="margin:0;max-width:780px;font:800 clamp(28px,3.8vw,56px)/1.04 Manrope,sans-serif;letter-spacing:-0.04em;text-wrap:balance">O teto do MEI, desenhado em uma linha.</h2>
+        <div style="display:flex;align-items:baseline;gap:clamp(8px,1vw,16px);font:800 clamp(44px,8vw,124px)/1 Manrope,sans-serif;letter-spacing:-0.04em;font-variant-numeric:tabular-nums">
+          <span style="font-size:0.42em;color:var(--t3);letter-spacing:-0.02em">R$</span>
+          <span ref="{{ odoRef }}" style="display:inline-flex;align-items:baseline">
+            <sc-for list="{{ odo }}" as="c" hint-placeholder-count="9">
+              <sc-if value="{{ c.sep }}" hint-placeholder-val="{{ false }}"><span style="display:inline-block;width:0.3em;text-align:center;color:var(--t2)">{{ c.ch }}</span></sc-if>
+              <sc-if value="{{ c.dig }}" hint-placeholder-val="{{ true }}"><span data-d="" style="position:relative;display:inline-block;width:0.64em;height:1em"><span data-glow="" aria-hidden="true" style="position:absolute;inset:-25% -45%;border-radius:50%;background:radial-gradient(closest-side,currentColor,transparent);opacity:0;filter:blur(10px);pointer-events:none;color:var(--ok)"></span><span style="position:relative;display:block;height:1em;overflow:hidden;text-align:center"><span data-strip="" style="display:flex;flex-direction:column;transition:{{ odoTr }}"><sc-for list="{{ nums }}" as="n" hint-placeholder-count="10"><span style="height:1em;display:block">{{ n }}</span></sc-for></span></span></span></sc-if>
+            </sc-for>
+          </span>
+        </div>
+        <div>
+          <svg viewBox="0 0 1000 40" style="width:100%;height:auto;display:block;overflow:visible">
+            <line x1="0" y1="20" x2="909" y2="20" style="stroke:var(--track);stroke-width:2;stroke-linecap:round"></line>
+            <line x1="727" y1="8" x2="727" y2="32" style="stroke:var(--t3);stroke-width:1.5"></line>
+            <line x1="909" y1="2" x2="909" y2="38" style="stroke:var(--t2);stroke-width:2"></line>
+            <path ref="{{ limPathRef }}" d="M0 20 H1000" pathLength="100" stroke-dasharray="100" style="fill:none;stroke:var(--ok);stroke-width:4;stroke-linecap:round;stroke-dashoffset:100;transition:stroke .4s"></path>
+            <circle ref="{{ limDotRef }}" cx="0" cy="20" r="9" style="fill:var(--ok);transition:fill .4s"></circle>
+          </svg>
+          <div style="position:relative;height:22px;margin-top:8px;font:600 14px Manrope,sans-serif;color:var(--t3);font-variant-numeric:tabular-nums"><span style="position:absolute;left:0">R$ 0</span><span style="position:absolute;left:72.7%;transform:translateX(-50%)">80%</span><span style="position:absolute;left:90.9%;transform:translateX(-50%);color:var(--t2);white-space:nowrap">R$ 81 mil</span></div>
+        </div>
+        <div ref="{{ barsRef }}" aria-hidden="true" style="position:relative;height:{{ chartH }}px;display:grid;grid-template-columns:repeat(11,minmax(0,1fr));gap:clamp(4px,0.8vw,12px)">
+          <sc-for list="{{ bars }}" as="b" hint-placeholder-count="11">
+            <div style="display:flex;flex-direction:column;justify-content:flex-end;gap:6px;min-width:0">
+              <div style="position:relative;height:{{ b.h }}%">
+                <div data-bar="" style="position:absolute;inset:0;border-radius:8px 8px 3px 3px;transform-origin:50% 100%;transform:scaleY(0);color:var(--ok);background:linear-gradient(180deg,currentColor,color-mix(in oklch,currentColor 22%,transparent));transition:color .3s"></div>
+              </div>
+              <span style="text-align:center;font:600 14px Figtree,sans-serif;color:var(--t3)">{{ b.m }}</span>
+            </div>
+          </sc-for>
+          <div ref="{{ barLabelRef }}" style="position:absolute;left:0;bottom:28px;width:100%;height:0;opacity:0;transition:opacity .2s;pointer-events:none">
+            <span data-lt="" style="position:absolute;left:0;bottom:10px;transform:translateX(-50%);white-space:nowrap;padding:4px 10px;border-radius:10px;background:linear-gradient(180deg,oklch(0.25 0.035 255 / 0.66),oklch(0.18 0.03 255 / 0.66));border:1px solid oklch(0.97 0.02 255 / 0.12);box-shadow:inset 0 1px 0 oklch(1 0 0 / 0.09),0 1px 2px oklch(0 0 0 / 0.35),0 14px 34px -14px oklch(0 0 0 / 0.55),0 44px 90px -44px oklch(0 0 0 / 0.75);backdrop-filter:blur(18px) saturate(1.2);-webkit-backdrop-filter:blur(18px) saturate(1.2);font:700 14px Manrope,sans-serif;font-variant-numeric:tabular-nums">jan · R$ 5.200,00</span>
+          </div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px">
+          <span ref="{{ pillRef }}" style="display:inline-flex;align-items:center;min-height:36px;padding:0 14px;border-radius:999px;background:oklch(0.84 0.13 160 / 0.16);color:var(--ok);font:700 15px Figtree,sans-serif;transition:color .4s,background .4s">Com folga</span>
+          <span ref="{{ msgRef }}" style="font:700 clamp(18px,1.8vw,24px) Manrope,sans-serif;font-variant-numeric:tabular-nums">Faltam R$ 81.000,00</span>
+          <span style="font-size:15px;color:var(--t3)">Faturamento mês a mês · exemplo</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- A IA SÓ RASCUNHA -->
+  <section id="ia" data-fio="0.3" data-screen-label="A IA só rascunha" style="position:relative;z-index:1;padding:clamp(96px,12vw,160px) 0 clamp(64px,8vw,120px)">
+    <div style="width:min(1240px,calc(100% - 40px));margin:0 auto;display:grid;grid-template-columns:{{ twoCols }};gap:clamp(40px,6vw,88px);align-items:center">
+      <div style="display:flex;flex-direction:column;gap:22px">
+        <div data-reveal="" style="font:600 14px Figtree,sans-serif;letter-spacing:0.08em;text-transform:uppercase;color:var(--acc-ink)">A IA só rascunha</div>
+        <h2 data-lines="" data-skew="" style="margin:0;font:800 clamp(36px,4.8vw,68px)/1.02 Manrope,sans-serif;letter-spacing:-0.04em;text-wrap:balance">A IA sugere. O código calcula. Você decide.</h2>
+        <div style="display:flex;flex-direction:column;margin-top:6px">
+          <sc-for list="{{ roles }}" as="r" hint-placeholder-count="3">
+            <div data-reveal="" style="display:grid;grid-template-columns:110px 1fr;gap:18px;padding:18px 0;border-top:1px solid var(--line)">
+              <span style="font:800 18px Manrope,sans-serif;color:{{ r.c }}">{{ r.who }}</span>
+              <span style="margin:0;font-size:18px;line-height:1.55;color:var(--t2);text-wrap:pretty;font-size:17px">{{ r.what }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div ref="{{ iaRef }}" data-reveal="" style="display:flex;justify-content:center;perspective:1200px">
+        <div data-tilt="" data-spot="" style="width:min(440px,100%);border-radius:26px;background:radial-gradient(360px circle at var(--x,50%) var(--y,0%),oklch(0.78 0.12 240 / 0.12),transparent 62%),linear-gradient(180deg,oklch(0.25 0.035 255 / 0.66),oklch(0.18 0.03 255 / 0.66));border:1px solid oklch(0.97 0.02 255 / 0.12);box-shadow:inset 0 1px 0 oklch(1 0 0 / 0.09),0 1px 2px oklch(0 0 0 / 0.35),0 14px 34px -14px oklch(0 0 0 / 0.55),0 44px 90px -44px oklch(0 0 0 / 0.75);backdrop-filter:blur(18px) saturate(1.2);-webkit-backdrop-filter:blur(18px) saturate(1.2);transition:border-color .3s;padding:22px;display:flex;flex-direction:column;gap:14px;box-sizing:border-box">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div style="display:flex;flex-direction:column;gap:3px"><span style="font:800 20px Manrope,sans-serif">Rascunho</span><span aria-live="polite" style="font-size:14px;color:{{ scanColor }}">{{ scanStatus }}</span></div><span style="font:600 14px Figtree,sans-serif;color:var(--t3);border:1px dashed var(--line-strong);border-radius:8px;padding:2px 8px">exemplo</span></div>
+          <div style="position:relative;height:76px;border-radius:14px;overflow:hidden;background:repeating-linear-gradient(135deg,var(--s2) 0 8px,var(--s3) 8px 16px);display:flex;align-items:center;justify-content:center;font:500 14px ui-monospace,Menlo,monospace;color:var(--t2)">recibo.jpg
+            <sc-if value="{{ scanning }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:0;right:0;top:0;height:40%;background:linear-gradient(180deg,transparent,oklch(0.78 0.12 240 / 0.5),transparent);animation:cc-scany 1s ease-in-out infinite alternate"></div></sc-if>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <sc-for list="{{ fields }}" as="f" hint-placeholder-count="4">
+              <div style="display:flex;flex-direction:column;gap:6px;grid-column:{{ f.span }}">
+                <span style="font:600 14px Figtree,sans-serif;color:{{ f.lc }}">{{ f.label }}</span>
+                <span style="display:flex;align-items:center;height:{{ f.hgt }}px;padding:0 14px;border-radius:14px;background:{{ f.bg }};border:1px solid {{ f.bd }};transition:background .3s,border-color .3s">
+                  <sc-if value="{{ f.filled }}" hint-placeholder-val="{{ true }}"><span style="font:{{ f.font }};font-variant-numeric:tabular-nums">{{ f.val }}</span></sc-if>
+                  <sc-if value="{{ f.empty }}" hint-placeholder-val="{{ false }}"><span style="height:12px;width:{{ f.sk }};border-radius:6px;background:var(--s3);animation:cc-pulse 1.2s ease-in-out infinite"></span></sc-if>
+                </span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;background:var(--s2);font-size:14px;line-height:1.4;color:var(--t2)"><span style="width:7px;height:7px;border-radius:50%;background:var(--t3);flex:none"></span>Nada foi salvo. Só entra no fio quando você confirmar.</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+            <button onClick="{{ replayScan }}" style="min-height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--line-strong);background:transparent;color:var(--t1);font:600 15px Figtree,sans-serif;cursor:pointer;transition:background .2s,transform .2s" style-hover="background:var(--s2)" style-active="transform:scale(.97)">Ler de novo</button>
+            <span style="font-size:14px;color:var(--t3)">Ilustração do app</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHAT -->
+  <section data-fio="0.3" data-screen-label="Chat com fonte" style="position:relative;z-index:1;padding:clamp(64px,8vw,120px) 0">
+    <div style="width:min(1240px,calc(100% - 40px));margin:0 auto;display:grid;grid-template-columns:{{ twoCols }};gap:clamp(40px,6vw,88px);align-items:center">
+      <div data-reveal="" style="display:flex;flex-direction:column;gap:14px;order:{{ chatOrder }}">
+        <div style="align-self:flex-end;max-width:80%;padding:14px 18px;border-radius:22px 22px 6px 22px;background:oklch(0.78 0.12 240 / 0.16);border:1px solid oklch(0.78 0.12 240 / 0.35);font-size:17px">E se eu passar do limite?</div>
+        <div data-spot="" style="align-self:flex-start;max-width:92%;padding:18px;border-radius:22px 22px 22px 6px;background:radial-gradient(360px circle at var(--x,50%) var(--y,0%),oklch(0.78 0.12 240 / 0.12),transparent 62%),linear-gradient(180deg,oklch(0.25 0.035 255 / 0.66),oklch(0.18 0.03 255 / 0.66));border:1px solid oklch(0.97 0.02 255 / 0.12);box-shadow:inset 0 1px 0 oklch(1 0 0 / 0.09),0 1px 2px oklch(0 0 0 / 0.35),0 14px 34px -14px oklch(0 0 0 / 0.55),0 44px 90px -44px oklch(0 0 0 / 0.75);backdrop-filter:blur(18px) saturate(1.2);-webkit-backdrop-filter:blur(18px) saturate(1.2);transition:border-color .3s;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;gap:12px;align-items:flex-start"><svg width="34" height="10" viewBox="0 0 34 10" style="flex:none;margin-top:8px"><line x1="1" y1="5" x2="33" y2="5" style="stroke:var(--track);stroke-width:2;stroke-linecap:round"></line><line x1="1" y1="5" x2="30" y2="5" style="stroke:var(--err);stroke-width:2.5;stroke-linecap:round"></line><circle cx="30" cy="5" r="3" style="fill:var(--err)"></circle></svg><span style="font-size:17px;line-height:1.55;text-wrap:pretty">Se passar até 20% (até R$ 97.200,00), você segue MEI até dezembro, paga imposto sobre o excesso e vira microempresa em janeiro.</span></div>
+          <button onClick="{{ toggleChip }}" style="align-self:flex-start;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border-radius:12px;border:1px solid {{ chipBorder }};background:var(--s2);color:var(--t1);font:600 15px Figtree,sans-serif;cursor:pointer;transition:background .2s,transform .2s" style-hover="background:var(--s3)" style-active="transform:scale(.97)"><span style="width:6px;height:6px;border-radius:50%;background:var(--acc)"></span>LC 123/2006, art. 18-A, § 7º<span style="color:var(--t3)">{{ chipArrow }}</span></button>
+          <sc-if value="{{ chipOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:14px;border-radius:14px;background:var(--s2);border:1px solid var(--line);font-size:15px;line-height:1.5;color:var(--t2)">Trata do desenquadramento do MEI. O texto oficial é o que vale. <a href="https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp123.htm" target="_blank" rel="noopener">Abrir no Planalto ↗</a></div>
+          </sc-if>
+          <div style="font-size:14px;color:var(--t3);border-top:1px solid var(--line);padding-top:10px">Informativo. Não substitui um contador.</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:22px">
+        <div data-reveal="" style="font:600 14px Figtree,sans-serif;letter-spacing:0.08em;text-transform:uppercase;color:var(--acc-ink)">Chat com fonte</div>
+        <h2 data-lines="" data-skew="" style="margin:0;font:800 clamp(36px,4.8vw,68px)/1.02 Manrope,sans-serif;letter-spacing:-0.04em;text-wrap:balance">Pergunte. A resposta vem com a lei.</h2>
+        <p data-reveal="" style="margin:0;font-size:18px;line-height:1.55;color:var(--t2);text-wrap:pretty;max-width:480px">Respostas curtas, sem juridiquês. Cada uma mostra de onde saiu, num chip que você toca para conferir.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SEGURANÇA -->
+  <section id="seguranca" data-fio="0.3" data-screen-label="Segurança" style="position:relative;z-index:1;scroll-margin-top:80px;padding:clamp(64px,8vw,120px) 0">
+    <div style="width:min(1240px,calc(100% - 40px));margin:0 auto;display:flex;flex-direction:column;gap:40px">
+      <div style="display:flex;flex-direction:column;gap:18px;max-width:780px">
+        <div data-reveal="" style="font:600 14px Figtree,sans-serif;letter-spacing:0.08em;text-transform:uppercase;color:var(--acc-ink)">Segurança e privacidade</div>
+        <h2 data-lines="" data-skew="" style="margin:0;font:800 clamp(36px,4.8vw,68px)/1.02 Manrope,sans-serif;letter-spacing:-0.04em;text-wrap:balance">Seu dinheiro, suas regras.</h2>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px">
+        <sc-for list="{{ privacy }}" as="p" hint-placeholder-count="3">
+          <div data-reveal="" data-tilt="" data-spot="" style="min-height:240px;padding:28px;border-radius:24px;background:radial-gradient(360px circle at var(--x,50%) var(--y,0%),oklch(0.78 0.12 240 / 0.12),transparent 62%),linear-gradient(180deg,oklch(0.25 0.035 255 / 0.66),oklch(0.18 0.03 255 / 0.66));border:1px solid oklch(0.97 0.02 255 / 0.12);box-shadow:inset 0 1px 0 oklch(1 0 0 / 0.09),0 1px 2px oklch(0 0 0 / 0.35),0 14px 34px -14px oklch(0 0 0 / 0.55),0 44px 90px -44px oklch(0 0 0 / 0.75);backdrop-filter:blur(18px) saturate(1.2);-webkit-backdrop-filter:blur(18px) saturate(1.2);transition:border-color .3s;display:flex;flex-direction:column;justify-content:space-between;gap:28px;box-sizing:border-box">
+            <svg width="64" height="14" viewBox="0 0 64 14"><line x1="2" y1="7" x2="62" y2="7" style="stroke:var(--track);stroke-width:2;stroke-linecap:round"></line><line x1="2" y1="7" x2="{{ p.x }}" y2="7" style="stroke:var(--ok);stroke-width:3;stroke-linecap:round"></line><circle cx="{{ p.x }}" cy="7" r="4.5" style="fill:var(--ok)"></circle></svg>
+            <div style="display:flex;flex-direction:column;gap:10px"><span style="font:800 24px/1.15 Manrope,sans-serif;letter-spacing:-0.02em">{{ p.title }}</span><span style="margin:0;font-size:18px;line-height:1.55;color:var(--t2);text-wrap:pretty;font-size:16px">{{ p.body }}</span></div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="perguntas" data-fio="0.25" data-screen-label="Perguntas" style="position:relative;z-index:1;scroll-margin-top:80px;padding:clamp(64px,8vw,120px) 0">
+    <div style="width:min(900px,calc(100% - 40px));margin:0 auto;display:flex;flex-direction:column;gap:32px">
+      <h2 data-lines="" data-skew="" style="margin:0;font:800 clamp(36px,4.8vw,68px)/1.02 Manrope,sans-serif;letter-spacing:-0.04em;text-wrap:balance">Perguntas frequentes</h2>
+      <div data-reveal="" style="border-radius:24px;background:linear-gradient(180deg,oklch(0.25 0.035 255 / 0.66),oklch(0.18 0.03 255 / 0.66));border:1px solid oklch(0.97 0.02 255 / 0.12);box-shadow:inset 0 1px 0 oklch(1 0 0 / 0.09),0 1px 2px oklch(0 0 0 / 0.35),0 14px 34px -14px oklch(0 0 0 / 0.55),0 44px 90px -44px oklch(0 0 0 / 0.75);backdrop-filter:blur(18px) saturate(1.2);-webkit-backdrop-filter:blur(18px) saturate(1.2);padding:4px 24px">
+        <sc-for list="{{ faq }}" as="q" hint-placeholder-count="6">
+          <div style="border-top:{{ q.sep }}">
+            <button onClick="{{ q.toggle }}" aria-expanded="{{ q.open }}" style="width:100%;display:flex;justify-content:space-between;align-items:center;gap:20px;min-height:72px;padding:16px 0;border:0;background:transparent;color:var(--t1);text-align:left;font:700 clamp(17px,1.5vw,20px)/1.35 Figtree,sans-serif;cursor:pointer;transition:color .2s" style-hover="color:var(--acc-ink)">{{ q.q }}<span style="flex:none;width:36px;height:36px;border-radius:999px;border:1px solid var(--line-strong);display:flex;align-items:center;justify-content:center;font:500 20px Figtree,sans-serif;color:var(--acc-ink);transform:rotate({{ q.rot }}deg);transition:transform .3s cubic-bezier(.2,.7,.2,1)">+</span></button>
+            <sc-if value="{{ q.open }}" hint-placeholder-val="{{ false }}"><div style="margin:0;font-size:18px;line-height:1.55;color:var(--t2);text-wrap:pretty;font-size:17px;padding:0 56px 22px 0">{{ q.a }}</div></sc-if>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section data-fio="1" data-screen-label="CTA final" style="position:relative;z-index:1;padding:clamp(24px,4vw,48px) 0 clamp(96px,12vw,160px)">
+    <svg viewBox="0 0 20 300" preserveAspectRatio="none" aria-hidden="true" style="display:block;margin:0 auto;width:20px;height:clamp(160px,26vh,280px);overflow:visible">
+      <line x1="10" y1="0" x2="10" y2="300" style="stroke:var(--track);stroke-width:2;vector-effect:non-scaling-stroke"></line>
+      <path ref="{{ ctaFioRef }}" d="M10 0 V300" pathLength="100" stroke-dasharray="100" style="fill:none;stroke:oklch(0.88 0.08 232);stroke-width:3;stroke-linecap:round;stroke-dashoffset:100;vector-effect:non-scaling-stroke;filter:drop-shadow(0 0 6px oklch(0.78 0.12 240))"></path>
+    </svg>
+    <div data-reveal="" style="position:relative;overflow:hidden;width:min(1240px,calc(100% - 40px));margin:0 auto;padding:clamp(72px,11vw,152px) clamp(24px,5vw,72px);box-sizing:border-box;border-radius:40px;background:linear-gradient(180deg,oklch(0.25 0.035 255 / 0.66),oklch(0.18 0.03 255 / 0.66));border:1px solid oklch(0.97 0.02 255 / 0.12);box-shadow:inset 0 1px 0 oklch(1 0 0 / 0.09),0 1px 2px oklch(0 0 0 / 0.35),0 14px 34px -14px oklch(0 0 0 / 0.55),0 44px 90px -44px oklch(0 0 0 / 0.75);backdrop-filter:blur(18px) saturate(1.2);-webkit-backdrop-filter:blur(18px) saturate(1.2);display:flex;flex-direction:column;align-items:center;text-align:center;gap:28px">
+      <div aria-hidden="true" style="position:absolute;top:0;left:50%;width:1.5px;height:50%;translate:-50% 0;pointer-events:none;background:linear-gradient(180deg,oklch(0.98 0.02 230),transparent);box-shadow:0 0 20px 3px oklch(0.78 0.12 240 / 0.45),0 0 100px 30px oklch(0.62 0.14 245 / 0.22)"></div>
+      <div aria-hidden="true" style="position:absolute;inset:auto -10% -40% -10%;height:80%;pointer-events:none;background:radial-gradient(50% 60% at 50% 100%,oklch(0.55 0.14 245 / 0.45),transparent 70%)"></div>
+      <h2 data-lines="" style="position:relative;margin:0;max-width:820px;font:800 clamp(42px,6.6vw,104px)/0.95 Manrope,sans-serif;letter-spacing:-0.05em;text-wrap:balance">Conta comigo para a papelada.</h2>
+      <p style="position:relative;margin:0;font-size:18px;line-height:1.55;color:var(--t2);text-wrap:pretty;max-width:520px">Crie sua conta em um minuto, ou teste agora com dados de exemplo.</p>
+      <div style="position:relative;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:12px">
+        <span style="display:inline-flex;padding:1.5px;border-radius:999px;background:conic-gradient(from var(--ang),oklch(1 0 0 / 0) 0deg,oklch(1 0 0 / 0) 280deg,oklch(0.85 0.10 235) 330deg,oklch(1 0 0 / 0) 360deg);animation:cc-ang 3.2s linear infinite"><button data-magnet="" onClick="{{ openSignup }}" style="min-height:58px;padding:0 32px;border-radius:999px;border:0;background:oklch(0.97 0.01 240);color:oklch(0.18 0.04 255);font:700 18px Figtree,sans-serif;cursor:pointer;box-shadow:inset 0 -2px 0 oklch(0.82 0.03 240),0 14px 44px -10px oklch(0.75 0.13 240 / 0.8);transition:transform .2s cubic-bezier(.2,.7,.2,1),background .2s" style-hover="background:oklch(1 0 0)" style-active="transform:scale(.97)">Comece agora</button></span>
+        <button onClick="{{ openDemo }}" style="display:inline-flex;align-items:center;gap:10px;min-height:58px;padding:0 26px;border-radius:999px;border:1px solid var(--line-strong);background:oklch(0.20 0.03 255 / 0.55);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:var(--t1);font:600 18px Figtree,sans-serif;cursor:pointer;transition:background .2s,border-color .2s,transform .2s cubic-bezier(.2,.7,.2,1)" style-hover="background:oklch(0.26 0.035 255 / 0.8);border-color:oklch(0.97 0.02 255 / 0.3)" style-active="transform:scale(.97)">Testar com a conta demo</button>
+      </div>
+    </div>
+  </section>
+
+  <footer style="position:relative;z-index:1;padding:8px 0 48px">
+    <div style="width:min(1240px,calc(100% - 40px));margin:0 auto;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:20px">
+      <div style="display:flex;flex-direction:column;gap:6px"><span style="font:800 17px Manrope,sans-serif">Conta Comigo</span><span style="font-size:15px;color:var(--t2);max-width:460px">Projeto de hackathon. Não é um escritório de contabilidade e não substitui um contador.</span></div>
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px">
+        <a href="#termos" style="display:flex;align-items:center;min-height:44px;padding:0 12px;border-radius:999px;color:var(--t2);font:600 15px Figtree,sans-serif;text-decoration:none" style-hover="color:var(--t1);background:oklch(1 0 0 / 0.05)">Termos de uso</a>
+        <a href="#privacidade" style="display:flex;align-items:center;min-height:44px;padding:0 12px;border-radius:999px;color:var(--t2);font:600 15px Figtree,sans-serif;text-decoration:none" style-hover="color:var(--t1);background:oklch(1 0 0 / 0.05)">Privacidade</a>
+        <button onClick="{{ toggleLeve }}" role="switch" aria-checked="{{ leve }}" style="display:flex;align-items:center;gap:10px;min-height:44px;padding:0 16px 0 10px;border-radius:999px;background:linear-gradient(180deg,oklch(0.25 0.035 255 / 0.66),oklch(0.18 0.03 255 / 0.66));border:1px solid oklch(0.97 0.02 255 / 0.12);box-shadow:inset 0 1px 0 oklch(1 0 0 / 0.09),0 1px 2px oklch(0 0 0 / 0.35),0 14px 34px -14px oklch(0 0 0 / 0.55),0 44px 90px -44px oklch(0 0 0 / 0.75);backdrop-filter:blur(18px) saturate(1.2);-webkit-backdrop-filter:blur(18px) saturate(1.2);color:var(--t1);font:600 15px Figtree,sans-serif;cursor:pointer;transition:transform .2s" style-active="transform:scale(.97)"><span style="width:40px;height:24px;border-radius:12px;background:{{ leveTrack }};position:relative;display:block;transition:background .2s"><span style="position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--t1);transform:translateX({{ leveKnob }}px);transition:transform .2s"></span></span>Modo leve</button>
+      </div>
+    </div>
+  </footer>
+
+  <!-- AUTH -->
+  <sc-if value="{{ hasAuth }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;z-index:80;background:oklch(0.10 0.02 255 / 0.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;overflow:auto">
+      <div style="position:relative;width:min(440px,100%);padding:28px;box-sizing:border-box;border-radius:28px;border:1px solid var(--line-strong);background:radial-gradient(120% 60% at 50% -10%,oklch(0.55 0.13 245 / 0.25),transparent 60%),var(--s1);box-shadow:0 40px 90px -30px oklch(0 0 0 / 0.9);display:flex;flex-direction:column;gap:16px">
+        <button onClick="{{ closeAuth }}" aria-label="Fechar" style="position:absolute;top:12px;right:12px;width:44px;height:44px;border-radius:12px;border:0;background:transparent;color:var(--t2);font-size:22px;cursor:pointer">×</button>
+        <span style="font:800 28px/1.1 Manrope,sans-serif;letter-spacing:-0.02em;padding-right:40px">{{ auth.title }}</span>
+        <span style="font-size:16px;line-height:1.5;color:var(--t2)">{{ auth.sub }}</span>
+        <sc-if value="{{ auth.sent }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;gap:12px;padding:16px;border-radius:16px;background:oklch(0.84 0.13 160 / 0.10);border:1px solid oklch(0.84 0.13 160 / 0.4);font-size:15px;line-height:1.5"><span style="flex:none;width:24px;height:24px;border-radius:50%;background:var(--ok);color:var(--on-ok);display:flex;align-items:center;justify-content:center;font:800 14px Figtree,sans-serif">✓</span>Se existir uma conta com esse e-mail, o link chega em alguns minutos. Confira também o spam.</div>
+          <button onClick="{{ toLogin }}" style="height:56px;border-radius:16px;border:0;background:var(--acc);color:var(--on-acc);font:700 17px Figtree,sans-serif;cursor:pointer">Voltar para entrar</button>
+        </sc-if>
+        <sc-if value="{{ auth.form }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <label style="display:flex;flex-direction:column;gap:6px"><span style="font:600 14px Figtree,sans-serif;color:var(--t2)">E-mail</span><input type="email" value="{{ email }}" onChange="{{ onEmail }}" placeholder="voce@email.com" autoComplete="email" style="height:52px;padding:0 16px;border-radius:14px;border:1px solid {{ emailBorder }};background:var(--s2);color:var(--t1);font:500 16px Figtree,sans-serif;outline:0" style-focus="border-color:var(--ring);box-shadow:0 0 0 4px oklch(0.80 0.11 240 / 0.18)"></input>
+              <sc-if value="{{ emailErr }}" hint-placeholder-val="{{ false }}"><span style="font:600 14px Figtree,sans-serif;color:var(--err)">Confira o e-mail: falta o @ ou o domínio.</span></sc-if>
+            </label>
+            <sc-if value="{{ auth.pass }}" hint-placeholder-val="{{ true }}">
+              <label style="display:flex;flex-direction:column;gap:6px"><span style="font:600 14px Figtree,sans-serif;color:var(--t2)">Senha</span>
+                <span style="display:flex;align-items:center;height:52px;padding:0 6px 0 16px;border-radius:14px;border:1px solid {{ passBorder }};background:var(--s2)"><input type="{{ passType }}" value="{{ pass }}" onChange="{{ onPass }}" placeholder="{{ auth.passPh }}" autoComplete="{{ auth.ac }}" style="flex:1;min-width:0;border:0;outline:0;background:transparent;color:var(--t1);font:500 16px Figtree,sans-serif"></input><button onClick="{{ togglePass }}" style="min-height:44px;padding:0 12px;border-radius:10px;border:0;background:transparent;color:var(--acc-ink);font:600 14px Figtree,sans-serif;cursor:pointer">{{ passBtn }}</button></span>
+                <sc-if value="{{ auth.signup }}" hint-placeholder-val="{{ false }}"><span style="font-size:14px;color:{{ passHintColor }}">{{ passHint }}</span></sc-if>
+              </label>
+            </sc-if>
+            <sc-if value="{{ auth.login }}" hint-placeholder-val="{{ false }}"><button onClick="{{ toForgot }}" style="align-self:flex-start;min-height:44px;margin:-8px 0;padding:0;border:0;background:transparent;color:var(--acc-ink);font:600 15px Figtree,sans-serif;cursor:pointer">Esqueci a senha</button></sc-if>
+            <sc-if value="{{ auth.signup }}" hint-placeholder-val="{{ false }}">
+              <button onClick="{{ toggleTerms }}" role="checkbox" aria-checked="{{ terms }}" style="display:flex;align-items:flex-start;gap:12px;min-height:44px;padding:4px 0;border:0;background:transparent;color:{{ termsColor }};font:500 15px/1.45 Figtree,sans-serif;text-align:left;cursor:pointer"><span style="flex:none;width:24px;height:24px;border-radius:7px;border:1.5px solid {{ termsBorder }};background:{{ termsBg }};color:var(--on-acc);display:flex;align-items:center;justify-content:center;font:800 14px Figtree,sans-serif;box-sizing:border-box">{{ termsCheck }}</span><span>Li e aceito os Termos de uso e a Política de Privacidade.</span></button>
+            </sc-if>
+            <button onClick="{{ submit }}" style="height:56px;border-radius:16px;border:0;background:{{ submitBg }};color:{{ submitFg }};font:700 17px Figtree,sans-serif;cursor:pointer">{{ auth.cta }}</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;font-size:14px;color:var(--t3)"><span style="flex:1;height:1px;background:var(--line)"></span>ou<span style="flex:1;height:1px;background:var(--line)"></span></div>
+          <button onClick="{{ openDemo }}" style="height:56px;border-radius:16px;border:1px solid oklch(0.78 0.12 240 / 0.55);background:oklch(0.78 0.12 240 / 0.10);color:var(--t1);font:700 16px Figtree,sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px" style-hover="background:oklch(0.78 0.12 240 / 0.18)"><span style="width:8px;height:8px;border-radius:50%;background:var(--warn)"></span>Testar com a conta demo</button>
+          <button onClick="{{ auth.switchGo }}" style="min-height:44px;border:0;background:transparent;color:var(--t2);font:500 15px Figtree,sans-serif;cursor:pointer">{{ auth.switchTxt }} <span style="color:var(--acc-ink);font-weight:700">{{ auth.switchLink }}</span></button>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- APP -->
+  <sc-if value="{{ hasApp }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;z-index:90;background:radial-gradient(50% 60% at 50% 50%,oklch(0.40 0.12 245 / 0.45),transparent 70%),oklch(0.10 0.02 255 / 0.94);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:12px;box-sizing:border-box">
+      <div style="display:flex;align-items:center;gap:12px">
+        <button onClick="{{ closeApp }}" style="min-height:44px;padding:0 16px;border-radius:12px;border:1px solid var(--line-strong);background:var(--s2);color:var(--t1);font:600 15px Figtree,sans-serif;cursor:pointer">← Voltar ao site</button>
+        <span style="font-size:15px;color:var(--t2)">{{ appLabel }}</span>
+      </div>
+      <div style="width:{{ appPh.w }}px;height:{{ appPh.h }}px;position:relative">
+        <div style="position:absolute;left:0;top:0;transform:scale({{ appPh.s }});transform-origin:0 0"><dc-import name="conta-comigo-app" start="{{ appStart }}" hint-size="390px,844px"></dc-import></div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;leve&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+const NOISE = `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .5 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='.07'/></svg>")`;
+const LIMIT = 81000;
+const brl = n => 'R$ ' + n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const cl = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const mix = (a, b, t) => a.map((v, i) => Math.round(v + (b[i] - v) * cl(t)));
+const C = { ice: [172, 214, 250], ok: [112, 226, 172], warn: [242, 192, 92], err: [240, 108, 92] };
+const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov'];
+const MV = [5200, 6100, 6800, 7400, 7000, 7900, 8300, 8600, 8900, 9100, 8940];
+const MAXV = 9100;
+const STEPS = [
+  { kicker: '1 · Você tira a foto', title: 'Um toque em Foto. Pronto.', body: 'Recibo amassado, nota do Pix, print. Do jeito que estiver à mão.', screen: 'adicionar' },
+  { kicker: '2 · A IA lê', title: 'Valor, data e tipo, em segundos.', body: 'A tela diz o que está acontecendo. Nada é salvo ainda.', screen: 'lendo' },
+  { kicker: '3 · Você confere', title: 'O rascunho pronto. Você confirma.', body: 'O que ficou duvidoso aparece em âmbar, para você olhar.', screen: 'conferir' },
+  { kicker: '4 · O fio anda', title: 'Confirmou, o Fio do Limite avança.', body: 'O número sobe na hora e mostra quanto ainda falta para o teto.', screen: 'confirmado' }
+];
+const FAQ = [
+  ['O que acontece se eu passar do limite?', 'O app avisa em âmbar a partir de 80% e em vermelho se passar. Até 20% acima do teto, você segue MEI até dezembro, paga imposto sobre o excesso e vira microempresa no ano seguinte. O chat mostra a regra com a fonte.'],
+  ['Preciso aceitar a IA?', 'Não. A IA é opcional. Se recusar, você preenche os lançamentos na mão e o app calcula tudo do mesmo jeito.'],
+  ['A IA calcula meu imposto?', 'Não. A IA só lê o que você manda e monta um rascunho. Limite e DAS são calculados pelo código do app, com regras fixas.'],
+  ['Algo é salvo sem eu ver?', 'Nada. Cada lançamento só entra depois que você confirma. E dá para desfazer logo depois.'],
+  ['Posso apagar meus dados?', 'Sim, quando quiser, pelo Perfil. Apagou, sumiu.'],
+  ['Substitui meu contador?', 'Não. O Conta Comigo organiza a papelada do dia a dia e explica as regras do MEI. Para decisões maiores, fale com um contador.']
+];
+const FIELDS = [
+  { label: 'Valor', val: 'R$ 350,00', span: '1 / -1', hgt: 60, font: '800 24px Manrope,sans-serif', sk: '40%' },
+  { label: 'Data · confira', val: '2?/11/2026', warn: true, span: 'auto', hgt: 52, font: '600 16px Manrope,sans-serif', sk: '70%' },
+  { label: 'Tipo', val: 'Entrada', span: 'auto', hgt: 52, font: '600 16px Figtree,sans-serif', sk: '55%' },
+  { label: 'Categoria', val: 'Serviço prestado', span: '1 / -1', hgt: 52, font: '500 16px Figtree,sans-serif', sk: '50%' }
+];
+
+class Component extends DCLogic {
+  state = { w: innerWidth, h: innerHeight, step: 0, faq: 0, menu: false, chipOpen: false, auth: null, sent: false, email: '', pass: '', showPass: false, terms: false, tried: false, app: null, leve: !!this.props.leve, glOn: false, intro: true, introOut: false, introDraw: false, fill: 4, scanning: false };
+  progRef = React.createRef(); glRef = React.createRef(); svgFioRef = React.createRef(); sigaRef = React.createRef(); sigaFillRef = React.createRef();
+  limRef = React.createRef(); limPathRef = React.createRef(); limDotRef = React.createRef(); odoRef = React.createRef(); pillRef = React.createRef(); msgRef = React.createRef();
+  barsRef = React.createRef(); barLabelRef = React.createRef(); iaRef = React.createRef(); ctaFioRef = React.createRef(); navRef = React.createRef(); heroStageRef = React.createRef();
+
+  componentDidMount() {
+    this.reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.onResize = () => this.setState({ w: innerWidth, h: innerHeight }, () => this.tick());
+    this.onScroll = () => { if (!this.ticking) { this.ticking = true; requestAnimationFrame(() => { this.ticking = false; this.tick(); }); } };
+    this.onMove = e => this.pointer(e);
+    addEventListener('resize', this.onResize); addEventListener('scroll', this.onScroll, { passive: true });
+    document.addEventListener('pointermove', this.onMove, { passive: true });
+    let seen = false;
+    try { seen = sessionStorage.getItem('cc_intro') === '1'; sessionStorage.setItem('cc_intro', '1'); } catch (e) {}
+    if (this.reduced || this.state.leve || seen) this.setState({ intro: false, introDraw: true });
+    else {
+      requestAnimationFrame(() => requestAnimationFrame(() => this.setState({ introDraw: true })));
+      this.iT1 = setTimeout(() => this.setState({ introOut: true }), 1350);
+      this.iT2 = setTimeout(() => this.setState({ intro: false }), 1950);
+    }
+    if ('IntersectionObserver' in window && this.iaRef.current) {
+      this.io = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { this.io.disconnect(); this.startScan(); } }, { threshold: 0.4 });
+      this.io.observe(this.iaRef.current);
+    }
+    this.initFx(); this.tick();
+  }
+  componentWillUnmount() {
+    removeEventListener('resize', this.onResize); removeEventListener('scroll', this.onScroll); document.removeEventListener('pointermove', this.onMove);
+    clearTimeout(this.iT1); clearTimeout(this.iT2); clearTimeout(this.gT); clearInterval(this.scanI);
+    if (this.io) this.io.disconnect();
+    this.teardown();
+  }
+
+  heavy() { return !this.state.leve && !this.reduced; }
+  initFx() {
+    let tries = 0;
+    const wait = () => {
+      if (window.gsap && window.ScrollTrigger) (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => this.initGsap());
+      else if (tries++ < 60) this.gT = setTimeout(wait, 100);
+    };
+    wait();
+    if (this.heavy() && innerWidth >= 900 && innerHeight >= 600 && matchMedia('(pointer: fine)').matches) this.initGL();
+  }
+  initGL() {
+    const url = new URL('./fio3d.js', location.href).href;
+    import(url).then(m => m.mountFio(this.glRef.current)).then(api => {
+      if (!this.heavy() || !this.glRef.current) { api.destroy(); return; }
+      this.gl = api; this.setState({ glOn: true }, () => this.tick());
+    }).catch(err => console.warn('Fio 3D indisponível, usando SVG.', err));
+  }
+  initGsap() {
+    if (!this.heavy() || this.mm) return;
+    const gsap = window.gsap, ST = window.ScrollTrigger;
+    gsap.registerPlugin(ST); if (window.SplitText) gsap.registerPlugin(window.SplitText);
+    const root = this.progRef.current && this.progRef.current.parentElement;
+    if (!root) return;
+    this.tweens = [];
+    this.mm = gsap.matchMedia();
+    this.mm.add({ desk: '(min-width: 900px) and (pointer: fine)', all: '(min-width: 0px)' }, ctx => {
+      const desk = ctx.conditions.desk, splits = [];
+      const heroEls = root.querySelectorAll('[data-hero]'), hl = root.querySelector('[data-hero-lines]');
+      const tl = gsap.timeline({ delay: this.state.intro ? 1.35 : 0.15, defaults: { ease: 'power3.out', duration: 0.8 } });
+      if (hl && window.SplitText) { const sp = window.SplitText.create(hl, { type: 'lines', mask: 'lines' }); splits.push(sp); if (sp.masks) gsap.set(sp.masks, { paddingBottom: '0.14em', marginBottom: '-0.14em', paddingTop: '0.04em', marginTop: '-0.04em' }); tl.from(sp.lines, { yPercent: 110, duration: 1.1, ease: 'power4.out', stagger: 0.08 }, 0.1); }
+      if (heroEls.length) tl.from(heroEls, { y: 24, opacity: 0, stagger: 0.08 }, 0);
+      this.heroTl = tl;
+      if (desk) { const tg = root.querySelectorAll('[data-skew]'); if (tg.length) { const q = gsap.quickTo(tg, 'skewY', { duration: 0.5, ease: 'power3.out' }); ST.create({ onUpdate: self => q(cl(self.getVelocity() / -500, -2, 2)) }); this.skewEnd = () => q(0); ST.addEventListener('scrollEnd', this.skewEnd); } }
+      root.querySelectorAll('[data-reveal]').forEach(el => this.tweens.push(gsap.from(el, { y: desk ? 40 : 18, opacity: 0, duration: 0.8, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 92%', once: true } })));
+      root.querySelectorAll('[data-lines]').forEach(el => {
+        if (window.SplitText) {
+          const sp = window.SplitText.create(el, { type: 'lines', mask: 'lines' }); splits.push(sp);
+          if (sp.masks) gsap.set(sp.masks, { paddingBottom: '0.14em', marginBottom: '-0.14em', paddingTop: '0.04em', marginTop: '-0.04em' });
+          this.tweens.push(gsap.from(sp.lines, { yPercent: 110, duration: 1, ease: 'power4.out', stagger: 0.09, scrollTrigger: { trigger: el, start: 'top 90%', once: true } }));
+        } else this.tweens.push(gsap.from(el, { clipPath: 'inset(0 0 100% 0)', y: 24, duration: 0.9, ease: 'power4.out', scrollTrigger: { trigger: el, start: 'top 90%', once: true } }));
+      });
+      if (desk) {
+        root.querySelectorAll('[data-speed]').forEach(el => gsap.to(el, { yPercent: parseFloat(el.dataset.speed) * -40, ease: 'none', scrollTrigger: { trigger: el.closest('section') || el, start: 'top top', end: 'bottom top', scrub: true } }));
+        root.querySelectorAll('[data-float]').forEach(el => gsap.to(el, { y: -12, duration: 3.4, ease: 'sine.inOut', yoyo: true, repeat: -1 }));
+        if (window.Lenis && !this.lenis) {
+          this.lenis = new window.Lenis({ lerp: 0.1, anchors: true });
+          this.lenis.on('scroll', ST.update);
+          this.lenisRaf = t => this.lenis && this.lenis.raf(t * 1000);
+          gsap.ticker.add(this.lenisRaf); gsap.ticker.lagSmoothing(0);
+          document.documentElement.style.scrollBehavior = 'auto';
+        }
+      }
+      return () => { splits.forEach(s => s.revert()); if (this.skewEnd) { ST.removeEventListener('scrollEnd', this.skewEnd); this.skewEnd = null; } };
+    });
+    this.fsT = setTimeout(() => (this.tweens || []).forEach(t => {
+      const el = t.scrollTrigger && t.scrollTrigger.trigger; if (!el) return;
+      const r = el.getBoundingClientRect();
+      if (r.top < innerHeight && r.bottom > 0 && t.progress() === 0) t.progress(1);
+    }), 1500);
+    this.fsT2 = setTimeout(() => { if (this.heroTl && this.heroTl.progress() < 1 && !this.heroTl.isActive()) this.heroTl.progress(1); }, 3800);
+    requestAnimationFrame(() => ST.refresh());
+  }
+  teardown() {
+    clearTimeout(this.fsT); clearTimeout(this.fsT2);
+    if (this.mm) { this.mm.revert(); this.mm = null; }
+    if (this.lenis) { if (window.gsap) window.gsap.ticker.remove(this.lenisRaf); this.lenis.destroy(); this.lenis = null; document.documentElement.style.scrollBehavior = ''; }
+    if (this.gl) { this.gl.destroy(); this.gl = null; }
+  }
+  toggleLeve() {
+    const leve = !this.state.leve;
+    this.teardown();
+    this.setState({ leve, glOn: false }, () => { if (!leve) this.initFx(); else this.setState({ fill: 4, scanning: false }); this.tick(); });
+  }
+
+  pointer(e) {
+    if (this.gl) this.gl.pointer(e.clientX / innerWidth - 0.5, e.clientY / innerHeight - 0.5);
+    const t = e.target && e.target.closest ? e.target.closest('[data-spot],[data-tilt],[data-magnet]') : null;
+    if (this.lastT && this.lastT !== t) { this.lastT.style.transform = ''; this.lastT = null; }
+    if (!t) return;
+    const r = t.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+    if (t.hasAttribute('data-spot')) { t.style.setProperty('--x', x + 'px'); t.style.setProperty('--y', y + 'px'); }
+    if (!this.heavy() || e.pointerType !== 'mouse') return;
+    if (t.hasAttribute('data-tilt')) { t.style.transition = 'transform .25s cubic-bezier(.2,.7,.2,1)'; t.style.transform = `perspective(1000px) rotateX(${((0.5 - y / r.height) * 7).toFixed(2)}deg) rotateY(${((x / r.width - 0.5) * 9).toFixed(2)}deg)`; this.lastT = t; }
+    else if (t.hasAttribute('data-magnet')) { t.style.transition = 'transform .2s'; t.style.transform = `translate(${((x / r.width - 0.5) * 12).toFixed(1)}px, ${((y / r.height - 0.5) * 8).toFixed(1)}px)`; this.lastT = t; }
+  }
+
+  startScan() {
+    clearInterval(this.scanI);
+    if (!this.heavy()) { this.setState({ fill: 4, scanning: false }); return; }
+    this.setState({ fill: 0, scanning: true });
+    this.scanI = setInterval(() => {
+      const f = this.state.fill + 1;
+      if (f >= 4) { clearInterval(this.scanI); this.setState({ fill: 4, scanning: false }); } else this.setState({ fill: f });
+    }, 560);
+  }
+
+  tick() {
+    const vh = innerHeight, max = document.documentElement.scrollHeight - vh, gp = max > 0 ? cl(scrollY / max) : 0;
+    if (this.progRef.current) this.progRef.current.style.transform = `scaleX(${gp.toFixed(4)})`;
+    const nav = this.navRef.current, navOn = scrollY > 40;
+    if (nav && navOn !== this.navOn) { this.navOn = navOn; Object.assign(nav.style, navOn ? { background: 'oklch(0.18 0.03 255 / 0.62)', borderColor: 'oklch(0.97 0.02 255 / 0.16)', boxShadow: 'inset 0 1px 0 oklch(1 0 0 / 0.08), 0 20px 40px -24px oklch(0 0 0 / 0.7)', backdropFilter: 'blur(20px) saturate(1.3)', webkitBackdropFilter: 'blur(20px) saturate(1.3)' } : { background: 'transparent', borderColor: 'transparent', boxShadow: 'none', backdropFilter: 'none', webkitBackdropFilter: 'none' }); }
+    const hsEl = this.heroStageRef.current;
+    if (hsEl) { if (this.heavy()) { const r = hsEl.parentElement.getBoundingClientRect(), hp = cl(-r.top / (r.height * 0.75)); hsEl.style.transform = `translateY(${(-hp * 90).toFixed(1)}px) scale(${(1 - hp * 0.08).toFixed(3)})`; hsEl.style.opacity = String(cl(1 - hp * 1.25)); } else { hsEl.style.transform = ''; hsEl.style.opacity = ''; } }
+    let fo = 1;
+    document.querySelectorAll('[data-fio]').forEach(s => { const r = s.getBoundingClientRect(); if (r.top <= vh * 0.5 && r.bottom >= vh * 0.5) fo = parseFloat(s.dataset.fio); });
+    let sp = 0;
+    const sg = this.sigaRef.current;
+    if (sg) {
+      const r = sg.getBoundingClientRect(); sp = cl(-r.top / Math.max(1, r.height - vh));
+      const step = Math.min(3, Math.floor(sp * 4));
+      if (step !== this.state.step) this.setState({ step });
+      if (this.sigaFillRef.current) this.sigaFillRef.current.style.strokeDashoffset = (100 - sp * 100).toFixed(2);
+    }
+    let lp = 0, inLim = false, after = false, pct = 0;
+    const lm = this.limRef.current;
+    if (lm) {
+      const r = lm.getBoundingClientRect();
+      lp = cl(-r.top / Math.max(1, r.height - vh));
+      inLim = r.top <= vh * 0.5 && r.bottom > vh * 0.5; after = r.bottom <= vh * 0.5;
+      const k = lp * 11; let v = 0, cum = 0, cur = -1;
+      const bs = this.barsRef.current;
+      const barEls = bs ? bs.querySelectorAll('[data-bar]') : [];
+      MV.forEach((mv, i) => {
+        const s = cl(k - i); cum += mv; v += mv * s; if (s > 0) cur = i;
+        const b = barEls[i];
+        if (b) { b.style.transform = `scaleY(${s.toFixed(3)})`; const cp = cum / LIMIT * 100; b.style.color = cp > 100 ? 'var(--err)' : cp >= 80 ? 'var(--warn)' : 'var(--ok)'; }
+      });
+      v = Math.round(v);
+      const lab = this.barLabelRef.current;
+      if (lab && bs) {
+        if (cur < 0) lab.style.opacity = '0';
+        else {
+          const s = cl(k - cur), H = bs.clientHeight - 28, y = MV[cur] / MAXV * H * s;
+          lab.style.opacity = '1';
+          lab.style.transform = `translate(${((cur + 0.5) / 11 * 100).toFixed(2)}%, ${(-y).toFixed(1)}px)`;
+          const t = lab.querySelector('[data-lt]'); if (t) t.textContent = `${MESES[cur]} · ${brl(MV[cur])}`;
+        }
+      }
+      pct = v / LIMIT * 100;
+      const st = pct > 100 ? 'over' : pct >= 80 ? 'warn' : 'ok';
+      const c = { ok: 'var(--ok)', warn: 'var(--warn)', over: 'var(--err)' }[st], shown = Math.min(pct, 110);
+      const path = this.limPathRef.current, dot = this.limDotRef.current, pl = this.pillRef.current, msg = this.msgRef.current, odo = this.odoRef.current;
+      if (path) { path.style.strokeDashoffset = (100 - shown / 110 * 100).toFixed(2); path.style.stroke = c; }
+      if (dot) { dot.style.transform = `translateX(${(shown / 110 * 1000).toFixed(1)}px)`; dot.style.fill = c; }
+      if (pl) { pl.textContent = { ok: 'Com folga', warn: 'Atenção · passou de 80%', over: 'Estourou o teto' }[st]; pl.style.color = c; pl.style.background = `color-mix(in oklch, ${c} 16%, transparent)`; }
+      if (msg) msg.textContent = st === 'over' ? `Passou ${brl(v - LIMIT)} do teto` : `Faltam ${brl(LIMIT - v)}`;
+      if (odo) {
+        const digits = String(v).padStart(5, '0') + '00', lead = String(v).length;
+        odo.querySelectorAll('[data-d]').forEach((d, i) => {
+          const s = d.querySelector('[data-strip]'); if (s) s.style.transform = `translateY(${-parseInt(digits[i], 10)}em)`;
+          d.style.opacity = (i < 5 - lead && i < 4) ? '0.25' : '1';
+          if (this.prevDig && this.prevDig[i] !== digits[i] && this.heavy()) {
+            const g = d.querySelector('[data-glow]');
+            if (g) { g.style.color = c; g.style.transition = 'none'; g.style.opacity = '0.5'; requestAnimationFrame(() => { g.style.transition = 'opacity .7s cubic-bezier(.2,.7,.2,1)'; g.style.opacity = '0'; }); }
+          }
+        });
+        this.prevDig = digits;
+      }
+    }
+    let col;
+    if (after) col = C.ice;
+    else if (lp > 0 || inLim) col = pct < 70 ? C.ok : pct < 80 ? mix(C.ok, C.warn, (pct - 70) / 10) : pct <= 100 ? C.warn : mix(C.warn, C.err, (pct - 100) / 3);
+    else col = mix(C.ice, C.ok, sp);
+    if (this.gl) this.gl.set({ p: gp, drawn: Math.min(1, gp * 0.86 + 0.3), color: col });
+    if (this.glRef.current) this.glRef.current.style.opacity = this.gl ? String(fo) : '0';
+    const sv = this.svgFioRef.current;
+    if (sv) {
+      sv.style.opacity = String(Math.min(1, fo + 0.2));
+      sv.querySelectorAll('[data-fiosvg]').forEach((p, i) => { p.style.strokeDashoffset = (100 - gp * 100).toFixed(2); p.style.stroke = i ? `rgb(${col})` : `rgba(${col},0.16)`; });
+    }
+    const cf = this.ctaFioRef.current;
+    if (cf) { const r = cf.getBoundingClientRect(); cf.style.strokeDashoffset = (100 - cl((vh * 0.95 - r.top) / (r.height + vh * 0.35)) * 100).toFixed(2); }
+  }
+
+  openAuth(kind) { this.setState({ auth: kind, sent: false, tried: false, menu: false, app: null }); }
+
+  renderVals() {
+    const s = this.state, wide = s.w >= 900;
+    const hs = wide ? Math.max(0.56, Math.min(0.7, (s.h - 180) / 844)) : 0.5;
+    const gs = wide ? Math.max(0.5, Math.min(0.72, (s.h * 0.68) / 844)) : Math.max(0.3, Math.min(0.46, (s.h * 0.7 - 240) / 844));
+    const as = Math.max(0.5, Math.min(1, (s.h - 90) / 844, (s.w - 24) / 390));
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(s.email.trim());
+    const passOk = s.pass.length >= 8;
+    const A = s.auth;
+    const M = {
+      signup: { title: 'Criar sua conta', sub: 'Leva um minuto. Depois, o app pergunta só três coisas.', cta: 'Criar minha conta', pass: true, signup: true, login: false, passPh: 'Pelo menos 8 caracteres', ac: 'new-password', switchTxt: 'Já tem conta?', switchLink: 'Entrar', switchGo: () => this.openAuth('login') },
+      login: { title: 'Entrar', sub: 'Bom te ver de novo.', cta: 'Entrar na minha conta', pass: true, signup: false, login: true, passPh: 'Sua senha', ac: 'current-password', switchTxt: 'Ainda não tem conta?', switchLink: 'Criar conta', switchGo: () => this.openAuth('signup') },
+      forgot: { title: 'Recuperar senha', sub: 'Mandamos um link para você criar uma senha nova.', cta: 'Enviar link de recuperação', pass: false, signup: false, login: false, passPh: '', ac: 'off', switchTxt: 'Lembrou?', switchLink: 'Voltar para entrar', switchGo: () => this.openAuth('login') }
+    };
+    const sent = A === 'forgot' && s.sent;
+    const au = A ? { ...M[A], sent, form: !sent, sub: sent ? 'Pronto. Agora é com seu e-mail.' : M[A].sub } : {};
+    const valid = A === 'signup' ? emailOk && passOk && s.terms : A === 'login' ? emailOk && s.pass.length > 0 : emailOk;
+    const dot = i => s.step >= i ? 'var(--ok)' : 'oklch(0.40 0.03 255)';
+    return {
+      noise: NOISE, wide, narrow: !wide,
+      progRef: this.progRef, glRef: this.glRef, svgFioRef: this.svgFioRef, sigaRef: this.sigaRef, sigaFillRef: this.sigaFillRef, limRef: this.limRef, limPathRef: this.limPathRef, limDotRef: this.limDotRef,
+      odoRef: this.odoRef, pillRef: this.pillRef, msgRef: this.msgRef, barsRef: this.barsRef, barLabelRef: this.barLabelRef, iaRef: this.iaRef, ctaFioRef: this.ctaFioRef, navRef: this.navRef, heroStageRef: this.heroStageRef,
+      svgDisplay: s.glOn ? 'none' : 'block',
+      intro: s.intro, introO: s.introOut ? 0 : 1, introOff: s.introDraw ? 0 : 100, introDx: s.introDraw ? 404 : 0, introLogoO: s.introDraw ? 1 : 0,
+      skipIntro: () => { clearTimeout(this.iT1); clearTimeout(this.iT2); this.setState({ intro: false }); },
+      links: [['#como', 'Como funciona'], ['#recursos', 'O limite'], ['#seguranca', 'Segurança'], ['#perguntas', 'Perguntas']].map(([href, label]) => ({ href, label })),
+      menuOpen: s.menu && !wide, menuLabel: s.menu ? 'Fechar' : 'Menu', toggleMenu: () => this.setState({ menu: !s.menu }), closeMenu: () => this.setState({ menu: false }),
+      twoCols: wide ? 'minmax(0,1fr) minmax(0,1fr)' : 'minmax(0,1fr)', chatOrder: wide ? 0 : 2,
+      heroPh: { s: hs.toFixed(3), w: Math.round(390 * hs), h: Math.round(844 * hs), r: Math.round(44 * hs) }, stageH: Math.round(844 * hs * (wide ? 0.74 : 0.68)),
+      sigaH: wide ? '420vh' : '360vh', sigaPad: wide ? '40px' : '76px', sigaGap: wide ? '64px' : '18px', scrimPad: wide ? '32px' : '4px 0',
+      sigaPh: { s: gs.toFixed(3), w: Math.round(390 * gs), h: Math.round(844 * gs), r: Math.round(44 * gs) },
+      dot1: dot(0), dot2: dot(1), dot3: dot(2), dot4: dot(3),
+      steps: STEPS.map((st, i) => { const on = s.step === i; return { ...st, screen: i === 3 ? (on ? 'confirmado' : 'conferir') : st.screen, o: on ? 1 : 0, hidden: !on, y: on ? 0 : (i < s.step ? -24 : 24), py: on ? 0 : (i < s.step ? -40 : 60), rx: on ? 0 : (i < s.step ? 8 : -8), sc: on ? 1 : 0.94 }; }),
+      limH: wide ? '300vh' : '260vh', chartH: wide ? (s.h < 820 ? 130 : 180) : 110,
+      odo: [{ dig: true }, { dig: true }, { sep: true, ch: '.' }, { dig: true }, { dig: true }, { dig: true }, { sep: true, ch: ',' }, { dig: true }, { dig: true }],
+      nums: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'], odoTr: this.reduced ? 'none' : 'transform .45s cubic-bezier(.2,.7,.2,1)',
+      bars: MV.map((v, i) => ({ m: MESES[i], h: (v / MAXV * 100).toFixed(1) })),
+      roles: [
+        { who: 'A IA', what: 'Lê a foto, o áudio ou o print e sugere valor, data, tipo e categoria. Se ficar em dúvida, avisa.', c: 'var(--acc-ink)' },
+        { who: 'O código', what: 'Calcula limite anual, DAS e alertas com regras fixas e testadas. A IA não faz conta.', c: 'var(--ok)' },
+        { who: 'Você', what: 'Confere, corrige se precisar e confirma. Sem sua confirmação, nada é salvo.', c: 'var(--t1)' }
+      ],
+      scanning: s.scanning, scanStatus: s.scanning ? 'Lendo a foto… procurando valor, data e tipo' : 'Pronto para você conferir', scanColor: s.scanning ? 'var(--acc-ink)' : 'var(--t2)',
+      replayScan: () => this.startScan(),
+      fields: FIELDS.map((f, i) => { const filled = s.fill > i, warn = !!f.warn && filled; return { ...f, filled, empty: !filled, lc: f.warn ? 'var(--warn)' : 'var(--t2)', bg: warn ? 'color-mix(in oklch, var(--warn) 10%, var(--s2))' : 'var(--s2)', bd: warn ? 'var(--warn)' : (filled ? 'var(--line-strong)' : 'var(--line)') }; }),
+      chipOpen: s.chipOpen, toggleChip: () => this.setState({ chipOpen: !s.chipOpen }), chipBorder: s.chipOpen ? 'var(--acc)' : 'var(--line-strong)', chipArrow: s.chipOpen ? '−' : '↗',
+      privacy: [
+        { title: 'Você apaga quando quiser', body: 'Um toque no Perfil e seus lançamentos somem. Sem formulário, sem esperar.', x: 20 },
+        { title: 'Nada é salvo sem você', body: 'Cada lançamento passa pelos seus olhos antes de entrar. E dá para desfazer.', x: 40 },
+        { title: 'A IA é opcional', body: 'Não quer IA? Recuse no cadastro ou desligue no Perfil. O app segue calculando tudo.', x: 60 }
+      ],
+      faq: FAQ.map(([q, a], i) => ({ q, a, sep: i ? '1px solid var(--line)' : '0', open: s.faq === i, rot: s.faq === i ? 45 : 0, toggle: () => this.setState({ faq: s.faq === i ? null : i }) })),
+      leve: s.leve, toggleLeve: () => this.toggleLeve(), leveTrack: s.leve ? 'var(--acc)' : 'var(--s3)', leveKnob: s.leve ? 16 : 0,
+      openSignup: () => this.openAuth('signup'), openLogin: () => this.openAuth('login'),
+      openDemo: () => this.setState({ app: 'painel', auth: null, menu: false }),
+      hasAuth: !!A, auth: au, closeAuth: () => this.setState({ auth: null }), toLogin: () => this.openAuth('login'), toForgot: () => this.openAuth('forgot'),
+      email: s.email, onEmail: e => this.setState({ email: e.target.value }),
+      emailErr: s.tried && !emailOk, emailBorder: s.tried && !emailOk ? 'var(--err)' : 'var(--line-strong)',
+      pass: s.pass, onPass: e => this.setState({ pass: e.target.value }), passType: s.showPass ? 'text' : 'password', passBtn: s.showPass ? 'Ocultar' : 'Mostrar', togglePass: () => this.setState({ showPass: !s.showPass }),
+      passBorder: s.tried && A === 'signup' && !passOk ? 'var(--err)' : 'var(--line-strong)',
+      passHint: passOk ? 'Senha boa.' : `Faltam ${8 - s.pass.length} caracteres.`, passHintColor: passOk ? 'var(--ok)' : (s.tried ? 'var(--err)' : 'var(--t3)'),
+      terms: s.terms, toggleTerms: () => this.setState({ terms: !s.terms }), termsBorder: s.terms ? 'var(--acc)' : (s.tried ? 'var(--err)' : 'var(--line-strong)'), termsBg: s.terms ? 'var(--acc)' : 'transparent', termsCheck: s.terms ? '✓' : '', termsColor: s.tried && !s.terms ? 'var(--t1)' : 'var(--t2)',
+      submitBg: valid ? 'var(--acc)' : 'var(--s3)', submitFg: valid ? 'var(--on-acc)' : 'var(--t2)',
+      submit: () => {
+        if (!valid) { this.setState({ tried: true }); return; }
+        if (A === 'forgot') this.setState({ sent: true });
+        else this.setState({ auth: null, app: A === 'signup' ? 'onb1' : 'painel' });
+      },
+      hasApp: !!s.app, appStart: s.app || 'painel', appLabel: s.app === 'onb1' ? 'Sua conta nova · cadastro' : 'Conta demo · dados de exemplo', closeApp: () => this.setState({ app: null }),
+      appPh: { s: as.toFixed(3), w: Math.round(390 * as), h: Math.round(844 * as) }
+    };
+  }
+}
+</script>
+</body>
+</html>
