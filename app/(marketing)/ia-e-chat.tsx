@@ -63,8 +63,14 @@ function CartaoRascunho() {
       <div className="flex items-center justify-between gap-2.5">
         <div className="flex flex-col gap-[3px]">
           <span className="num text-xl font-extrabold">Rascunho</span>
-          <span data-movimento="ia-status" aria-live="polite" className="text-sm text-ok">
-            Pronto para você conferir
+          {/* O texto invisível reserva a altura do status mais longo ("Lendo…"): a troca não muda o layout. */}
+          <span className="grid text-sm">
+            <span data-movimento="ia-status" aria-live="polite" className="[grid-area:1/1] text-ok">
+              Pronto para você conferir
+            </span>
+            <span aria-hidden="true" data-movimento="ia-status-lendo" className="invisible [grid-area:1/1]">
+              Lendo a foto… procurando valor, data e tipo
+            </span>
           </span>
         </div>
         <span className="rounded-xs border border-dashed border-line-strong px-2 py-0.5 text-sm font-semibold text-t3">

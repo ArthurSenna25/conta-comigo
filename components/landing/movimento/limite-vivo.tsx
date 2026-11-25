@@ -118,16 +118,17 @@ export function LimiteVivo({ barras }: { barras: readonly BarraExemplo[] }) {
 
       <Barras barras={barras} />
 
-      <div className="flex flex-wrap items-center gap-3">
+      {/* Linhas fixas (o texto muda com o scroll): nada quebra de linha diferente nem empurra a página (CLS). */}
+      <div className="flex flex-wrap items-center gap-3 whitespace-nowrap">
         <span
-          className="inline-flex min-h-9 items-center gap-2 rounded-full px-3.5 text-[15px] font-bold"
+          className="inline-flex min-h-9 min-w-[10.5em] items-center justify-center gap-2 rounded-full px-3.5 text-[15px] font-bold"
           style={{ color: cor, background: `color-mix(in oklch, ${cor} 16%, transparent)` }}
         >
           <span aria-hidden="true" className="size-2 rounded-full" style={{ background: cor }} />
           {STATUS[nivel]}
         </span>
-        <span className="num text-[clamp(18px,1.8vw,24px)] font-bold">{mensagem(acumulado)}</span>
-        <span className="text-[15px] text-t3">Faturamento mês a mês · exemplo</span>
+        <span className="num basis-full text-[clamp(18px,1.8vw,24px)] font-bold md:basis-auto">{mensagem(acumulado)}</span>
+        <span className="basis-full text-[15px] text-t3">Faturamento mês a mês · exemplo</span>
       </div>
     </div>
   );

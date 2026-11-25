@@ -5,7 +5,6 @@ import { BOTAO } from "@/components/botao";
 import { useEstatico } from "./preferencias";
 
 const CAMPO_MS = 560;
-const LENDO = "Lendo a foto… procurando valor, data e tipo";
 
 /** Sequência do cartão "Rascunho": esvazia, varre a imagem e preenche um campo a cada 560ms. */
 function criarLeitura(cartao: HTMLElement) {
@@ -13,6 +12,7 @@ function criarLeitura(cartao: HTMLElement) {
   const status = cartao.querySelector<HTMLElement>('[data-movimento~="ia-status"]');
   const varredura = cartao.querySelector<HTMLElement>('[data-movimento~="ia-varredura"]');
   const pronto = status?.textContent ?? "";
+  const lendo = cartao.querySelector('[data-movimento~="ia-status-lendo"]')?.textContent?.trim() ?? "";
   let timers: number[] = [];
 
   const parar = () => {
@@ -23,7 +23,7 @@ function criarLeitura(cartao: HTMLElement) {
     parar();
     for (const c of campos) c.setAttribute("data-vazio", "");
     varredura?.setAttribute("data-lendo", "");
-    if (status) status.textContent = LENDO;
+    if (status) status.textContent = lendo;
   };
   const encher = () => {
     parar();
