@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { BOTAO } from "@/components/botao";
 import { EstadoErro } from "@/components/estado-erro";
 import { RODAPE_FLUXO, useFluxo } from "@/app/(app)/fluxo-lancamento";
-import { podeEnviarTexto, resultadoDaLeitura } from "./leitura";
+import { mensagemSemResposta, podeEnviarTexto, resultadoDaLeitura, TEMPO_MAX_LEITURA_MS } from "./leitura";
 
 const MANUAL = "/conferir?modo=manual";
 const TEXTO_MAX = 2000; // IngestRequest
@@ -35,9 +35,15 @@ export function Adicionar() {
     const fd = new FormData();
     fd.set("kind", "texto");
     fd.set("texto", texto.trim());
+    let estourou = false;
+    const prazo = setTimeout(() => {
+      estourou = true;
+      controle.abort();
+    }, TEMPO_MAX_LEITURA_MS);
     try {
       const resposta = await fetch("/api/ingest", { method: "POST", body: fd, signal: controle.signal });
       const corpo: unknown = await resposta.json().catch(() => null);
+      if (estourou) throw new Error("tempo"); // o corpo não chegou a tempo: cai na mensagem de demora
       if (controle.signal.aborted) return;
       const r = resultadoDaLeitura(resposta.status, corpo);
       if (r.tipo === "rascunhos") {
@@ -49,10 +55,11 @@ export function Adicionar() {
         setEtapa({ tipo: "escrever", falha: { status: r.status, mensagem: r.mensagem } });
       }
     } catch {
-      if (!controle.signal.aborted) {
-        setEtapa({ tipo: "escrever", falha: { mensagem: "Sem conexão com a internet. Confira e tente de novo." } });
+      if (estourou || !controle.signal.aborted) {
+        setEtapa({ tipo: "escrever", falha: { mensagem: mensagemSemResposta(estourou) } });
       }
     } finally {
+      clearTimeout(prazo);
       if (leitura.current === controle) leitura.current = null;
     }
   }

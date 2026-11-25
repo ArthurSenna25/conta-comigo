@@ -8,6 +8,7 @@ import { confirmarLancamento } from "@/actions/lancamentos";
 import { BOTAO } from "@/components/botao";
 import { ROTULO_CATEGORIA } from "@/components/categoria";
 import { formatarSemSimbolo } from "@/components/moeda";
+import { criarTrava, desfechoDaConfirmacao, MSG_AMBIGUA } from "./confirmacao";
 import { RODAPE_FLUXO, useFluxo } from "@/app/(app)/fluxo-lancamento";
 import {
   centavosDigitados,
@@ -36,10 +37,10 @@ export function Conferir({ manual, hoje }: ConferirProps) {
   );
   const [indice, setIndice] = useState(0);
   const [erros, setErros] = useState<Erros>({});
-  const [falha, setFalha] = useState<string | null>(null);
+  const [falha, setFalha] = useState<{ mensagem: string; ambigua: boolean } | null>(null);
   const [pendente, setPendente] = useState(false);
   const [tentativa, setTentativa] = useState(0); // só a confirmação recusada move o foco, não cada tecla
-  const enviando = useRef(false);
+  const trava = useRef(criarTrava());
   const formulario = useRef<HTMLFormElement>(null);
 
   // refresh apaga a memória do cliente: sem rascunho não há o que conferir
@@ -79,7 +80,7 @@ export function Conferir({ manual, hoje }: ConferirProps) {
 
   function aoConfirmar(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault();
-    if (enviando.current || !forms) return;
+    if (!forms) return;
     const v = validar(atual, hoje);
     if (!v.ok) return recusar(v.erros);
     if (!ultimo) return irPara(indice + 1);
@@ -89,25 +90,27 @@ export function Conferir({ manual, hoje }: ConferirProps) {
       return recusar(lote.erros);
     }
 
-    enviando.current = true;
+    if (!trava.current.pegar()) return; // um envio por vez, mesmo com clique duplo
     setPendente(true);
     setFalha(null);
     startTransition(async () => {
+      let desfecho = desfechoDaConfirmacao("excecao");
       try {
-        const r = await confirmarLancamento(formDataDoLote(lote.lancamentos));
-        if (r.ok) {
-          const n = r.dados.lancamentos.length;
-          despachar({ tipo: "concluir", aviso: { titulo: n > 1 ? `${n} lançamentos salvos` : "Lançamento salvo" } });
-          router.push("/painel");
-          return;
-        }
-        setFalha(r.erro.mensagem); // inclui a falha de gravação da conta demo: mensagem segura, tela intacta
+        desfecho = desfechoDaConfirmacao(await confirmarLancamento(formDataDoLote(lote.lancamentos)));
       } catch {
-        setFalha("Não foi possível salvar agora. Confira a internet e tente de novo.");
-      } finally {
-        enviando.current = false;
-        setPendente(false);
+        // mantém "ambiguo": a resposta pode ter se perdido depois de gravar
       }
+      if (desfecho.tipo === "salvo") {
+        // a trava não solta: a tela está saindo e um segundo toque não pode regravar
+        const n = desfecho.quantidade;
+        despachar({ tipo: "concluir", aviso: { titulo: n > 1 ? `${n} lançamentos salvos` : "Lançamento salvo" } });
+        router.push("/painel");
+        return;
+      }
+      // sem nova tentativa automática; o rascunho fica na tela
+      setFalha(desfecho.tipo === "ambiguo" ? { mensagem: MSG_AMBIGUA, ambigua: true } : { mensagem: desfecho.mensagem, ambigua: false });
+      trava.current.soltar();
+      setPendente(false);
     });
   }
 
@@ -226,7 +229,15 @@ export function Conferir({ manual, hoje }: ConferirProps) {
           </p>
           {falha && (
             <p role="alert" className="text-[15px] font-semibold text-err text-pretty">
-              {falha}
+              {falha.mensagem}
+              {falha.ambigua && (
+                <>
+                  {" "}
+                  <Link href="/lancamentos" className="underline">
+                    Abrir Lançamentos
+                  </Link>
+                </>
+              )}
             </p>
           )}
           <div className="grid grid-cols-[1fr_1.5fr] gap-2">
