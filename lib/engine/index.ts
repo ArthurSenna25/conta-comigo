@@ -9,8 +9,10 @@ import type {
   Lancamento,
   Perfil,
   ResumoMes,
-  StatusLimiteMei,
 } from "@/lib/contracts";
+
+export { statusLimiteMei } from "./status-limite-mei";
+export { projecaoAnual } from "./projecao-anual";
 
 /** DAS-MEI do ano: 5% do salário mínimo + R$ 1 (ICMS) e/ou R$ 5 (ISS). Em centavos. */
 export function valorDas(atividade: Atividade, ano: number): number {
@@ -32,18 +34,6 @@ export type EntradaLimite = {
   dataAbertura: string;
   hoje: string;
 };
-
-/** Faixas: ok, 70, 90, 100 (%). */
-export function statusLimiteMei(entrada: EntradaLimite): StatusLimiteMei {
-  void entrada;
-  throw new Error("not implemented");
-}
-
-/** Projeção linear do faturamento até 31/12. */
-export function projecaoAnual(entrada: EntradaLimite): number {
-  void entrada;
-  throw new Error("not implemented");
-}
 
 /** `mes` = "YYYY-MM". Só lançamentos do mês entram. */
 export function resumoMes(lancamentos: readonly Lancamento[], mes: string): ResumoMes {
