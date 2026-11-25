@@ -68,7 +68,7 @@ export function Rodape() {
         <div className="flex flex-col gap-1.5">
           <Marca tamanho={28} />
           <p className="m-0 max-w-[460px] text-[15px] text-t2">
-            Projeto de hackathon. Não é um escritório de contabilidade e não substitui um contador.
+            Projeto do Hack Brasil 2026. A conta de demonstração usa dados fictícios e o conteúdo não substitui um contador.
           </p>
         </div>
         <ul className="flex flex-wrap items-center gap-2">
