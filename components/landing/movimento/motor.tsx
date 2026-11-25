@@ -3,6 +3,8 @@
 import { useEffect } from "react";
 import { flutuar, linhaDoCta, parallax, prenderSigaOFio, revelar, sairDoPalco } from "./cenas";
 import { ligarFioEstatico, ligarFioScrub } from "./fio-fundo";
+import { ligarFio3d } from "./fio3d-ligar";
+import { CONSULTA_FIO3D, podeMontarFio3d } from "./fio3d-limites";
 import { holofote, ima, inclinar } from "./ponteiro";
 import { aplicarClasse, useEstatico } from "./preferencias";
 import { ligarLenis } from "./rolagem";
@@ -16,8 +18,8 @@ const CONDICOES = {
   reduzido: CONSULTA_REDUZIDO,
   md: "(min-width: 768px)",
   preso: "(min-width: 900px) and (min-height: 720px)",
-  desktop: "(min-width: 1280px)",
   mouse: "(hover: hover) and (pointer: fine)",
+  ...CONSULTA_FIO3D, // desktop (≥1280), alto (≥600) e fino (pointer: fine) do canvas WebGL
 };
 
 /**
@@ -109,6 +111,7 @@ async function montar(): Promise<() => void> {
     const c = ctx.conditions ?? {};
     if (c.reduzido) return; // sem scrub, parallax, tilt nem abertura: tudo estático e visível
     const paradas: (() => void)[] = [ligarFioScrub(gsap, ScrollTrigger)];
+    if (podeMontarFio3d(c)) paradas.push(ligarFio3d()); // 05 L10; destroy() no revert (05 L13)
     if (c.desktop && c.mouse) paradas.push(ligarLenis(Lenis, gsap, ScrollTrigger));
     if (c.preso) paradas.push(prenderSigaOFio(ScrollTrigger));
     revelar(gsap, c.md ? 40 : 18);

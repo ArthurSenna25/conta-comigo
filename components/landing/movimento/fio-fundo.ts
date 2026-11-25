@@ -40,26 +40,29 @@ function misturar(a: Rgb, b: Rgb, t: number): Rgb {
 const css = ([r, g, b]: Rgb, alfa?: number) => `rgb(${r} ${g} ${b}${alfa === undefined ? "" : ` / ${alfa}`})`;
 
 /** Dentro de O limite (05 L23): <70 verde; 70–80 verde→âmbar; 80–100 âmbar; >100 âmbar→vermelho em 3 pontos. */
-export function corDoLimite(pct: number, alfa?: number): string {
-  if (pct < 70) return css(VERDE, alfa);
-  if (pct < 80) return css(misturar(VERDE, AMBAR, (pct - 70) / 10), alfa);
-  if (pct <= 100) return css(AMBAR, alfa);
-  return css(misturar(AMBAR, VERMELHO, (pct - 100) / 3), alfa);
+export function rgbDoLimite(pct: number): Rgb {
+  if (pct < 70) return VERDE;
+  if (pct < 80) return misturar(VERDE, AMBAR, (pct - 70) / 10);
+  if (pct <= 100) return AMBAR;
+  return misturar(AMBAR, VERMELHO, (pct - 100) / 3);
 }
 
 /** Cor pela posição (05 L22-24): gelo → verde pelo progresso do Siga o Fio; limite por pct; depois, gelo. */
-export function corDoFio(pos: PosicaoFio, alfa?: number): string {
+export function rgbDoFio(pos: PosicaoFio): Rgb {
   switch (pos.fase) {
     case "siga":
-      return css(misturar(GELO, VERDE, pos.progresso), alfa);
+      return misturar(GELO, VERDE, pos.progresso);
     case "entre":
-      return css(VERDE, alfa);
+      return VERDE;
     case "limite":
-      return corDoLimite(pos.pct, alfa);
+      return rgbDoLimite(pos.pct);
     default:
-      return css(GELO, alfa);
+      return GELO;
   }
 }
+
+export const corDoLimite = (pct: number, alfa?: number): string => css(rgbDoLimite(pct), alfa);
+export const corDoFio = (pos: PosicaoFio, alfa?: number): string => css(rgbDoFio(pos), alfa);
 
 /** Fase pela linha do meio da tela (05 L19: "seção que cruza o meio da tela"). */
 export function faseDoFio(meio: number, siga: Faixa, limite: Faixa, pct: number): PosicaoFio {
@@ -75,6 +78,21 @@ export function opacidadeDoFio(dataFio: string | undefined): number {
   const v = Number(dataFio);
   return dataFio === undefined || Number.isNaN(v) ? 1 : Math.min(1, v + 0.2);
 }
+
+/** Opacidade do canvas WebGL por seção: o valor cru de `data-fio` (05 L19; só o SVG soma 0.2). */
+export function opacidadeDoCanvas(dataFio: string | undefined): number {
+  const v = Number(dataFio);
+  return dataFio === undefined || Number.isNaN(v) ? 1 : limitar(v);
+}
+
+/** O que o Fio de fundo "está fazendo agora"; o canvas WebGL lê isto a cada quadro (05 L144: progresso da página). */
+export interface EstadoFio {
+  readonly progresso: number;
+  readonly rgb: Rgb;
+  readonly opacidade: number;
+}
+let estado: EstadoFio = { progresso: 0, rgb: GELO, opacidade: 1 };
+export const estadoDoFio = (): EstadoFio => estado;
 
 /** Mesma janela do ScrollTrigger de LimiteVivo ("top 85%" → "bottom 70%"). */
 export function progressoNaJanela(topo: number, altura: number, alturaTela: number): number {
@@ -127,6 +145,11 @@ function prepararFio(escreverOpacidade: (svg: SVGSVGElement, alvo: number) => vo
         const f = faixa(s);
         return f.topo <= meio && meio < f.base;
       });
+      estado = {
+        progresso: progressoDaPagina(),
+        rgb: rgbDoFio(pos),
+        opacidade: ativa ? opacidadeDoCanvas(ativa.dataset.fio) : estado.opacidade,
+      };
       const alvo = opacidadeDoFio(ativa?.dataset.fio);
       if (ativa && alvo !== alvoAtual) {
         alvoAtual = alvo;
