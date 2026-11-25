@@ -6,7 +6,7 @@ import { criarClienteServidor } from "@/lib/db/cliente-servidor";
 import { atualizarPerfil, criarPerfil, lerPerfil } from "@/lib/db/perfil";
 import { bloqueioDaContaDemo } from "@/lib/security/demo";
 import { modoMock } from "@/lib/security/modo-mock";
-import { interno, invalido } from "./resultado";
+import { erro, interno, invalido } from "./resultado";
 import { exigirAcesso } from "./sessao";
 
 /**
@@ -32,5 +32,21 @@ export async function salvarPerfil(entrada: unknown): Promise<Resultado<Perfil>>
     return perfil ? { ok: true, dados: perfil } : interno("salvarPerfil", new Error("perfil sumiu na atualização"));
   } catch (e) {
     return interno("salvarPerfil", e);
+  }
+}
+
+/**
+ * Perfil do usuário logado, para preencher o formulário de edição. Leitura: a conta demo também pode.
+ * Portão só até o consentimento: sem perfil não redireciona aqui, devolve `nao_encontrado` e a tela decide
+ * (vai ao onboarding). O filtro por `userId` da SESSÃO soma-se à RLS.
+ */
+export async function obterPerfil(): Promise<Resultado<Perfil>> {
+  if (modoMock()) return { ok: true, dados: mockPerfil };
+  const { userId } = await exigirAcesso("consentimento");
+  try {
+    const perfil = await lerPerfil(await criarClienteServidor(), userId);
+    return perfil ? { ok: true, dados: perfil } : erro("nao_encontrado");
+  } catch (e) {
+    return interno("obterPerfil", e);
   }
 }
