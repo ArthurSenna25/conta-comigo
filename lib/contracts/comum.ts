@@ -6,6 +6,10 @@ export const Centavos = z.int().positive().max(VALOR_MAX_CENTAVOS);
 
 /** Data de calendário "YYYY-MM-DD", sem hora (fuso America/Sao_Paulo na borda). */
 export const DataISO = z.iso.date();
+/** Hoje no Brasil ("YYYY-MM-DD"). `sv-SE` formata como ISO; 23h30 em Brasília ainda é o mesmo dia. */
+export function hojeBrasil(agora: Date = new Date()): string {
+  return agora.toLocaleDateString("sv-SE", { timeZone: "America/Sao_Paulo" });
+}
 /** Mês "YYYY-MM". */
 export const MesISO = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, "mês inválido (YYYY-MM)");
 export const Uuid = z.uuid();
