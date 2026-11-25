@@ -2,129 +2,200 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@custom-variant dark (&:is(.dark *));
+/* Tokens Azul-noite (design/handoff/01-TOKENS.md). Produto só tem tema escuro. */
+:root {
+  color-scheme: dark;
+
+  /* superfícies e texto */
+  --bg: oklch(0.16 0.025 255);
+  --s1: oklch(0.20 0.03 255);
+  --s2: oklch(0.245 0.035 255);
+  --s3: oklch(0.30 0.04 255);
+  --t1: oklch(0.97 0.008 255);
+  --t2: oklch(0.85 0.02 255);
+  --t3: oklch(0.72 0.025 255);
+  --line: oklch(0.97 0.02 255 / 0.12);
+  --line-strong: oklch(0.97 0.02 255 / 0.22);
+
+  /* acento e estados */
+  --acc: oklch(0.78 0.12 240);
+  --acc-ink: oklch(0.80 0.11 240);
+  --on-acc: oklch(0.17 0.04 255);
+  --ring: oklch(0.80 0.11 240);
+  --ok: oklch(0.84 0.13 160);
+  --on-ok: oklch(0.20 0.03 180);
+  --warn: oklch(0.83 0.14 78);
+  --err: oklch(0.71 0.18 25);
+
+  /* fio e atmosfera */
+  --track: oklch(0.97 0.02 255 / 0.16);
+  --glow: oklch(0.55 0.13 245 / 0.28);
+  --glow2: oklch(0.50 0.09 215 / 0.20);
+  --spot: oklch(0.78 0.12 240 / 0.15);
+  --hi: oklch(1 0 0 / 0.07);
+  --shadow: oklch(0 0 0 / 0.7);
+
+  /* derivadas */
+  --acc-a10: oklch(0.78 0.12 240 / 0.10);
+  --acc-a14: oklch(0.78 0.12 240 / 0.14);
+  --acc-a16: oklch(0.78 0.12 240 / 0.16);
+  --acc-a35: oklch(0.78 0.12 240 / 0.35);
+  --acc-a40: oklch(0.78 0.12 240 / 0.40);
+  --ring-halo: oklch(0.80 0.11 240 / 0.18);
+  --panel: oklch(0.20 0.03 255 / 0.72);
+  --card-solid: oklch(0.20 0.03 255 / 0.8);
+  --glass-top: oklch(0.25 0.035 255 / 0.66);
+  --glass-bottom: oklch(0.18 0.03 255 / 0.66);
+  --glass-line: oklch(0.97 0.02 255 / 0.12);
+  --glass-hi: oklch(1 0 0 / 0.09);
+  --cta-bg: oklch(0.97 0.01 240);
+  --cta-bg-hover: oklch(1 0 0);
+  --cta-fg: oklch(0.18 0.04 255);
+  --cta-inset: oklch(0.82 0.03 240);
+  --fio-wire: oklch(0.86 0.08 232);
+  --fio-head: oklch(0.95 0.04 232);
+  --scrim: oklch(0.08 0.02 255 / 0.6);
+  --scrim-modal: oklch(0.10 0.02 255 / 0.72);
+  --star: oklch(0.95 0.02 240);
+
+  /* sombras */
+  --shadow-glass: inset 0 1px 0 var(--glass-hi), 0 1px 2px oklch(0 0 0 / 0.35), 0 14px 34px -14px oklch(0 0 0 / 0.55), 0 44px 90px -44px oklch(0 0 0 / 0.75);
+  --shadow-panel: inset 0 1px 0 var(--hi), 0 30px 60px -34px var(--shadow);
+  --shadow-nav: inset 0 1px 0 var(--hi), 0 20px 40px -20px var(--shadow);
+  --shadow-nav-top: inset 0 1px 0 oklch(1 0 0 / 0.08), 0 20px 40px -24px oklch(0 0 0 / 0.7);
+  --shadow-toast: 0 20px 44px -16px var(--shadow);
+  --shadow-fab: 0 14px 34px -10px oklch(0.78 0.12 240 / 0.7), inset 0 1px 0 oklch(1 0 0 / 0.35);
+  --shadow-cta: inset 0 -2px 0 var(--cta-inset), 0 14px 44px -10px oklch(0.75 0.13 240 / 0.8);
+  --shadow-modal: 0 40px 90px -30px oklch(0 0 0 / 0.9);
+  --shadow-tour: 0 24px 50px -20px oklch(0 0 0 / 0.8);
+
+  /* z-index */
+  --z-bg: 0; --z-content: 1; --z-fab: 3; --z-tabbar: 4; --z-toast: 6; --z-sheet: 7; --z-tour: 9;
+  --z-grain: 45; --z-menu: 49; --z-nav: 50; --z-progress: 60; --z-modal: 80; --z-intro: 100;
+
+  /* movimento (ver 06) */
+  --dur-press: 150ms; --dur-fast: 200ms; --dur-base: 320ms; --dur-slow: 550ms; --dur-fio: 1100ms;
+
+  /* ===== variáveis que o shadcn espera ===== */
+  --radius: 14px;
+  --background: var(--bg);
+  --foreground: var(--t1);
+  --card: var(--s1);
+  --card-foreground: var(--t1);
+  --popover: var(--s2);
+  --popover-foreground: var(--t1);
+  --primary: var(--acc);
+  --primary-foreground: var(--on-acc);
+  --secondary: var(--s2);
+  --secondary-foreground: var(--t1);
+  --muted: var(--s2);
+  --muted-foreground: var(--t3);
+  --accent: var(--s3);
+  --accent-foreground: var(--t1);
+  --destructive: var(--err);
+  --border: var(--line);
+  --input: var(--line-strong);
+  /* --ring já definido acima */
+}
 
 @theme inline {
+  /* fontes (variáveis criadas pelo next/font em app/fonts.ts) */
+  --font-sans: var(--font-figtree), system-ui, sans-serif;
+  --font-num: var(--font-manrope), system-ui, sans-serif;
+
+  /* shadcn */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Conta Comigo */
+  --color-bg: var(--bg);
+  --color-s1: var(--s1);
+  --color-s2: var(--s2);
+  --color-s3: var(--s3);
+  --color-t1: var(--t1);
+  --color-t2: var(--t2);
+  --color-t3: var(--t3);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-acc: var(--acc);
+  --color-acc-ink: var(--acc-ink);
+  --color-on-acc: var(--on-acc);
+  --color-ok: var(--ok);
+  --color-on-ok: var(--on-ok);
+  --color-warn: var(--warn);
+  --color-err: var(--err);
+  --color-track: var(--track);
+  --color-panel: var(--panel);
+  --color-card-solid: var(--card-solid);
+  --color-cta: var(--cta-bg);
+  --color-cta-fg: var(--cta-fg);
+
+  /* raios: rounded-xs … rounded-cta */
+  --radius-xs: 8px;
+  --radius-sm: 10px;
+  --radius-md: 12px;
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
-}
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius-3xl: 24px;
+  --radius-4xl: 26px;
+  --radius-sheet: 30px;
+  --radius-cta: 40px;
 
-:root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
+  /* sombras: shadow-glass … */
+  --shadow-glass: var(--shadow-glass);
+  --shadow-panel: var(--shadow-panel);
+  --shadow-nav: var(--shadow-nav);
+  --shadow-toast: var(--shadow-toast);
+  --shadow-fab: var(--shadow-fab);
+  --shadow-cta: var(--shadow-cta);
+  --shadow-modal: var(--shadow-modal);
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* easing: ease-cc, ease-cc-inout */
+  --ease-cc: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-cc-inout: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* breakpoints: md (768) e xl (1280) já são padrão do Tailwind v4 */
+  --breakpoint-xs: 24.375rem; /* 390px */
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-  html {
-    @apply font-sans;
-  }
+  * { border-color: var(--border); }
+  html, body { background: var(--bg); color: var(--t1); -webkit-font-smoothing: antialiased; }
+  body { font-family: var(--font-figtree), system-ui, sans-serif; }
+  a { color: var(--acc-ink); text-underline-offset: 3px; }
+  a:hover { opacity: .85; }
+  :focus-visible { outline: 2px solid var(--ring); outline-offset: 3px; }
+  .num { font-family: var(--font-manrope), system-ui, sans-serif; font-variant-numeric: tabular-nums; }
+}
+
+/* Loops e entradas (design/handoff/06-MOVIMENTO.md). Só transform, opacity e stroke-dashoffset. */
+@keyframes cc-spin  { to { transform: rotate(360deg); } }
+@keyframes cc-pulse { 0%,100% { opacity: .45; } 50% { opacity: 1; } }
+@keyframes cc-wave  { 0%,100% { transform: scaleY(.22); } 50% { transform: scaleY(1); } }
+@keyframes cc-scan  { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+@keyframes cc-scany { from { transform: translateY(-10%); } to { transform: translateY(160%); } }
+/* Fio: parte do zero e termina no valor inline do elemento. */
+@keyframes cc-fio-traco { from { stroke-dashoffset: 100; } }
+@keyframes cc-fio-bola  { from { transform: translateX(0); } }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
 }
