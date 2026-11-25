@@ -191,10 +191,14 @@ export function criarGeminiProvider(opcoes: OpcoesGemini = {}): AiProvider {
       }, opcoes);
     },
     async responder(mensagens, contexto) {
-      const { texto, fontes } = prepararChat(mensagens, contexto);
+      const preparado = prepararChat(mensagens, contexto);
+      if (preparado.periodoDiferente) {
+        const resultado = lerChat({ indicador: null, referencias: [] }, preparado.contexto);
+        return { resultado, custoCentavos: 0 };
+      }
       return gerar({
-        operacao: "chat", partes: [{ text: texto }], esquema: ESQUEMA_CHAT,
-        instrucao: INSTRUCAO_CHAT, validar: (json) => lerChat(json, fontes),
+        operacao: "chat", partes: [{ text: preparado.texto }], esquema: ESQUEMA_CHAT,
+        instrucao: INSTRUCAO_CHAT, validar: (json) => lerChat(json, preparado.contexto),
       }, opcoes);
     },
   };

@@ -116,13 +116,27 @@ describe("Gemini", () => {
 
   it("publica fontes do contexto, omitindo o nome e o identificador do perfil", async () => {
     const fonte = { titulo: "Fonte", arquivo: "kb/fonte.md", url: null, verificadoEm: hoje };
-    gerar.mockResolvedValue(resposta({ resposta: "Consulte a orientação para o seu caso.", referencias: [0] }));
+    gerar.mockResolvedValue(resposta({ indicador: "das", referencias: [0] }));
     const { resultado } = await criarGeminiProvider().responder([{ role: "user", conteudo: "Qual a orientação?" }], {
       perfil: mockPerfil, dashboard: mockDashboard, kb: [{ texto: "Trecho de teste", fonte }],
     });
     expect(resultado.fontes).toEqual([fonte]);
+    expect(resultado.resposta).toContain("82,05");
     const texto = gerar.mock.calls[0][0].contents[0].parts[0].text;
     expect(texto).not.toContain(mockPerfil.nomeNegocio);
     expect(texto).not.toContain(mockPerfil.userId);
+    expect(texto).not.toContain(String(mockDashboard.proximoDas.valorCentavos));
+  });
+
+  it("não usa os valores do painel para responder sobre outro ano", async () => {
+    const antesDaChamada = vi.fn();
+    const { resultado } = await criarGeminiProvider({ antesDaChamada }).responder(
+      [{ role: "user", conteudo: "Qual vai ser meu limite em 2027?" }],
+      { perfil: mockPerfil, dashboard: mockDashboard, kb: [] },
+    );
+    expect(resultado.resposta).toContain("consulte um contador");
+    expect(resultado.fontes).toEqual([]);
+    expect(antesDaChamada).not.toHaveBeenCalled();
+    expect(gerar).not.toHaveBeenCalled();
   });
 });
