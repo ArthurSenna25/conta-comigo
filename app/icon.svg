@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36" fill="none">
+<rect x="0.5" y="0.5" width="35" height="35" rx="10" style="fill:oklch(0.245 0.035 255);stroke:oklch(0.97 0.02 255 / 0.12)"></rect>
+<line x1="8" y1="18" x2="28" y2="18" style="stroke:oklch(0.72 0.025 255);stroke-width:1.5;stroke-linecap:round;opacity:.5"></line>
+<line x1="8" y1="18" x2="21" y2="18" style="stroke:oklch(0.84 0.13 160);stroke-width:2;stroke-linecap:round"></line>
+<circle cx="21" cy="18" r="3" style="fill:oklch(0.84 0.13 160)"></circle>
+</svg>

@@ -11,6 +11,7 @@
 - Auth: contrato novo `lib/contracts/auth.ts` (commit separado). `cacheComponents`/PPR desligados (nada usava). 184 testes em `pnpm check`; `test:rls` 34 casos; reviews de código e segurança em 3 blocos. Achados corrigidos: open redirect por dot-segments, cookie sem HttpOnly/Secure, senha na URL em envio antes da hidratação, falha de rede mostrada como senha errada.
 - Murilo (24/11) implementou `statusLimiteMei` e `projecaoAnual`, com limite proporcional do MEI e projeção em centavos com precisão monetária via `BigInt`. 30 novos testes unitários. `pnpm check` aprovado com 366 testes e build padrão de produção aprovado manualmente com `NEXT_PUBLIC_USE_MOCKS=false pnpm build`. Data de abertura futura: o perfil passou a recusar (PR #15).
 - Arthur (24/11, `feat/design-fundacao`): tokens Azul-noite em `globals.css`, Figtree/Manrope via next/font, `components/` (FioDoLimite, ValorMoeda, ProximoPasso, ChipFonte, Skeleton, EstadoErro 503/429, EstadoVazio) e vitrine `/dev/componentes` (só em dev). O Fio recebe `nivel` (`folga|atencao|estourou`) por props; mapear `FaixaLimite` é papel da tela até o PR de contrato.
+- Arthur (24/11, `feat/landing-estrutura`): landing estática completa em `app/(marketing)` (sem animação, sem JS obrigatório, ganchos `data-movimento`), celular de exemplo em `components/landing`. Lighthouse mobile: a11y 100, SEO 100, boas práticas 100 (favicon `app/icon.svg`). Fontes conferidas em 24/11/2026: teto (art. 18-A § 1º), regra dos 20% e chip (§ 7º, III, a e b, e § 10). Falta: texto do rodapé, Termos/Privacidade (Frigeri), LCP 3,17 s em 4G lento.
 ## Próximo
 Divisão de 24/11 (ver `docs/handoff/`). Cada um segue o "Falta" do seu handoff, um PR por item; só o Arthur faz merge; plano B em 27/11 12h.
 - **Arthur:** tokens e componentes (primeiro), landing (estrutura › movimento › fio 3D), variáveis da Vercel, demo do júri, revisão de todos os PRs.
@@ -35,6 +36,6 @@ Notas operacionais que seguem valendo:
 - Gemini Free teve 503 e timeouts na avaliação sintética. Segundo lote completo: 13/25 respostas válidas, 69/182 campos corretos. Critérios de precisão e disponibilidade continuam pendentes.
 - Riscos abertos em `AMEACAS.md` #14–#19: enumeração de e-mail (aceito, Confirm email desligado), força bruta/limite por IP, portão em route handlers, token vale até expirar, reaceite de consentimento revogado.
 - `pnpm audit`: 1 moderada em `minimatch` via `shadcn › ts-morph` (CLI de dev, pré-existente). `shadcn` já está em devDependencies: `pnpm audit --prod` limpo.
-- CODEOWNERS só com Arthur (de propósito: ele revisa tudo); favicon 404 em dev; LGPD.md com itens "REVISAR COM HUMANO".
+- CODEOWNERS só com Arthur (de propósito: ele revisa tudo); LGPD.md com itens "REVISAR COM HUMANO".
 ## Backlog
 - simularEmprestimo (S1) · audit_log de lançamentos · estados de rascunho persistidos · tabela de mensagens do chat · CSP · PWA (matcher do proxy e `/sw.js`).

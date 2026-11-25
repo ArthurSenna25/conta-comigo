@@ -1,0 +1,226 @@
+/* Landing (design/handoff/05-LANDING.md). Estática: só transições de hover/foco/pressão em transform.
+   Os ganchos da etapa de movimento ficam em [data-movimento] no HTML (06-MOVIMENTO.md). */
+@layer components {
+  .lp {
+    position: relative;
+    overflow-x: clip;
+    font-size: 17px;
+    isolation: isolate;
+  }
+  .lp :where(section[id]) { scroll-margin-top: 80px; }
+
+  /* ---- fundo fixo: gradiente → estrelas → Fio (SVG) → grão ---- */
+  .lp-fundo, .lp-estrelas, .lp-fio-fundo, .lp-grao {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+  }
+  .lp-fundo {
+    z-index: -3;
+    background:
+      radial-gradient(120% 70% at 50% -10%, oklch(0.24 0.06 245), transparent 60%),
+      radial-gradient(80% 60% at 100% 100%, oklch(0.20 0.045 235 / 0.7), transparent 70%),
+      linear-gradient(180deg, oklch(0.155 0.026 255), oklch(0.13 0.022 255));
+  }
+  .lp-estrelas {
+    z-index: -2;
+    opacity: 0.28;
+    background-image:
+      radial-gradient(1px 1px at 23px 37px, var(--star), transparent),
+      radial-gradient(1px 1px at 141px 83px, var(--star), transparent),
+      radial-gradient(1.5px 1.5px at 211px 191px, var(--star), transparent),
+      radial-gradient(1px 1px at 77px 229px, var(--star), transparent),
+      radial-gradient(1px 1px at 251px 13px, var(--star), transparent);
+    background-size: 270px 270px;
+  }
+  .lp-fio-fundo { z-index: -1; width: 100%; height: 100%; opacity: 0.45; }
+  .lp-fio-fundo path { fill: none; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+  .lp-grao { z-index: var(--z-grain); background-image: url("/landing/textura-grao.svg"); opacity: 0.875; }
+
+  /* ---- layout ---- */
+  .lp-contido { width: min(1240px, 100% - 40px); margin-inline: auto; }
+  .lp-secao { position: relative; padding-block: clamp(64px, 8vw, 120px); }
+  .lp-2col { display: grid; gap: clamp(40px, 6vw, 88px); align-items: center; }
+  @media (min-width: 768px) {
+    .lp-2col { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  }
+  /* escurece atrás do texto para manter contraste sobre o Fio de fundo */
+  .lp-sombra-texto { position: relative; }
+  .lp-sombra-texto::before {
+    content: "";
+    position: absolute;
+    inset: -20% -10%;
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(closest-side, oklch(0.13 0.025 255 / 0.8), transparent);
+  }
+
+  /* ---- tipografia (02-TIPOGRAFIA.md, escala da landing) ---- */
+  .lp-kicker {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--acc-ink);
+  }
+  .lp-h2 {
+    margin: 0;
+    font-family: var(--font-manrope), system-ui, sans-serif;
+    font-weight: 800;
+    font-size: clamp(36px, 4.8vw, 68px);
+    line-height: 1.02;
+    letter-spacing: -0.04em;
+    text-wrap: balance;
+  }
+  .lp-corpo { margin: 0; font-size: 18px; line-height: 1.55; color: var(--t2); text-wrap: pretty; }
+
+  /* ---- vidro (03 · cartões de vidro, variante landing) ---- */
+  .lp-vidro {
+    background:
+      radial-gradient(360px circle at var(--x, 50%) var(--y, 0%), oklch(0.78 0.12 240 / 0.12), transparent 62%),
+      linear-gradient(180deg, var(--glass-top), var(--glass-bottom));
+    border: 1px solid var(--glass-line);
+    box-shadow: var(--shadow-glass);
+    backdrop-filter: blur(18px) saturate(1.2);
+    -webkit-backdrop-filter: blur(18px) saturate(1.2);
+  }
+
+  /* ---- botões grandes da landing (58px, pílula) ---- */
+  .lp-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 58px;
+    padding: 0 30px;
+    border-radius: 999px;
+    font-size: 18px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform var(--dur-press) var(--ease-cc);
+  }
+  .lp-btn:hover { opacity: 1; }
+  .lp-btn:active { transform: scale(0.97); }
+  .lp-btn-branco {
+    background: var(--cta-bg);
+    color: var(--cta-fg);
+    font-weight: 700;
+    box-shadow: var(--shadow-cta);
+  }
+  .lp-btn-branco:hover { background: var(--cta-bg-hover); }
+  .lp-btn-vidro {
+    border: 1px solid var(--line-strong);
+    background: oklch(0.20 0.03 255 / 0.55);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    color: var(--t1);
+    font-weight: 600;
+  }
+  .lp-btn-vidro:hover { background: oklch(0.26 0.035 255 / 0.8); border-color: oklch(0.97 0.02 255 / 0.3); }
+  /* Borda cônica do "Comece agora": gradiente fixo; a etapa de movimento gira o ::before (06). */
+  .lp-borda-conica {
+    position: relative;
+    display: inline-flex;
+    padding: 1.5px;
+    border-radius: 999px;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .lp-borda-conica::before {
+    content: "";
+    position: absolute;
+    inset: -150%;
+    z-index: -1;
+    background: conic-gradient(from 0deg, transparent 0deg 280deg, oklch(0.85 0.10 235) 330deg, transparent 360deg);
+  }
+
+  /* ---- nav ---- */
+  .lp-nav {
+    position: fixed;
+    top: 14px;
+    inset-inline: 12px;
+    z-index: var(--z-nav);
+    max-width: 1180px;
+    margin-inline: auto;
+    /* sem transform aqui: o painel do menu é position: fixed relativo à tela */
+    border-radius: 999px;
+    isolation: isolate;
+  }
+  /* Camada de vidro. Sem JS fica visível (legibilidade); a etapa de movimento a esconde no topo. */
+  .lp-nav::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: oklch(0.18 0.03 255 / 0.62);
+    border: 1px solid oklch(0.97 0.02 255 / 0.16);
+    box-shadow: var(--shadow-nav-top);
+    backdrop-filter: blur(20px) saturate(1.3);
+    -webkit-backdrop-filter: blur(20px) saturate(1.3);
+    transition: opacity 400ms var(--ease-cc);
+  }
+  .lp-nav-link {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 14px;
+    border-radius: 12px;
+    color: var(--t2);
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .lp-nav-link:hover { opacity: 1; color: var(--t1); background: oklch(1 0 0 / 0.05); }
+  .lp-menu > summary { list-style: none; cursor: pointer; }
+  .lp-menu > summary::-webkit-details-marker { display: none; }
+  .lp-menu .lp-menu-fechar, .lp-menu[open] .lp-menu-abrir { display: none; }
+  .lp-menu[open] .lp-menu-fechar { display: inline; }
+
+  /* ---- celular (escala sobre a tela de 390×844) ---- */
+  .celular {
+    --s: 0.5;
+    position: relative;
+    flex: none;
+    width: calc(390px * var(--s));
+    height: calc(844px * var(--s));
+    border-radius: calc(44px * var(--s));
+    overflow: hidden;
+    box-shadow:
+      0 0 0 1px oklch(0.85 0.08 235 / 0.3),
+      0 0 90px -12px oklch(0.65 0.14 242 / 0.55),
+      0 40px 80px -30px oklch(0 0 0 / 0.8);
+  }
+  .celular-tela {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 390px;
+    height: 844px;
+    overflow: hidden;
+    transform: scale(var(--s));
+    transform-origin: 0 0;
+    font-size: 16px;
+    color: var(--t1);
+    background:
+      radial-gradient(120% 45% at 25% -5%, var(--glow), transparent 62%),
+      radial-gradient(80% 35% at 110% 35%, var(--glow2), transparent 70%),
+      var(--bg);
+  }
+  @media (min-width: 768px) { .celular { --s: 0.56; } }
+  @media (min-width: 1280px) { .celular-hero { --s: 0.68; } .celular-passo { --s: 0.62; } }
+
+  /* ---- FAQ com <details> nativo ---- */
+  .lp-faq > summary { list-style: none; cursor: pointer; }
+  .lp-faq > summary::-webkit-details-marker { display: none; }
+  .lp-faq > summary:hover { color: var(--acc-ink); }
+  .lp-faq-icone { transition: transform 300ms var(--ease-cc); }
+  .lp-faq[open] .lp-faq-icone { transform: rotate(45deg); }
+
+  /* ---- chip de fonte inline (landing) ---- */
+  .lp-chip > summary { list-style: none; cursor: pointer; }
+  .lp-chip > summary::-webkit-details-marker { display: none; }
+  .lp-chip .lp-chip-menos, .lp-chip[open] .lp-chip-mais { display: none; }
+  .lp-chip[open] .lp-chip-menos { display: inline; }
+  .lp-chip[open] > summary { border-color: var(--acc-a40); }
+}
