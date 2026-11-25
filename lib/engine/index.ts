@@ -15,11 +15,7 @@ export { projecaoAnual } from "./projecao-anual";
 
 export { valorDas } from "./valor-das";
 
-/** Próximo dia 20 a partir de `hoje` (inclusive). */
-export function proximoVencimentoDas(hoje: string): string {
-  void hoje;
-  throw new Error("not implemented");
-}
+export { proximoVencimentoDas } from "./proximo-vencimento-das";
 
 export type EntradaLimite = {
   /** Receitas confirmadas do ano + receitaInicialCentavos do perfil. */
