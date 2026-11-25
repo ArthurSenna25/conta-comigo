@@ -1,6 +1,6 @@
 # PROGRESS — Conta Comigo
 
-**Nível:** N2 (segurança e LGPD reforçadas) · **Fase atual:** telas, engine, IA e landing em paralelo (divisão de 24/11) · **Atualizado:** 24/11/2026
+**Nível:** N2 (segurança e LGPD reforçadas) · **Fase atual:** telas, engine, IA e landing em paralelo (divisão de 24/11) · **Atualizado:** 25/11/2026
 
 ## Feito
 - Gui: provider Gemini multimodal e rota de rascunho com Zod, modo mock e portão de sessão, consentimento e origem. Suíte real executável em `tests/avaliacao-ia`.
@@ -12,6 +12,7 @@
 - Murilo (24/11) implementou `statusLimiteMei` e `projecaoAnual`, com limite proporcional do MEI e projeção em centavos com precisão monetária via `BigInt`. 30 novos testes unitários. `pnpm check` aprovado com 366 testes e build padrão de produção aprovado manualmente com `NEXT_PUBLIC_USE_MOCKS=false pnpm build`. Data de abertura futura: o perfil passou a recusar (PR #15).
 - Arthur (24/11, `feat/design-fundacao`): tokens Azul-noite em `globals.css`, Figtree/Manrope via next/font, `components/` (FioDoLimite, ValorMoeda, ProximoPasso, ChipFonte, Skeleton, EstadoErro 503/429, EstadoVazio) e vitrine `/dev/componentes` (só em dev). O Fio recebe `nivel` (`folga|atencao|estourou`) por props; mapear `FaixaLimite` é papel da tela até o PR de contrato.
 - Arthur (24/11, `feat/landing-estrutura`): landing estática completa em `app/(marketing)` (sem animação, sem JS obrigatório, ganchos `data-movimento`), celular de exemplo em `components/landing`. Lighthouse mobile: a11y 100, SEO 100, boas práticas 100 (favicon `app/icon.svg`). Fontes conferidas em 24/11/2026: teto (art. 18-A § 1º), regra dos 20% e chip (§ 7º, III, a e b, e § 10). Falta: texto do rodapé, Termos/Privacidade (Frigeri), LCP 3,17 s em 4G lento.
+- Arthur (25/11, `feat/landing-movimento`): camada de movimento em ilhas client (`components/landing/movimento`), gsap+ScrollTrigger e lenis por `import()` (JS inicial +7 KB gzip). Siga o Fio preso ≥900×720, O limite em scrub com nível do engine via `nivelDoFio`, modo leve (localStorage) e reduced motion estáticos, failsafe de 1,5 s. CLS 0 carregando e rolando (390/768/1280).
 ## Próximo
 Divisão de 24/11 (ver `docs/handoff/`). Cada um segue o "Falta" do seu handoff, um PR por item; só o Arthur faz merge; plano B em 27/11 12h.
 - **Arthur:** tokens e componentes (primeiro), landing (estrutura › movimento › fio 3D), variáveis da Vercel, demo do júri, revisão de todos os PRs.
@@ -38,4 +39,5 @@ Notas operacionais que seguem valendo:
 - `pnpm audit`: 1 moderada em `minimatch` via `shadcn › ts-morph` (CLI de dev, pré-existente). `shadcn` já está em devDependencies: `pnpm audit --prod` limpo.
 - CODEOWNERS só com Arthur (de propósito: ele revisa tudo); LGPD.md com itens "REVISAR COM HUMANO".
 ## Backlog
+- Landing (cortado do movimento): skew por velocidade, ímã, flutuação do celular, saída do palco do herói, SplitText. Fio de fundo ligado ao scroll fica para o PR do fio 3D.
 - simularEmprestimo (S1) · audit_log de lançamentos · estados de rascunho persistidos · tabela de mensagens do chat · CSP · PWA (matcher do proxy e `/sw.js`).
