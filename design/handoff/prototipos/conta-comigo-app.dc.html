@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;background:oklch(0.13 0.02 255);-webkit-font-smoothing:antialiased}
+a{color:oklch(0.80 0.11 240)}a:hover{opacity:.85}
+input,textarea,button{font-family:inherit}
+@keyframes cc-spin{to{transform:rotate(360deg)}}
+@keyframes cc-pulse{0%,100%{opacity:.45}50%{opacity:1}}
+@keyframes cc-wave{0%,100%{transform:scaleY(.22)}50%{transform:scaleY(1)}}
+@keyframes cc-scan{0%{transform:translateX(-100%)}100%{transform:translateX(250%)}}
+@keyframes cc-ring{0%{transform:scale(1);opacity:.55}100%{transform:scale(1.7);opacity:0}}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+</helmet>
+
+<div data-screen-label="{{ screenLabel }}" style="--bg:oklch(0.16 0.025 255);--s1:oklch(0.20 0.03 255);--s2:oklch(0.245 0.035 255);--s3:oklch(0.30 0.04 255);--t1:oklch(0.97 0.008 255);--t2:oklch(0.85 0.02 255);--t3:oklch(0.72 0.025 255);--line:oklch(0.97 0.02 255 / 0.12);--line-strong:oklch(0.97 0.02 255 / 0.22);--acc:oklch(0.78 0.12 240);--acc-ink:oklch(0.80 0.11 240);--on-acc:oklch(0.17 0.04 255);--ring:oklch(0.80 0.11 240);--ok:oklch(0.84 0.13 160);--on-ok:oklch(0.20 0.03 180);--warn:oklch(0.83 0.14 78);--err:oklch(0.71 0.18 25);--track:oklch(0.97 0.02 255 / 0.16);--glow:oklch(0.55 0.13 245 / 0.30);--glow2:oklch(0.50 0.09 215 / 0.20);--spot:oklch(0.78 0.12 240 / 0.16);--hi:oklch(1 0 0 / 0.07);--shadow:oklch(0 0 0 / 0.7);position:relative;width:390px;height:844px;overflow:hidden;border-radius:44px;background:radial-gradient(120% 45% at 25% -5%,var(--glow),transparent 62%),radial-gradient(80% 35% at 110% 35%,var(--glow2),transparent 70%),var(--bg);color:var(--t1);font-family:Figtree,system-ui,sans-serif;font-size:16px;box-shadow:0 0 0 1px var(--line-strong),0 40px 90px -40px oklch(0 0 0 / 0.9);isolation:isolate">
+  <div style="position:absolute;inset:0;pointer-events:none;background-image:{{ noise }};z-index:0"></div>
+
+  <!-- status bar -->
+  <div style="position:absolute;top:0;left:0;right:0;height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 32px;z-index:5;font:600 15px Figtree,sans-serif">
+    <span style="font-variant-numeric:tabular-nums">9:41</span>
+    <span style="display:flex;align-items:center;gap:6px"><span style="display:flex;gap:2px;align-items:flex-end"><span style="width:3px;height:5px;border-radius:1px;background:var(--t1)"></span><span style="width:3px;height:7px;border-radius:1px;background:var(--t1)"></span><span style="width:3px;height:9px;border-radius:1px;background:var(--t1)"></span><span style="width:3px;height:11px;border-radius:1px;background:var(--t1)"></span></span><span style="width:24px;height:12px;border-radius:4px;border:1.5px solid var(--t2);padding:1.5px;box-sizing:border-box;display:flex"><span style="flex:0 0 70%;border-radius:2px;background:var(--t1)"></span></span></span>
+  </div>
+  <!-- demo strip -->
+  <div style="position:absolute;top:44px;left:12px;right:12px;height:30px;border-radius:10px;display:flex;align-items:center;justify-content:center;gap:8px;z-index:5;background:repeating-linear-gradient(135deg,oklch(0.245 0.035 255) 0 9px,oklch(0.28 0.04 255) 9px 18px);border:1px solid var(--line-strong);font:600 14px Figtree,sans-serif"><span style="width:7px;height:7px;border-radius:50%;background:var(--warn)"></span>Modo demonstração · dados de exemplo</div>
+
+  <!-- content -->
+  <div style="position:absolute;top:78px;left:0;right:0;bottom:0;z-index:1;transform:translateY({{ enterY }}px);opacity:{{ enterO }};transition:{{ enterTr }}">
+
+    <!-- ============ ONBOARDING 1 ============ -->
+    <sc-if value="{{ is.onb1 }}" hint-placeholder-val="{{ false }}">
+      <div style="height:100%;display:flex;flex-direction:column">
+        <div style="flex:1;overflow:auto;padding:24px 20px 16px;display:flex;flex-direction:column;gap:18px">
+          <div style="display:flex;gap:6px"><span style="flex:1;height:4px;border-radius:2px;background:var(--acc)"></span><span style="flex:1;height:4px;border-radius:2px;background:var(--track)"></span><span style="flex:1;height:4px;border-radius:2px;background:var(--track)"></span></div>
+          <div style="font:600 14px Figtree,sans-serif;color:var(--t3)">Passo 1 de 3</div>
+          <div style="font:800 30px/1.1 Manrope,sans-serif;letter-spacing:-0.02em;text-wrap:pretty">O que você faz como MEI?</div>
+          <div style="font-size:16px;line-height:1.5;color:var(--t2)">Com isso a gente sabe quais impostos e limites valem para você.</div>
+          <button onClick="{{ helpCNAE }}" style="align-self:flex-start;min-height:44px;margin:-12px 0 -8px;padding:0;border:0;background:transparent;color:var(--acc-ink);font:600 15px Figtree,sans-serif;cursor:pointer;text-decoration:underline;text-underline-offset:3px">O que é CNAE?</button>
+          <div style="display:flex;align-items:center;gap:10px;height:52px;padding:0 16px;border-radius:14px;background:var(--s2);border:1px solid var(--line-strong);color:var(--t3);font-size:16px"><span style="width:14px;height:14px;border-radius:50%;border:2px solid var(--t3);box-sizing:border-box"></span>Buscar atividade ou CNAE</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ acts }}" as="a" hint-placeholder-count="4">
+              <button onClick="{{ a.pick }}" style="display:flex;align-items:center;gap:14px;min-height:64px;padding:12px 16px;border-radius:16px;border:1px solid {{ a.border }};background:{{ a.bg }};color:var(--t1);text-align:left;cursor:pointer">
+                <span style="flex:none;width:22px;height:22px;border-radius:50%;border:2px solid {{ a.border }};display:flex;align-items:center;justify-content:center;box-sizing:border-box"><span style="width:10px;height:10px;border-radius:50%;background:{{ a.dot }}"></span></span>
+                <span style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font:600 16px Figtree,sans-serif">{{ a.nome }}</span><span style="font:500 14px Manrope,sans-serif;color:var(--t3);font-variant-numeric:tabular-nums">CNAE {{ a.cnae }}</span></span>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+        <div style="padding:12px 20px 34px;display:flex;flex-direction:column;gap:8px">
+          <button onClick="{{ toOnb2 }}" disabled="{{ onb1Off }}" style="height:56px;border-radius:16px;border:0;background:{{ onb1Bg }};color:{{ onb1Fg }};font:700 17px Figtree,sans-serif;cursor:pointer">Continuar</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ============ ONBOARDING 2 ============ -->
+    <sc-if value="{{ is.onb2 }}" hint-placeholder-val="{{ false }}">
+      <div style="height:100%;display:flex;flex-direction:column">
+        <div style="flex:1;overflow:auto;padding:24px 20px 16px;display:flex;flex-direction:column;gap:18px">
+          <div style="display:flex;gap:6px"><span style="flex:1;height:4px;border-radius:2px;background:var(--acc)"></span><span style="flex:1;height:4px;border-radius:2px;background:var(--acc)"></span><span style="flex:1;height:4px;border-radius:2px;background:var(--track)"></span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center"><span style="font:600 14px Figtree,sans-serif;color:var(--t3)">Passo 2 de 3</span><button onClick="{{ toOnb1 }}" style="min-height:44px;padding:0 10px;border:0;background:transparent;color:var(--acc-ink);font:600 15px Figtree,sans-serif;cursor:pointer">Voltar</button></div>
+          <div style="font:800 30px/1.1 Manrope,sans-serif;letter-spacing:-0.02em;text-wrap:pretty">Quanto você já faturou em 2026?</div>
+          <div style="font-size:16px;line-height:1.5;color:var(--t2)">Pode ser aproximado. Você ajusta depois, lançamento por lançamento.</div>
+          <label style="display:flex;align-items:center;gap:10px;height:76px;padding:0 20px;border-radius:20px;background:var(--s2);border:1px solid var(--ring);box-shadow:0 0 0 4px oklch(0.80 0.11 240 / 0.18)">
+            <span style="font:700 24px Manrope,sans-serif;color:var(--t3)">R$</span>
+            <input inputMode="numeric" value="{{ onbFmt }}" onChange="{{ onOnbFat }}" style="flex:1;min-width:0;border:0;outline:0;background:transparent;color:var(--t1);font:800 36px Manrope,sans-serif;letter-spacing:-0.02em;font-variant-numeric:tabular-nums"></input>
+          </label>
+          <div style="display:flex;flex-direction:column;gap:10px;padding:18px;border-radius:18px;border:1px solid var(--line);background:oklch(0.20 0.03 255 / 0.7)">
+            <div style="display:flex;justify-content:space-between;font:600 14px Figtree,sans-serif;color:var(--t3)"><span>Seu fio, por enquanto</span><span style="font-family:Manrope,sans-serif;font-variant-numeric:tabular-nums">{{ onbPct }}</span></div>
+            <svg viewBox="0 0 320 24" style="width:100%;height:auto;overflow:visible"><line x1="0" y1="12" x2="290.9" y2="12" style="stroke:var(--track);stroke-width:3;stroke-linecap:round"></line><line x1="232.7" y1="5" x2="232.7" y2="19" style="stroke:var(--t3);stroke-width:1.5"></line><line x1="290.9" y1="1" x2="290.9" y2="23" style="stroke:var(--t2);stroke-width:2"></line><path d="M0 12 H320" pathLength="100" stroke-dasharray="100" style="fill:none;stroke:{{ onbFio.color }};stroke-width:4;stroke-linecap:round;stroke-dashoffset:{{ onbFio.off }};transition:stroke-dashoffset .4s cubic-bezier(.2,.7,.2,1)"></path><circle cx="0" cy="12" r="6" style="fill:{{ onbFio.color }};transform:translateX({{ onbFio.dx }}px);transition:transform .4s cubic-bezier(.2,.7,.2,1)"></circle></svg>
+            <div style="font:600 15px Figtree,sans-serif;font-variant-numeric:tabular-nums">{{ onbFio.msg }}</div>
+          </div>
+        </div>
+        <div style="padding:12px 20px 34px;display:flex;flex-direction:column;gap:6px">
+          <button onClick="{{ toOnb3 }}" style="height:56px;border-radius:16px;border:0;background:var(--acc);color:var(--on-acc);font:700 17px Figtree,sans-serif;cursor:pointer" style-active="transform:scale(.98)">Continuar</button>
+          <button onClick="{{ toOnb3Zero }}" style="height:48px;border-radius:14px;border:0;background:transparent;color:var(--acc-ink);font:600 16px Figtree,sans-serif;cursor:pointer">Ainda não faturei nada</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ============ ONBOARDING 3 ============ -->
+    <sc-if value="{{ is.onb3 }}" hint-placeholder-val="{{ false }}">
+      <div style="height:100%;display:flex;flex-direction:column">
+        <div style="flex:1;overflow:auto;padding:24px 20px 16px;display:flex;flex-direction:column;gap:18px">
+          <div style="display:flex;gap:6px"><span style="flex:1;height:4px;border-radius:2px;background:var(--acc)"></span><span style="flex:1;height:4px;border-radius:2px;background:var(--acc)"></span><span style="flex:1;height:4px;border-radius:2px;background:var(--acc)"></span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center"><span style="font:600 14px Figtree,sans-serif;color:var(--t3)">Passo 3 de 3</span><button onClick="{{ toOnb2 }}" style="min-height:44px;padding:0 10px;border:0;background:transparent;color:var(--acc-ink);font:600 15px Figtree,sans-serif;cursor:pointer">Voltar</button></div>
+          <div style="font:800 30px/1.1 Manrope,sans-serif;letter-spacing:-0.02em;text-wrap:pretty">Posso usar IA para ler o que você mandar?</div>
+          <div style="display:flex;flex-direction:column;gap:2px;border-radius:18px;border:1px solid var(--line);background:oklch(0.20 0.03 255 / 0.7);overflow:hidden">
+            <div style="display:flex;gap:14px;padding:16px"><span style="flex:none;width:28px;height:28px;border-radius:9px;background:oklch(0.78 0.12 240 / 0.16);color:var(--acc-ink);display:flex;align-items:center;justify-content:center;font:800 14px Manrope,sans-serif">1</span><div style="display:flex;flex-direction:column;gap:4px"><span style="font:700 16px Figtree,sans-serif">A IA lê e monta um rascunho</span><span style="font-size:15px;line-height:1.45;color:var(--t2)">Foto de recibo, áudio, print de Pix ou texto viram um lançamento para você conferir.</span></div></div>
+            <div style="display:flex;gap:14px;padding:16px;border-top:1px solid var(--line)"><span style="flex:none;width:28px;height:28px;border-radius:9px;background:oklch(0.78 0.12 240 / 0.16);color:var(--acc-ink);display:flex;align-items:center;justify-content:center;font:800 14px Manrope,sans-serif">2</span><div style="display:flex;flex-direction:column;gap:4px"><span style="font:700 16px Figtree,sans-serif">Nada é salvo sem você</span><span style="font-size:15px;line-height:1.45;color:var(--t2)">Você confirma cada lançamento. Limite e DAS são calculados pelo app, não pela IA.</span></div></div>
+            <div style="display:flex;gap:14px;padding:16px;border-top:1px solid var(--line)"><span style="flex:none;width:28px;height:28px;border-radius:9px;background:oklch(0.78 0.12 240 / 0.16);color:var(--acc-ink);display:flex;align-items:center;justify-content:center;font:800 14px Manrope,sans-serif">3</span><div style="display:flex;flex-direction:column;gap:4px"><span style="font:700 16px Figtree,sans-serif">Seus dados são seus</span><span style="font-size:15px;line-height:1.45;color:var(--t2)">Você apaga tudo quando quiser, no Perfil.</span></div></div>
+          </div>
+          <div style="font-size:15px;line-height:1.5;color:var(--t2)">Se recusar, o app funciona igual, só que você preenche os lançamentos na mão.</div>
+        </div>
+        <div style="padding:12px 20px 34px;display:flex;flex-direction:column;gap:8px">
+          <button onClick="{{ acceptAI }}" style="height:56px;border-radius:16px;border:0;background:var(--acc);color:var(--on-acc);font:700 17px Figtree,sans-serif;cursor:pointer" style-active="transform:scale(.98)">Aceitar e começar</button>
+          <button onClick="{{ refuseAI }}" style="height:52px;border-radius:16px;border:1px solid var(--line-strong);background:var(--s2);color:var(--t1);font:600 16px Figtree,sans-serif;cursor:pointer">Recusar e preencher na mão</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ============ PAINEL ============ -->
+    <sc-if value="{{ is.painel }}" hint-placeholder-val="{{ false }}">
+      <div style="height:100%;overflow:auto;padding:18px 20px 190px;box-sizing:border-box;display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:15px;color:var(--t2)">Olá, Ana</span><span style="font:800 24px/1.1 Manrope,sans-serif;letter-spacing:-0.015em">Seu ano até aqui</span></div>
+          <button onClick="{{ goPerfil }}" aria-label="Perfil" style="width:44px;height:44px;border-radius:50%;border:1px solid var(--line-strong);background:var(--s2);color:var(--t1);font:700 16px Manrope,sans-serif;cursor:pointer">A</button>
+        </div>
+
+        <sc-if value="{{ netErr }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;gap:12px;padding:14px 14px 14px 16px;border-radius:16px;background:color-mix(in oklch,var(--err) 13%,var(--s1));border:1px solid color-mix(in oklch,var(--err) 55%,transparent)">
+            <div style="flex:1;display:flex;flex-direction:column;gap:3px"><span style="font:700 15px Figtree,sans-serif;color:var(--err)">Sem internet</span><span style="font-size:14px;line-height:1.4;color:var(--t2)">Mostrando o último painel salvo, de 9:12.</span></div>
+            <button onClick="{{ retryNet }}" style="min-height:44px;padding:0 14px;border-radius:12px;border:1px solid var(--line-strong);background:var(--s2);color:var(--t1);font:600 15px Figtree,sans-serif;cursor:pointer">Tentar de novo</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}">
+          <div aria-busy="true" style="display:flex;flex-direction:column;gap:16px">
+            <div style="border-radius:26px;border:1px solid var(--line);background:oklch(0.20 0.03 255 / 0.7);padding:22px;display:flex;flex-direction:column;gap:14px">
+              <div style="height:14px;width:40%;border-radius:7px;background:var(--s3);animation:cc-pulse 1.4s ease-in-out infinite"></div>
+              <div style="height:52px;width:78%;border-radius:12px;background:var(--s3);animation:cc-pulse 1.4s ease-in-out .15s infinite"></div>
+              <div style="height:4px;width:100%;border-radius:2px;background:var(--s3);animation:cc-pulse 1.4s ease-in-out .3s infinite"></div>
+              <div style="height:14px;width:55%;border-radius:7px;background:var(--s3);animation:cc-pulse 1.4s ease-in-out .45s infinite"></div>
+            </div>
+            <div style="height:96px;border-radius:20px;background:var(--s1);border:1px solid var(--line);animation:cc-pulse 1.4s ease-in-out .3s infinite"></div>
+            <div style="height:170px;border-radius:20px;background:var(--s1);border:1px solid var(--line);animation:cc-pulse 1.4s ease-in-out .45s infinite"></div>
+            <div style="text-align:center;font-size:14px;color:var(--t3)">Carregando seu painel…</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ notLoading }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <!-- hero fio -->
+            <div onPointerMove="{{ tilt }}" onPointerLeave="{{ untilt }}" style="position:relative;border-radius:26px;border:1px solid var(--line-strong);background:radial-gradient(380px circle at var(--x,25%) var(--y,0%),var(--spot),transparent 62%),oklch(0.20 0.03 255 / 0.72);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:inset 0 1px 0 var(--hi),0 30px 60px -34px var(--shadow);padding:22px 20px 20px;display:flex;flex-direction:column;gap:12px;transition:transform .35s cubic-bezier(.2,.7,.2,1);transform-style:preserve-3d">
+              <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:15px;color:var(--t2)">Faturado em 2026</span><span style="font:600 14px Figtree,sans-serif;color:var(--t3);border:1px dashed var(--line-strong);border-radius:8px;padding:2px 8px">exemplo</span></div>
+              <div style="font:800 52px/1 Manrope,sans-serif;letter-spacing:-0.035em;font-variant-numeric:tabular-nums;white-space:nowrap">{{ heroCount }}</div>
+              <div style="font-size:15px;color:var(--t2)">de R$ 81.000,00 · teto anual do MEI</div>
+              <div style="padding-top:8px">
+                <svg viewBox="0 0 320 28" style="width:100%;height:auto;display:block;overflow:visible">
+                  <line x1="0" y1="14" x2="290.9" y2="14" style="stroke:var(--track);stroke-width:2;stroke-linecap:round;stroke-dasharray:{{ trackDash }}"></line>
+                  <line x1="232.7" y1="6" x2="232.7" y2="22" style="stroke:var(--t3);stroke-width:1"></line>
+                  <line x1="290.9" y1="2" x2="290.9" y2="26" style="stroke:var(--t2);stroke-width:1.5"></line>
+                  <path d="M0 14 H320" pathLength="100" stroke-dasharray="100" style="fill:none;stroke:{{ fio.color }};stroke-width:3;stroke-linecap:round;stroke-dashoffset:{{ fio.off }};transition:{{ fio.tr }};filter:drop-shadow(0 0 6px {{ fio.color }})"></path>
+                  <circle cx="0" cy="14" r="5.5" style="fill:{{ fio.color }};transform:translateX({{ fio.dx }}px);transition:{{ fio.trDot }};filter:drop-shadow(0 0 9px {{ fio.color }})"></circle>
+                </svg>
+                <div style="position:relative;height:20px;margin-top:6px;font:600 14px Manrope,sans-serif;color:var(--t3);font-variant-numeric:tabular-nums"><span style="position:absolute;left:0">R$ 0</span><span style="position:absolute;left:72.7%;transform:translateX(-50%)">80%</span><span style="position:absolute;left:90.9%;transform:translateX(-50%);color:var(--t2)">81 mil</span></div>
+              </div>
+              <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px">
+                <span style="display:inline-flex;align-items:center;gap:8px;min-height:30px;padding:0 12px;border-radius:999px;background:{{ fio.tint }};color:{{ fio.color }};font:700 14px Figtree,sans-serif"><span style="width:8px;height:8px;border-radius:50%;background:{{ fio.color }}"></span>{{ fio.status }}</span>
+                <span style="font:700 18px Manrope,sans-serif;font-variant-numeric:tabular-nums">{{ fio.msg }}</span>
+              </div>
+              <div style="font-size:15px;line-height:1.5;color:var(--t2);text-wrap:pretty">{{ fio.proj }}</div>
+            </div>
+
+            <!-- limit alerts -->
+            <sc-if value="{{ fio.isWarn }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:8px;padding:16px;border-radius:18px;background:color-mix(in oklch,var(--warn) 11%,var(--s1));border:1px solid color-mix(in oklch,var(--warn) 50%,transparent)">
+                <span style="font:700 16px Figtree,sans-serif;color:var(--warn)">Você passou de 80% do teto</span>
+                <span style="font-size:15px;line-height:1.45;color:var(--t2)">Ainda cabe no MEI. Vale segurar notas grandes até janeiro, se der.</span>
+              </div>
+            </sc-if>
+            <sc-if value="{{ fio.isOver }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:12px;padding:16px;border-radius:18px;background:color-mix(in oklch,var(--err) 12%,var(--s1));border:1px solid color-mix(in oklch,var(--err) 55%,transparent)">
+                <span style="font:700 16px Figtree,sans-serif;color:var(--err)">Você passou do teto. O que fazer:</span>
+                <div style="display:flex;gap:10px;font-size:15px;line-height:1.45;color:var(--t1)"><span style="flex:none;font:800 15px Manrope,sans-serif;color:var(--err)">1</span>Como passou menos de 20%, você segue MEI até dezembro.</div>
+                <div style="display:flex;gap:10px;font-size:15px;line-height:1.45;color:var(--t1)"><span style="flex:none;font:800 15px Manrope,sans-serif;color:var(--err)">2</span>O valor acima do teto paga imposto em guia própria.</div>
+                <div style="display:flex;gap:10px;font-size:15px;line-height:1.45;color:var(--t1)"><span style="flex:none;font:800 15px Manrope,sans-serif;color:var(--err)">3</span>Em janeiro você vira microempresa. Fale com um contador antes.</div>
+                <button onClick="{{ askOver }}" style="align-self:flex-start;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border-radius:12px;border:1px solid var(--line-strong);background:var(--s2);color:var(--t1);font:600 14px Figtree,sans-serif;cursor:pointer"><span style="width:6px;height:6px;border-radius:50%;background:var(--acc)"></span>Ver a regra no chat</button>
+              </div>
+            </sc-if>
+
+            <button onClick="{{ next.run }}" style="display:flex;align-items:center;gap:14px;min-height:72px;padding:14px 16px;border-radius:20px;border:1px solid {{ next.border }};background:{{ next.bg }};color:var(--t1);text-align:left;cursor:pointer;transition:transform .1s" style-active="transform:scale(.98)">
+              <span style="flex:none;min-width:36px;height:36px;padding:0 6px;box-sizing:border-box;border-radius:12px;background:{{ next.color }};color:var(--on-acc);display:flex;align-items:center;justify-content:center;font:800 16px Manrope,sans-serif">{{ next.badge }}</span>
+              <span style="flex:1;display:flex;flex-direction:column;gap:3px"><span style="font:600 14px Figtree,sans-serif;color:var(--t3)">Próximo passo</span><span style="font:700 16px/1.3 Figtree,sans-serif">{{ next.title }}</span><span style="font-size:14px;line-height:1.4;color:var(--t2)">{{ next.sub }}</span></span>
+              <span style="font-size:22px;color:var(--t3)">›</span>
+            </button>
+
+            <sc-if value="{{ notEmpty }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;flex-direction:column;gap:16px">
+                <div style="display:grid;grid-template-columns:1fr auto;gap:6px 12px;align-items:center;padding:18px;border-radius:20px;border:1px solid var(--line);background:oklch(0.20 0.03 255 / 0.8)">
+                  <span style="display:flex;align-items:center;gap:6px;font:600 14px Figtree,sans-serif;color:var(--t3)">Próximo DAS · exemplo<button onClick="{{ helpDAS }}" aria-label="O que é DAS?" style="width:44px;height:44px;margin:-14px -10px;border:0;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center"><span style="width:20px;height:20px;border-radius:50%;border:1.5px solid var(--t3);color:var(--t2);display:flex;align-items:center;justify-content:center;font:700 13px Figtree,sans-serif;box-sizing:border-box">?</span></button></span>
+                  <span style="grid-row:span 2;font:700 14px Figtree,sans-serif;padding:6px 10px;border-radius:10px;background:var(--s3);color:var(--t1)">em 26 dias</span>
+                  <span style="font:800 26px Manrope,sans-serif;letter-spacing:-0.02em;font-variant-numeric:tabular-nums">R$ 81,90</span>
+                  <span style="grid-column:1/-1;font-size:15px;color:var(--t2);font-variant-numeric:tabular-nums">Vence em 20/12/2026 · referente a novembro</span>
+                </div>
+
+                <div style="display:flex;flex-direction:column;border-radius:20px;border:1px solid var(--line);background:oklch(0.20 0.03 255 / 0.8);overflow:hidden">
+                  <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px 6px"><span style="font:700 17px Figtree,sans-serif">Últimos lançamentos</span><button onClick="{{ goLanc }}" style="min-height:44px;padding:0 6px;border:0;background:transparent;color:var(--acc-ink);font:600 15px Figtree,sans-serif;cursor:pointer">Ver todos</button></div>
+                  <sc-for list="{{ recent }}" as="e" hint-placeholder-count="3">
+                    <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid var(--line)">
+                      <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font:600 15px Figtree,sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ e.nome }}</span><span style="font-size:14px;color:var(--t3);font-variant-numeric:tabular-nums">{{ e.meta }}</span></span>
+                      <span style="font:700 16px Manrope,sans-serif;font-variant-numeric:tabular-nums;color:{{ e.color }}">{{ e.valorTxt }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+      </div>
+      <button onClick="{{ goAdd }}" style="position:absolute;right:20px;bottom:108px;height:58px;padding:0 24px 0 18px;border-radius:20px;border:0;background:var(--acc);color:var(--on-acc);font:700 17px Figtree,sans-serif;display:flex;align-items:center;gap:10px;cursor:pointer;box-shadow:0 14px 34px -10px oklch(0.78 0.12 240 / 0.7),inset 0 1px 0 oklch(1 0 0 / 0.35);z-index:3" style-active="transform:scale(.96)"><span style="position:relative;width:22px;height:22px;display:flex;align-items:center;justify-content:center"><span style="position:absolute;width:16px;height:2.5px;border-radius:2px;background:currentColor"></span><span style="position:absolute;width:2.5px;height:16px;border-radius:2px;background:currentColor"></span></span>Adicionar</button>
+    </sc-if>
+
+    <!-- ============ ADICIONAR ============ -->
+    <sc-if value="{{ is.adicionar }}" hint-placeholder-val="{{ false }}">
+      <div style="height:100%;display:flex;flex-direction:column">
+        <div style="flex:1;overflow:auto;padding:22px 20px 12px;display:flex;flex-direction:column;gap:18px">
+          <div style="font:800 30px/1.1 Manrope,sans-serif;letter-spacing:-0.02em">O que entrou ou saiu?</div>
+          <div style="font-size:16px;line-height:1.5;color:var(--t2)">Mande do jeito mais fácil. A IA monta um rascunho e você confere.</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+            <button onClick="{{ pickFoto }}" style="aspect-ratio:0.82;border-radius:20px;border:1px solid var(--line-strong);background:oklch(0.20 0.03 255 / 0.8);color:var(--t1);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;font:600 15px Figtree,sans-serif;cursor:pointer" style-hover="background:var(--s2)" style-active="transform:scale(.95)"><svg width="30" height="30" viewBox="0 0 30 30"><rect x="3" y="8" width="24" height="17" rx="5" style="fill:none;stroke:var(--acc-ink);stroke-width:2"></rect><circle cx="15" cy="16.5" r="4.5" style="fill:none;stroke:var(--acc-ink);stroke-width:2"></circle><rect x="10" y="4.5" width="10" height="4" rx="1.5" style="fill:var(--acc-ink)"></rect></svg>Foto</button>
+            <button onClick="{{ pickAudio }}" style="aspect-ratio:0.82;border-radius:20px;border:1px solid var(--line-strong);background:oklch(0.20 0.03 255 / 0.8);color:var(--t1);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;font:600 15px Figtree,sans-serif;cursor:pointer" style-hover="background:var(--s2)" style-active="transform:scale(.95)"><svg width="30" height="30" viewBox="0 0 30 30"><rect x="10" y="3" width="10" height="16" rx="5" style="fill:none;stroke:var(--acc-ink);stroke-width:2"></rect><path d="M6 14a9 9 0 0 0 18 0" style="fill:none;stroke:var(--acc-ink);stroke-width:2;stroke-linecap:round"></path><line x1="15" y1="23" x2="15" y2="27" style="stroke:var(--acc-ink);stroke-width:2;stroke-linecap:round"></line></svg>Áudio</button>
+            <button onClick="{{ pickPrint }}" style="aspect-ratio:0.82;border-radius:20px;border:1px solid var(--line-strong);background:oklch(0.20 0.03 255 / 0.8);color:var(--t1);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;font:600 15px Figtree,sans-serif;cursor:pointer" style-hover="background:var(--s2)" style-active="transform:scale(.95)"><svg width="30" height="30" viewBox="0 0 30 30"><rect x="8" y="2.5" width="14" height="25" rx="4" style="fill:none;stroke:var(--acc-ink);stroke-width:2"></rect><rect x="11" y="8" width="8" height="8" rx="1.5" style="fill:var(--acc-ink);opacity:.5"></rect><line x1="11" y1="20" x2="19" y2="20" style="stroke:var(--acc-ink);stroke-width:2;stroke-linecap:round"></line></svg>Print</button>
+            <button onClick="{{ pickWrite }}" style="aspect-ratio:0.82;border-radius:20px;border:1px solid var(--line-strong);background:oklch(0.20 0.03 255 / 0.8);color:var(--t1);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;font:600 15px Figtree,sans-serif;cursor:pointer" style-hover="background:var(--s2)" style-active="transform:scale(.95)"><svg width="30" height="30" viewBox="0 0 30 30"><line x1="5" y1="9" x2="25" y2="9" style="stroke:var(--acc-ink);stroke-width:2;stroke-linecap:round"></line><line x1="5" y1="15" x2="25" y2="15" style="stroke:var(--acc-ink);stroke-width:2;stroke-linecap:round"></line><line x1="5" y1="21" x2="16" y2="21" style="stroke:var(--acc-ink);stroke-width:2;stroke-linecap:round"></line></svg>Escrever</button>
+          </div>
+          <label style="display:flex;flex-direction:column;gap:8px">
+            <span style="font:600 15px Figtree,sans-serif;color:var(--t2)">Ou escreva do seu jeito</span>
+            <textarea ref="{{ writeRef }}" value="{{ writeText }}" onChange="{{ onWrite }}" placeholder="recebi 120 do corte da Maria hoje" rows="3" style="resize:none;border-radius:16px;border:1px solid var(--line-strong);background:var(--s2);color:var(--t1);padding:14px 16px;font:500 17px/1.45 Figtree,sans-serif;outline:0" style-focus="border-color:var(--ring);box-shadow:0 0 0 4px oklch(0.80 0.11 240 / 0.18)"></textarea>
+          </label>
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.45;color:var(--t3)"><svg width="34" height="10" viewBox="0 0 34 10" style="flex:none;margin-top:5px"><line x1="1" y1="5" x2="33" y2="5" style="stroke:var(--track);stroke-width:2;stroke-linecap:round"></line><line x1="1" y1="5" x2="14" y2="5" style="stroke:var(--ok);stroke-width:2.5;stroke-linecap:round"></line><circle cx="14" cy="5" r="3" style="fill:var(--ok)"></circle></svg>A IA só rascunha. Quem calcula limite e DAS é o app, e nada entra sem você confirmar.</div>
+        </div>
+        <div style="padding:12px 20px 34px;display:flex;flex-direction:column;gap:6px">
+          <button onClick="{{ sendWrite }}" disabled="{{ writeOff }}" style="height:56px;border-radius:16px;border:0;background:{{ writeBg }};color:{{ writeFg }};font:700 17px Figtree,sans-serif;cursor:pointer">Enviar para a IA</button>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <button onClick="{{ goPainel }}" style="height:48px;border-radius:14px;border:0;background:transparent;color:var(--t2);font:600 16px Figtree,sans-serif;cursor:pointer">Cancelar</button>
+            <button onClick="{{ goManual }}" style="height:48px;border-radius:14px;border:0;background:transparent;color:var(--acc-ink);font:600 16px Figtree,sans-serif;cursor:pointer">Preencher na mão</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ============ GRAVANDO ============ -->
+    <sc-if value="{{ is.gravando }}" hint-placeholder-val="{{ false }}">
+      <div style="height:100%;display:flex;flex-direction:column">
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;padding:20px">
+          <div style="display:flex;align-items:center;gap:8px;font:700 15px Figtree,sans-serif;color:var(--err)"><span style="width:10px;height:10px;border-radius:50%;background:var(--err);animation:cc-pulse 1s ease-in-out infinite"></span>Gravando</div>
+          <div style="font:800 64px/1 Manrope,sans-serif;letter-spacing:-0.03em;font-variant-numeric:tabular-nums">{{ recTxt }}</div>
+          <div style="display:flex;align-items:center;gap:4px;height:84px">
+            <sc-for list="{{ bars }}" as="b" hint-placeholder-count="30">
+              <span style="width:5px;height:{{ b.h }}px;border-radius:3px;background:var(--acc);opacity:{{ b.o }};transform-origin:center;animation:cc-wave {{ b.dur }}ms ease-in-out {{ b.delay }}ms infinite"></span>
+            </sc-for>
+          </div>
+          <div style="font-size:16px;line-height:1.5;color:var(--t2);text-align:center;max-width:290px;text-wrap:pretty">Fale o valor, o que foi e de quem. Ex.: “recebi 350 de uma escova progressiva”.</div>
+        </div>
+        <div style="padding:12px 20px 34px;display:grid;grid-template-columns:1fr 1.6fr;gap:10px">
+          <button onClick="{{ cancelRec }}" style="height:60px;border-radius:18px;border:1px solid var(--line-strong);background:var(--s2);color:var(--t1);font:600 17px Figtree,sans-serif;cursor:pointer">Cancelar</button>
+          <button onClick="{{ stopRec }}" style="position:relative;height:60px;border-radius:18px;border:0;background:var(--acc);color:var(--on-acc);font:700 17px Figtree,sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px"><span style="width:14px;height:14px;border-radius:3px;background:currentColor"></span>Parar e enviar</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ============ LENDO ============ -->
+    <sc-if value="{{ is.lendo }}" hint-placeholder-val="{{ false }}">
+      <div style="height:100%;display:flex;flex-direction:column;padding:22px 20px 34px;box-sizing:border-box;gap:18px">
+        <div style="font:800 30px/1.1 Manrope,sans-serif;letter-spacing:-0.02em">{{ lendoTitle }}</div>
+        <div style="font-size:16px;line-height:1.5;color:var(--t2)">Isso leva poucos segundos. Nada foi salvo ainda.</div>
+        <div style="position:relative;overflow:hidden;border-radius:22px;border:1px solid var(--line);background:oklch(0.20 0.03 255 / 0.8);padding:20px;display:flex;flex-direction:column;gap:14px">
+          <div style="position:absolute;top:0;bottom:0;left:0;width:40%;background:linear-gradient(90deg,transparent,oklch(0.78 0.12 240 / 0.14),transparent);animation:cc-scan 1.6s cubic-bezier(.4,0,.2,1) infinite"></div>
+          <div style="height:14px;width:38%;border-radius:7px;background:var(--s3)"></div>
+          <div style="height:44px;width:70%;border-radius:12px;background:var(--s3)"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div style="height:48px;border-radius:12px;background:var(--s3)"></div><div style="height:48px;border-radius:12px;background:var(--s3)"></div></div>
+          <div style="height:48px;border-radius:12px;background:var(--s3)"></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px;font-size:15px;color:var(--t2)">
+          <div style="display:flex;align-items:center;gap:10px"><span style="width:20px;height:20px;border-radius:50%;background:var(--ok);color:var(--on-ok);display:flex;align-items:center;justify-content:center;font:800 13px Figtree,sans-serif">✓</span>Recebido</div>
+          <div style="display:flex;align-items:center;gap:10px"><span style="width:16px;height:16px;margin:2px;border-radius:50%;border:2px solid var(--acc);border-right-color:transparent;animation:cc-spin .8s linear infinite;box-sizing:border-box"></span>Procurando valor, data e tipo</div>
+          <div style="display:flex;align-items:center;gap:10px;color:var(--t3)"><span style="width:20px;height:20px;border-radius:50%;border:1.5px dashed var(--t3);box-sizing:border-box"></span>Montando o rascunho para você conferir</div>
+        </div>
+        <div style="flex:1"></div>
+        <button onClick="{{ goManual }}" style="height:48px;border-radius:14px;border:0;background:transparent;color:var(--acc-ink);font:600 16px Figtree,sans-serif;cursor:pointer">Prefiro preencher na mão</button>
+      </div>
+    </sc-if>
+
+    <!-- ============ IA FORA / 429 ============ -->
+    <sc-if value="{{ is.iafail }}" hint-placeholder-val="{{ false }}">
+      <div style="height:100%;display:flex;flex-direction:column">
+        <div style="flex:1;padding:28px 20px 12px;display:flex;flex-direction:column;gap:16px;justify-content:center">
+          <svg viewBox="0 0 320 28" style="width:100%;height:auto;overflow:visible"><line x1="0" y1="14" x2="320" y2="14" style="stroke:var(--track);stroke-width:2;stroke-linecap:round;stroke-dasharray:3 7"></line><line x1="0" y1="14" x2="120" y2="14" style="stroke:var(--warn);stroke-width:3;stroke-linecap:round"></line><circle cx="120" cy="14" r="6" style="fill:var(--warn)"></circle></svg>
+          <div style="font:600 14px Manrope,sans-serif;color:var(--warn);letter-spacing:0.02em">{{ fail.code }}</div>
+          <div style="font:800 30px/1.1 Manrope,sans-serif;letter-spacing:-0.02em;text-wrap:pretty">{{ fail.title }}</div>
+          <div style="font-size:16px;line-height:1.5;color:var(--t2);text-wrap:pretty">{{ fail.body }}</div>
+          <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-radius:14px;background:var(--s2);border:1px solid var(--line);font-size:15px;color:var(--t2)"><span style="width:20px;height:20px;border-radius:50%;background:var(--ok);color:var(--on-ok);display:flex;align-items:center;justify-content:center;font:800 13px Figtree,sans-serif;flex:none">✓</span>{{ fail.kept }}</div>
+        </div>
+        <div style="padding:12px 20px 34px;display:flex;flex-direction:column;gap:8px">
+          <button onClick="{{ goManual }}" style="height:56px;border-radius:16px;border:0;background:var(--acc);color:var(--on-acc);font:700 17px Figtree,sans-serif;cursor:pointer">Preencher manualmente</button>
+          <button onClick="{{ fail.second }}" style="height:52px;border-radius:16px;border:1px solid var(--line-strong);background:var(--s2);color:var(--t1);font:600 16px Figtree,sans-serif;cursor:pointer">{{ fail.secondLabel }}</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ============ CONFERIR ============ -->
+    <sc-if value="{{ is.conferir }}" hint-placeholder-val="{{ false }}">
+      <div style="height:100%;display:flex;flex-direction:column">
+        <div style="flex:1;overflow:auto;padding:14px 20px 12px;display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;align-items:center;gap:6px;margin-left:-10px">
+            <button onClick="{{ goBackFromDraft }}" aria-label="Voltar" style="width:44px;height:44px;border:0;border-radius:12px;background:transparent;color:var(--t1);font-size:24px;cursor:pointer">‹</button>
+            <span style="flex:1;font:800 22px Manrope,sans-serif;letter-spacing:-0.01em">{{ draftTitle }}</span>
+            <span style="font:600 14px Figtree,sans-serif;color:var(--t3);border:1px dashed var(--line-strong);border-radius:8px;padding:2px 8px">exemplo</span>
+          </div>
+          <sc-if value="{{ draftFromAI }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;gap:12px;align-items:center;padding:10px;border-radius:16px;background:var(--s1);border:1px solid var(--line)">
+              <div style="flex:none;width:64px;height:64px;border-radius:10px;background:repeating-linear-gradient(135deg,var(--s2) 0 6px,var(--s3) 6px 12px);display:flex;align-items:center;justify-content:center;font:500 14px ui-monospace,Menlo,monospace;color:var(--t3)">foto</div>
+              <div style="display:flex;flex-direction:column;gap:3px"><span style="font:700 15px Figtree,sans-serif">{{ draftSource }}</span><span style="font-size:14px;color:var(--t3)">Hoje, 14:32 · toque para ver o original</span></div>
+            </div>
+          </sc-if>
+          <label style="display:flex;flex-direction:column;gap:6px"><span style="font:600 14px Figtree,sans-serif;color:var(--t2)">Valor</span><span style="display:flex;align-items:center;gap:10px;height:64px;padding:0 16px;border-radius:16px;background:var(--s2);border:1px solid {{ valBorder }}"><span style="font:700 20px Manrope,sans-serif;color:var(--t3)">R$</span><input inputMode="numeric" value="{{ draftValor }}" onChange="{{ onDraftValor }}" style="flex:1;min-width:0;border:0;outline:0;background:transparent;color:var(--t1);font:800 28px Manrope,sans-serif;letter-spacing:-0.02em;font-variant-numeric:tabular-nums"></input></span>
+            <sc-if value="{{ valErr }}" hint-placeholder-val="{{ false }}"><span style="font:600 14px Figtree,sans-serif;color:var(--err)">Digite um valor maior que zero</span></sc-if>
+          </label>
+          <label style="display:flex;flex-direction:column;gap:6px"><span style="font:600 14px Figtree,sans-serif;color:var(--t2)">Descrição</span><span style="display:flex;align-items:center;height:52px;padding:0 16px;border-radius:14px;background:var(--s2);border:1px solid var(--line-strong)"><input value="{{ draft.desc }}" onChange="{{ onDraftDesc }}" placeholder="Ex.: Corte · Maria" style="width:100%;border:0;outline:0;background:transparent;color:var(--t1);font:500 16px Figtree,sans-serif"></input></span></label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <label style="display:flex;flex-direction:column;gap:6px"><span style="font:600 14px Figtree,sans-serif;color:{{ dateLabelColor }}">{{ dateLabel }}</span><span style="display:flex;align-items:center;height:52px;padding:0 14px;border-radius:14px;background:{{ dateBg }};border:1px solid {{ dateBorder }}"><input value="{{ draft.data }}" onChange="{{ onDraftData }}" style="width:100%;border:0;outline:0;background:transparent;color:var(--t1);font:600 16px Manrope,sans-serif;font-variant-numeric:tabular-nums"></input></span></label>
+            <div style="display:flex;flex-direction:column;gap:6px"><span style="font:600 14px Figtree,sans-serif;color:var(--t2)">Tipo</span><div style="display:flex;height:52px;padding:4px;border-radius:14px;background:var(--s2);border:1px solid var(--line-strong);gap:4px;box-sizing:border-box">
+              <sc-for list="{{ tipos }}" as="t" hint-placeholder-count="2"><button onClick="{{ t.pick }}" style="flex:1;border:0;border-radius:10px;background:{{ t.bg }};color:{{ t.fg }};font:700 15px Figtree,sans-serif;cursor:pointer">{{ t.label }}</button></sc-for>
+            </div></div>
+          </div>
+          <sc-if value="{{ dateDoubt }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 10px 10px 14px;border-radius:14px;background:color-mix(in oklch,var(--warn) 11%,var(--s1));border:1px solid color-mix(in oklch,var(--warn) 45%,transparent)">
+              <span style="flex:1;font-size:14px;line-height:1.4;color:var(--t1)">A data estava cortada na foto. Confira.</span>
+              <button onClick="{{ okDate }}" style="min-height:44px;padding:0 12px;border-radius:10px;border:1px solid var(--line-strong);background:var(--s2);color:var(--t1);font:600 14px Figtree,sans-serif;cursor:pointer">Está certa</button>
+            </div>
+          </sc-if>
+          <div style="display:flex;flex-direction:column;gap:8px"><span style="font:600 14px Figtree,sans-serif;color:var(--t2)">Categoria</span><div style="display:flex;flex-wrap:wrap;gap:8px">
+            <sc-for list="{{ cats }}" as="c" hint-placeholder-count="4"><button onClick="{{ c.pick }}" style="min-height:44px;padding:0 14px;border-radius:12px;border:1px solid {{ c.border }};background:{{ c.bg }};color:{{ c.fg }};font:600 15px Figtree,sans-serif;cursor:pointer">{{ c.label }}</button></sc-for>
+          </div></div>
+        </div>
+        <div style="padding:10px 20px 34px;display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--line);background:oklch(0.16 0.025 255 / 0.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)">
+          <div style="display:flex;align-items:center;gap:8px;font-size:14px;color:var(--t2)"><span style="width:7px;height:7px;border-radius:50%;background:var(--t3)"></span>{{ draftNote }}</div>
+          <div style="display:grid;grid-template-columns:1fr 1.5fr;gap:10px">
+            <button onClick="{{ discard }}" style="height:56px;border-radius:16px;border:0;background:transparent;color:var(--acc-ink);font:600 15px Figtree,sans-serif;cursor:pointer" style-hover="background:oklch(0.78 0.12 240 / 0.10)">{{ discardLabel }}</button>
+            <button onClick="{{ confirm }}" style="height:56px;border-radius:16px;border:0;background:var(--acc);color:var(--on-acc);font:700 16px Figtree,sans-serif;cursor:pointer" style-active="transform:scale(.98)">Confirmar lançamento</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ============ LANÇAMENTOS ============ -->
+    <sc-if value="{{ is.lancamentos }}" hint-placeholder-val="{{ false }}">
+      <div style="height:100%;overflow:auto;padding:18px 20px 120px;box-sizing:border-box;display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between"><span style="font:800 28px Manrope,sans-serif;letter-spacing:-0.02em">Lançamentos</span><span style="font:600 14px Figtree,sans-serif;color:var(--t3);border:1px dashed var(--line-strong);border-radius:8px;padding:2px 8px">exemplo</span></div>
+        <div style="display:flex;gap:4px;padding:4px;border-radius:14px;background:var(--s1);border:1px solid var(--line)">
+          <sc-for list="{{ filters }}" as="f" hint-placeholder-count="3"><button onClick="{{ f.pick }}" style="flex:1;min-height:44px;border:0;border-radius:10px;background:{{ f.bg }};color:{{ f.fg }};font:700 15px Figtree,sans-serif;cursor:pointer">{{ f.label }}</button></sc-for>
+        </div>
+        <div style="border-radius:20px;border:1px solid var(--line);background:oklch(0.20 0.03 255 / 0.8);padding:12px 12px 8px">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:0 4px 6px"><span style="font:700 16px Figtree,sans-serif">Novembro 2026</span><button onClick="{{ toggleCal }}" style="min-height:44px;padding:0 8px;border:0;background:transparent;color:var(--acc-ink);font:600 15px Figtree,sans-serif;cursor:pointer">{{ calLabel }}</button></div>
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font:600 14px Figtree,sans-serif;color:var(--t3);padding-bottom:4px"><span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span></div>
+          <sc-for list="{{ weeks }}" as="w" hint-placeholder-count="1">
+            <div style="display:grid;grid-template-columns:repeat(7,1fr)">
+              <sc-for list="{{ w.days }}" as="d" hint-placeholder-count="7">
+                <button onClick="{{ d.pick }}" disabled="{{ d.blank }}" style="height:44px;border:0;background:transparent;padding:3px;cursor:pointer;display:flex;align-items:center;justify-content:center">
+                  <span style="width:38px;height:38px;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:{{ d.bg }};color:{{ d.fg }};box-shadow:{{ d.ring }};font:600 15px Manrope,sans-serif;font-variant-numeric:tabular-nums">{{ d.n }}<span style="width:4px;height:4px;border-radius:50%;background:{{ d.dot }}"></span></span>
+                </button>
+              </sc-for>
+            </div>
+          </sc-for>
+        </div>
+        <sc-if value="{{ hasSel }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ clearDay }}" style="align-self:flex-start;min-height:44px;padding:0 14px;border-radius:12px;border:1px solid var(--line-strong);background:var(--s2);color:var(--t1);font:600 14px Figtree,sans-serif;cursor:pointer">Dia {{ selDay }} · limpar filtro ✕</button>
+        </sc-if>
+        <sc-for list="{{ groups }}" as="g" hint-placeholder-count="2">
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;padding:0 4px"><span style="font:700 16px Figtree,sans-serif">{{ g.mes }}</span><span style="font:600 14px Manrope,sans-serif;color:var(--t3);font-variant-numeric:tabular-nums">{{ g.total }}</span></div>
+            <div style="border-radius:20px;border:1px solid var(--line);background:oklch(0.20 0.03 255 / 0.8);overflow:hidden">
+              <sc-for list="{{ g.items }}" as="e" hint-placeholder-count="3">
+                <div style="border-top:{{ e.sep }}">
+                  <button onClick="{{ e.toggle }}" style="width:100%;display:flex;align-items:center;gap:12px;min-height:64px;padding:10px 16px;border:0;background:transparent;color:var(--t1);text-align:left;cursor:pointer">
+                    <span style="flex:none;width:40px;display:flex;flex-direction:column;align-items:center;font:800 18px/1 Manrope,sans-serif;font-variant-numeric:tabular-nums">{{ e.day }}<span style="font:600 14px Figtree,sans-serif;color:var(--t3);margin-top:3px">{{ e.mon }}</span></span>
+                    <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font:600 15px Figtree,sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ e.nome }}</span><span style="font-size:14px;color:var(--t3)">{{ e.cat }}</span></span>
+                    <span style="font:700 16px Manrope,sans-serif;font-variant-numeric:tabular-nums;color:{{ e.color }}">{{ e.valorTxt }}</span>
+                  </button>
+                  <sc-if value="{{ e.open }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 16px 14px">
+                      <button onClick="{{ e.edit }}" style="min-height:44px;border-radius:12px;border:1px solid var(--line-strong);background:var(--s2);color:var(--t1);font:600 15px Figtree,sans-serif;cursor:pointer">Editar</button>
+                      <button onClick="{{ e.del }}" style="min-height:44px;border-radius:12px;border:1px solid color-mix(in oklch,var(--err) 45%,transparent);background:transparent;color:var(--err);font:600 15px Figtree,sans-serif;cursor:pointer">Excluir</button>
+                    </div>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+        <sc-if value="{{ noGroups }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:28px 18px;border-radius:20px;border:1px dashed var(--line-strong);text-align:center;font-size:15px;color:var(--t2)">Nada por aqui com esse filtro.</div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <!-- ============ CHAT ============ -->
+    <sc-if value="{{ is.chat }}" hint-placeholder-val="{{ false }}">
+      <div style="height:100%;display:flex;flex-direction:column;padding-bottom:84px;box-sizing:border-box">
+        <div style="padding:16px 20px 10px;display:flex;flex-direction:column;gap:10px">
+          <span style="font:800 28px Manrope,sans-serif;letter-spacing:-0.02em">Pergunte</span>
+          <div style="font-size:14px;line-height:1.4;color:var(--t2);padding:9px 12px;border-radius:12px;background:var(--s1);border:1px solid var(--line)">Respostas informativas, sempre com a fonte. Não substitui um contador.</div>
+        </div>
+        <div ref="{{ chatRef }}" style="flex:1;overflow:auto;padding:8px 20px 12px;display:flex;flex-direction:column;gap:14px">
+          <sc-for list="{{ msgs }}" as="m" hint-placeholder-count="2">
+            <div style="display:flex;justify-content:{{ m.justify }}">
+              <div style="max-width:86%;display:flex;flex-direction:column;gap:10px;padding:{{ m.pad }};border-radius:{{ m.radius }};background:{{ m.bg }};border:1px solid {{ m.border }};color:{{ m.fg }}">
+                <div style="display:flex;gap:10px;align-items:flex-start">
+                  <sc-if value="{{ m.fio }}" hint-placeholder-val="{{ false }}"><svg width="30" height="10" viewBox="0 0 30 10" style="flex:none;margin-top:7px"><line x1="1" y1="5" x2="29" y2="5" style="stroke:var(--track);stroke-width:2;stroke-linecap:round"></line><line x1="1" y1="5" x2="12" y2="5" style="stroke:var(--ok);stroke-width:2.5;stroke-linecap:round"></line><circle cx="12" cy="5" r="3" style="fill:var(--ok)"></circle></svg></sc-if>
+                  <span style="font-size:16px;line-height:1.5;text-wrap:pretty">{{ m.text }}</span>
+                </div>
+                <sc-if value="{{ m.hasChips }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-wrap:wrap;gap:6px">
+                    <sc-for list="{{ m.chips }}" as="c" hint-placeholder-count="1">
+                      <button onClick="{{ c.open }}" style="display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--line-strong);background:var(--s2);color:var(--t1);font:600 14px Figtree,sans-serif;cursor:pointer" style-hover="background:var(--s3)" style-active="transform:scale(.97)"><span style="width:6px;height:6px;border-radius:50%;background:var(--acc)"></span>{{ c.label }}</button>
+                    </sc-for>
+                  </div>
+                </sc-if>
+              </div>
+            </div>
+          </sc-for>
+          <sc-if value="{{ typing }}" hint-placeholder-val="{{ false }}">
+            <div style="align-self:flex-start;display:flex;gap:5px;padding:14px 16px;border-radius:18px 18px 18px 6px;background:var(--s1);border:1px solid var(--line)"><span style="width:7px;height:7px;border-radius:50%;background:var(--t2);animation:cc-pulse 1s ease-in-out infinite"></span><span style="width:7px;height:7px;border-radius:50%;background:var(--t2);animation:cc-pulse 1s ease-in-out .15s infinite"></span><span style="width:7px;height:7px;border-radius:50%;background:var(--t2);animation:cc-pulse 1s ease-in-out .3s infinite"></span></div>
+          </sc-if>
+        </div>
+        <div style="padding:6px 16px 10px;display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:2px">
+            <sc-for list="{{ sugs }}" as="s" hint-placeholder-count="2"><button onClick="{{ s.ask }}" style="flex:none;min-height:44px;padding:0 14px;border-radius:999px;border:1px solid var(--line-strong);background:transparent;color:var(--t1);font:600 14px Figtree,sans-serif;cursor:pointer;white-space:nowrap">{{ s.q }}</button></sc-for>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input value="{{ chatText }}" onChange="{{ onChat }}" onKeyDown="{{ chatKey }}" placeholder="Escreva sua dúvida" style="flex:1;min-width:0;height:52px;padding:0 16px;border-radius:16px;border:1px solid var(--line-strong);background:var(--s2);color:var(--t1);font:500 16px Figtree,sans-serif;outline:0" style-focus="border-color:var(--ring)"></input>
+            <button onClick="{{ sendChat }}" aria-label="Enviar" style="width:52px;height:52px;border-radius:16px;border:0;background:var(--acc);color:var(--on-acc);font:800 20px Figtree,sans-serif;cursor:pointer">↑</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ============ PERFIL ============ -->
+    <sc-if value="{{ is.perfil }}" hint-placeholder-val="{{ false }}">
+      <div style="height:100%;overflow:auto;padding:18px 20px 120px;box-sizing:border-box;display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;align-items:center;gap:14px">
+          <span style="width:56px;height:56px;border-radius:50%;background:var(--s3);display:flex;align-items:center;justify-content:center;font:800 22px Manrope,sans-serif">A</span>
+          <div style="display:flex;flex-direction:column;gap:3px"><span style="font:800 22px Manrope,sans-serif">Ana · exemplo</span><span style="font-size:15px;color:var(--t2)">{{ actName }}</span></div>
+        </div>
+        <div style="border-radius:20px;border:1px solid var(--line);background:oklch(0.20 0.03 255 / 0.8);overflow:hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:60px;padding:8px 16px"><span style="display:flex;flex-direction:column;gap:2px"><span style="font:600 16px Figtree,sans-serif">Usar IA para ler</span><span style="font-size:14px;color:var(--t3)">{{ aiSub }}</span></span>
+            <button onClick="{{ toggleAI }}" aria-label="Usar IA" style="width:56px;height:44px;border:0;background:transparent;padding:0;cursor:pointer;display:flex;align-items:center"><span style="width:52px;height:30px;border-radius:15px;background:{{ aiTrack }};position:relative;display:block;transition:background .2s"><span style="position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:var(--t1);transform:translateX({{ aiKnob }}px);transition:transform .25s cubic-bezier(.2,.7,.2,1)"></span></span></button>
+          </div>
+          <button onClick="{{ restartOnb }}" style="width:100%;display:flex;justify-content:space-between;align-items:center;min-height:56px;padding:0 16px;border:0;border-top:1px solid var(--line);background:transparent;color:var(--t1);font:600 16px Figtree,sans-serif;cursor:pointer">Refazer o cadastro<span style="color:var(--t3)">›</span></button>
+          <button style="width:100%;display:flex;justify-content:space-between;align-items:center;min-height:56px;padding:0 16px;border:0;border-top:1px solid var(--line);background:transparent;color:var(--err);font:600 16px Figtree,sans-serif;cursor:pointer">Apagar todos os meus dados<span style="color:var(--t3)">›</span></button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <span style="font:600 14px Figtree,sans-serif;letter-spacing:0.06em;text-transform:uppercase;color:var(--t3)">Laboratório de estados · demo</span>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <sc-for list="{{ lab }}" as="l" hint-placeholder-count="8"><button onClick="{{ l.run }}" style="min-height:52px;padding:8px 12px;border-radius:14px;border:1px solid var(--line-strong);background:var(--s1);color:var(--t1);font:600 14px/1.3 Figtree,sans-serif;text-align:left;cursor:pointer;display:flex;align-items:center;gap:8px" style-hover="background:var(--s2)"><span style="flex:none;width:8px;height:8px;border-radius:50%;background:{{ l.c }}"></span>{{ l.label }}</button></sc-for>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+
+  <!-- bottom nav -->
+  <sc-if value="{{ showNav }}" hint-placeholder-val="{{ false }}">
+    <nav style="position:absolute;left:12px;right:12px;bottom:14px;z-index:4;display:grid;grid-template-columns:repeat(4,1fr);padding:6px;border-radius:26px;border:1px solid var(--line-strong);background:oklch(0.20 0.03 255 / 0.78);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:inset 0 1px 0 var(--hi),0 20px 40px -20px var(--shadow)">
+      <button onClick="{{ goPainel }}" style="min-height:58px;border:0;border-radius:20px;background:{{ nav.painel.bg }};color:{{ nav.painel.fg }};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font:700 14px Figtree,sans-serif;cursor:pointer"><svg width="24" height="24" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12" style="stroke:currentColor;stroke-width:1.5;opacity:.4;stroke-linecap:round"></line><line x1="3" y1="12" x2="14" y2="12" style="stroke:currentColor;stroke-width:2.2;stroke-linecap:round"></line><circle cx="14" cy="12" r="3" style="fill:currentColor"></circle></svg>Painel</button>
+      <button onClick="{{ goLanc }}" style="min-height:58px;border:0;border-radius:20px;background:{{ nav.lancamentos.bg }};color:{{ nav.lancamentos.fg }};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font:700 14px Figtree,sans-serif;cursor:pointer"><svg width="24" height="24" viewBox="0 0 24 24"><line x1="5" y1="7" x2="19" y2="7" style="stroke:currentColor;stroke-width:2;stroke-linecap:round"></line><line x1="5" y1="12" x2="19" y2="12" style="stroke:currentColor;stroke-width:2;stroke-linecap:round"></line><line x1="5" y1="17" x2="14" y2="17" style="stroke:currentColor;stroke-width:2;stroke-linecap:round"></line></svg>Lançamentos</button>
+      <button onClick="{{ goChat }}" style="min-height:58px;border:0;border-radius:20px;background:{{ nav.chat.bg }};color:{{ nav.chat.fg }};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font:700 14px Figtree,sans-serif;cursor:pointer"><svg width="24" height="24" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="12" rx="4" style="fill:none;stroke:currentColor;stroke-width:2"></rect><line x1="8" y1="20" x2="11" y2="17" style="stroke:currentColor;stroke-width:2;stroke-linecap:round"></line></svg>Chat</button>
+      <button onClick="{{ goPerfil }}" style="min-height:58px;border:0;border-radius:20px;background:{{ nav.perfil.bg }};color:{{ nav.perfil.fg }};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font:700 14px Figtree,sans-serif;cursor:pointer"><svg width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="9" r="4" style="fill:none;stroke:currentColor;stroke-width:2"></circle><path d="M5 20c1.5-3.5 4-5 7-5s5.5 1.5 7 5" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round"></path></svg>Perfil</button>
+    </nav>
+  </sc-if>
+
+  <!-- toast -->
+  <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;left:16px;right:16px;bottom:{{ toastBottom }}px;z-index:6;display:flex;align-items:center;gap:12px;padding:12px 10px 12px 16px;border-radius:18px;background:var(--s3);border:1px solid var(--line-strong);box-shadow:0 20px 44px -16px var(--shadow)">
+      <span style="flex:none;width:24px;height:24px;border-radius:50%;background:{{ toast.dotBg }};color:var(--on-ok);display:flex;align-items:center;justify-content:center;font:800 14px Figtree,sans-serif">{{ toast.icon }}</span>
+      <div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font:700 15px Figtree,sans-serif">{{ toast.msg }}</span><span style="font-size:14px;color:var(--t2);font-variant-numeric:tabular-nums">{{ toast.sub }}</span></div>
+      <sc-if value="{{ toast.hasUndo }}" hint-placeholder-val="{{ false }}"><button onClick="{{ undo }}" style="min-height:44px;padding:0 12px;border-radius:12px;border:0;background:transparent;color:var(--acc-ink);font:700 15px Figtree,sans-serif;cursor:pointer">Desfazer</button></sc-if>
+    </div>
+  </sc-if>
+
+  <!-- legal sheet -->
+  <sc-if value="{{ hasSheet }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeSheet }}" style="position:absolute;inset:0;z-index:7;background:oklch(0.08 0.02 255 / 0.6);display:flex;align-items:flex-end">
+      <div onClick="{{ stop }}" style="width:100%;padding:12px 20px 34px;border-radius:30px 30px 0 0;background:var(--s1);border-top:1px solid var(--line-strong);display:flex;flex-direction:column;gap:14px;box-sizing:border-box">
+        <span style="align-self:center;width:40px;height:5px;border-radius:3px;background:var(--line-strong)"></span>
+        <span style="font:600 14px Figtree,sans-serif;color:var(--t3);letter-spacing:0.04em;text-transform:uppercase">{{ sheet.kicker }}</span>
+        <span style="font:800 22px/1.2 Manrope,sans-serif">{{ sheet.label }}</span>
+        <span style="font-size:16px;line-height:1.55;color:var(--t2);text-wrap:pretty">{{ sheet.resumo }}</span>
+        <sc-if value="{{ sheet.isLaw }}" hint-placeholder-val="{{ false }}">
+          <span style="font-size:14px;line-height:1.45;color:var(--t3)">Resumo em linguagem simples. O texto oficial é o que vale.</span>
+          <a href="{{ sheet.url }}" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;height:52px;border-radius:16px;border:1px solid var(--line-strong);background:var(--s2);color:var(--t1);font:600 16px Figtree,sans-serif;text-decoration:none">Abrir texto oficial ↗</a>
+        </sc-if>
+        <button onClick="{{ closeSheet }}" style="height:48px;border-radius:14px;border:0;background:transparent;color:var(--acc-ink);font:600 16px Figtree,sans-serif;cursor:pointer">Fechar</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- guided tour -->
+  <sc-if value="{{ hasTour }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:9;background:transparent">
+      <div style="position:absolute;left:{{ tour.hl.l }}px;top:{{ tour.hl.t }}px;width:{{ tour.hl.w }}px;height:{{ tour.hl.h }}px;border-radius:{{ tour.hl.r }}px;box-shadow:0 0 0 2px var(--acc),0 0 0 9999px oklch(0.08 0.02 255 / 0.68),0 0 40px 4px oklch(0.78 0.12 240 / 0.5);transition:all .35s cubic-bezier(.2,.7,.2,1)"></div>
+      <div style="position:absolute;left:20px;right:20px;top:{{ tour.top }};bottom:{{ tour.bottom }};padding:18px;border-radius:22px;background:var(--s3);border:1px solid var(--line-strong);box-shadow:0 24px 50px -20px oklch(0 0 0 / 0.8);display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center"><span style="font:600 14px Figtree,sans-serif;color:var(--acc-ink)">Dica {{ tour.n }} de 3</span><span style="display:flex;gap:5px"><span style="width:18px;height:4px;border-radius:2px;background:{{ tour.d1 }}"></span><span style="width:18px;height:4px;border-radius:2px;background:{{ tour.d2 }}"></span><span style="width:18px;height:4px;border-radius:2px;background:{{ tour.d3 }}"></span></span></div>
+        <div style="font:800 20px/1.25 Manrope,sans-serif">{{ tour.title }}</div>
+        <div style="font-size:15px;line-height:1.5;color:var(--t2);text-wrap:pretty">{{ tour.body }}</div>
+        <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:8px;margin-top:4px">
+          <button onClick="{{ skipTour }}" style="height:48px;border-radius:14px;border:0;background:transparent;color:var(--t2);font:600 15px Figtree,sans-serif;cursor:pointer">Pular dicas</button>
+          <button onClick="{{ nextTour }}" style="height:48px;border-radius:14px;border:0;background:var(--acc);color:var(--on-acc);font:700 15px Figtree,sans-serif;cursor:pointer">{{ tour.cta }}</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <span style="position:absolute;bottom:6px;left:50%;transform:translateX(-50%);width:134px;height:5px;border-radius:3px;background:var(--t1);opacity:.55;z-index:8"></span>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:390,&quot;height&quot;:844},&quot;start&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;onb1&quot;,&quot;onb2&quot;,&quot;onb3&quot;,&quot;painel&quot;,&quot;adicionar&quot;,&quot;gravando&quot;,&quot;lendo&quot;,&quot;conferir&quot;,&quot;manual&quot;,&quot;lancamentos&quot;,&quot;chat&quot;,&quot;perfil&quot;,&quot;vazio&quot;,&quot;carregando&quot;,&quot;erro-rede&quot;,&quot;ia-off&quot;,&quot;ia-429&quot;,&quot;painel-80&quot;,&quot;painel-over&quot;],&quot;default&quot;:&quot;painel&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;still&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+const LIMIT = 81000, W = 320, SC = 110;
+const NOISE = `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .5 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='.08'/></svg>")`;
+const brl = n => 'R$ ' + n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const num = n => n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const MON = { 10: 'out', 11: 'nov' }, MES = { 11: 'Novembro 2026', 10: 'Outubro 2026' };
+const ENTRIES = [
+  { id: 1, nome: 'Coloração · Juliana', cat: 'Serviço', d: 21, m: 11, valor: 180, tipo: 'entrada' },
+  { id: 2, nome: 'Produtos de cabelo', cat: 'Material', d: 19, m: 11, valor: 245.9, tipo: 'saida' },
+  { id: 3, nome: 'Corte · Bruno', cat: 'Serviço', d: 18, m: 11, valor: 60, tipo: 'entrada' },
+  { id: 4, nome: 'Escova progressiva · Lia', cat: 'Serviço', d: 14, m: 11, valor: 350, tipo: 'entrada' },
+  { id: 5, nome: 'Aluguel da cadeira', cat: 'Outro', d: 8, m: 11, valor: 400, tipo: 'saida' },
+  { id: 6, nome: 'Corte e barba · Rafael', cat: 'Serviço', d: 5, m: 11, valor: 85, tipo: 'entrada' },
+  { id: 7, nome: 'Mechas · Carla', cat: 'Serviço', d: 30, m: 10, valor: 420, tipo: 'entrada' },
+  { id: 8, nome: 'Tintas e oxidante', cat: 'Material', d: 22, m: 10, valor: 189.4, tipo: 'saida' },
+  { id: 9, nome: 'Corte · Pedro', cat: 'Serviço', d: 15, m: 10, valor: 60, tipo: 'entrada' }
+];
+const ACTS = [
+  { nome: 'Cabeleireiro(a)', cnae: '9602-5/01' },
+  { nome: 'Manicure e pedicure', cnae: '9602-5/02' },
+  { nome: 'Confeiteiro(a)', cnae: '1091-1/02' },
+  { nome: 'Eletricista', cnae: '4321-5/00' }
+];
+const HELP = {
+  das: { kicker: 'Em linguagem simples', label: 'O que é o DAS?', resumo: 'É a guia mensal que o MEI paga. Um valor fixo que já junta INSS e o imposto da sua atividade. Vence todo dia 20.' },
+  cnae: { kicker: 'Em linguagem simples', label: 'O que é CNAE?', resumo: 'É o código da sua atividade, tipo um “RG” do que você faz. Ele define se você pode ser MEI e quanto paga no DAS. Está no seu Certificado MEI.' }
+};
+const CHIPS = {
+  lc1: { kicker: 'Fonte legal', isLaw: true, label: 'LC 123/2006, art. 18-A, § 1º', resumo: 'Define o teto do MEI: receita bruta de até R$ 81.000,00 no ano-calendário.', url: 'https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp123.htm' },
+  lc2: { kicker: 'Fonte legal', isLaw: true, label: 'LC 123/2006, art. 18-A, § 2º', resumo: 'No ano em que o MEI começa, o limite é proporcional: R$ 6.750,00 vezes o número de meses de atividade.', url: 'https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp123.htm' },
+  lc7: { kicker: 'Fonte legal', isLaw: true, label: 'LC 123/2006, art. 18-A, § 7º', resumo: 'Trata do desenquadramento. Se o excesso for de até 20%, a mudança vale a partir de janeiro do ano seguinte e o excesso é tributado à parte.', url: 'https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp123.htm' },
+  cgsn: { kicker: 'Fonte legal', isLaw: true, label: 'Resolução CGSN 140/2018', resumo: 'Regulamenta o Simples Nacional e o MEI, incluindo o DAS e o prazo de pagamento no dia 20 do mês seguinte.', url: 'https://www8.receita.fazenda.gov.br/SimplesNacional/' }
+};
+const QA = [
+  { q: 'Qual é o meu limite?', a: 'R$ 81.000,00 por ano. No ano em que você abre o MEI, o limite é R$ 6.750,00 por mês de atividade.', fio: true, chips: ['lc1', 'lc2'] },
+  { q: 'Quando vence o DAS?', a: 'Todo dia 20, referente ao mês anterior. O de novembro vence em 20/12.', chips: ['cgsn'] },
+  { q: 'E se eu passar do limite?', a: 'Se passar até 20% (até R$ 97.200,00), você segue MEI até dezembro, paga imposto sobre o excesso e vira microempresa em janeiro. Acima de 20%, a mudança volta para o começo do ano.', fio: true, chips: ['lc7'] }
+];
+const GREET = { from: 'ia', text: 'Pergunte do seu jeito. Eu respondo curto e mostro de onde tirei a regra.' };
+const matchQ = t => { t = t.toLowerCase(); if (/passa|estour|excede/.test(t)) return QA[2]; if (/das|venc|pagar|boleto/.test(t)) return QA[1]; if (/limite|teto|81/.test(t)) return QA[0]; return null; };
+const DRAFT_AI = () => ({ digits: '35000', desc: 'Escova progressiva · Maria', data: '2?/11/2026', tipo: 'entrada', cat: 'Serviço', manual: false, source: 'Lido de uma foto', doubt: true, editId: null });
+const DRAFT_MANUAL = () => ({ digits: '', desc: '', data: '24/11/2026', tipo: 'entrada', cat: 'Serviço', manual: true, source: '', doubt: false, editId: null });
+const BARS = Array.from({ length: 30 }, (_, i) => ({ h: 30 + Math.round(Math.abs(Math.sin(i * 1.7)) * 50), o: (0.55 + Math.abs(Math.cos(i)) * 0.45).toFixed(2), dur: 700 + (i * 137) % 500, delay: (i * 83) % 600 }));
+
+class Component extends DCLogic {
+  state = this.initial(this.props.start);
+
+  initial(start) {
+    const base = { screen: 'onb1', fat: 34020, entries: ENTRIES.map(e => ({ ...e })), empty: false, loading: false, netErr: false, pending: 2, filter: 'todos', openId: null, selDay: null, calOpen: false, toast: null, draft: DRAFT_AI(), valErr: false, rec: 0, msgs: [GREET], typing: false, sheet: null, chatText: '', writeText: '', act: 0, onbDigits: '3402000', ai: true, disp: 0, fioPct: 0, entering: false, fail: '503', lendoKind: 'foto', tour: null, toured: false };
+    const P = {
+      vazio: { screen: 'painel', empty: true, fat: 0, entries: [], pending: 0 },
+      carregando: { screen: 'painel', loading: true },
+      'erro-rede': { screen: 'painel', netErr: true },
+      'painel-80': { screen: 'painel', fat: 68040 },
+      'painel-over': { screen: 'painel', fat: 84240 },
+      'ia-off': { screen: 'iafail', fail: '503' },
+      'ia-429': { screen: 'iafail', fail: '429' },
+      gravando: { screen: 'gravando', rec: 7 },
+      onb1: { screen: 'onb1', act: null },
+      chat: { screen: 'chat', msgs: [GREET, { from: 'me', text: QA[0].q }, { from: 'ia', text: QA[0].a, fio: true, chips: QA[0].chips }] },
+      manual: { screen: 'conferir', draft: DRAFT_MANUAL() },
+      tour: { screen: 'painel', tour: 0 },
+      'tour-2': { screen: 'painel', tour: 1 },
+      confirmado: { screen: 'painel', fat: 34370, pending: 1, entries: [{ id: 99, nome: 'Escova progressiva · Maria', cat: 'Serviço', d: 22, m: 11, valor: 350, tipo: 'entrada' }, ...ENTRIES.map(e => ({ ...e }))], toast: { msg: 'Lançamento salvo', sub: 'Faltam R$ 46.630,00 no fio', undo: true, kind: 'ok' } }
+    };
+    return { ...base, ...(P[start] || { screen: start || 'onb1' }) };
+  }
+
+  chatRef = React.createRef();
+  writeRef = React.createRef();
+
+  componentDidMount() {
+    this.reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.afterEnter(this.state.screen);
+    this.failsafe = setTimeout(() => { if (this.state.entering) this.setState({ entering: false }); }, 1500);
+  }
+  componentDidUpdate(pp, ps) {
+    if (pp.start !== this.props.start && this.props.start) {
+      this.clearTimers();
+      this.setState({ ...this.initial(this.props.start), disp: 0, fioPct: 0 }, () => this.afterEnter(this.state.screen));
+    }
+    if (this.chatRef.current && (ps.msgs !== this.state.msgs || ps.typing !== this.state.typing)) {
+      const el = this.chatRef.current; el.scrollTop = el.scrollHeight;
+    }
+  }
+  componentWillUnmount() { this.clearTimers(); clearTimeout(this.failsafe); }
+  clearTimers() { cancelAnimationFrame(this.raf); clearTimeout(this.lendoT); clearInterval(this.recI); clearTimeout(this.toastT); clearTimeout(this.typeT); clearTimeout(this.loadT); }
+
+  go(screen, extra = {}) {
+    clearTimeout(this.lendoT); clearInterval(this.recI);
+    if (this.reduced) { this.setState({ ...extra, screen, sheet: null }, () => this.afterEnter(screen)); return; }
+    this.setState({ ...extra, screen, entering: true, sheet: null }, () => {
+      requestAnimationFrame(() => requestAnimationFrame(() => this.setState({ entering: false })));
+      this.afterEnter(screen);
+    });
+  }
+  afterEnter(screen) {
+    const still = this.props.still;
+    if (screen === 'painel') setTimeout(() => this.runFio(), 120);
+    if (screen === 'gravando' && !still) this.recI = setInterval(() => this.setState(s => ({ rec: s.rec + 1 })), 1000);
+    if (screen === 'lendo' && !still) this.lendoT = setTimeout(() => this.go('conferir', { draft: DRAFT_AI(), valErr: false }), 2200);
+    if (screen === 'painel' && this.state.loading && !still) this.loadT = setTimeout(() => this.setState({ loading: false }, () => this.runFio()), 1800);
+  }
+  runFio() {
+    const target = this.state.fat, from = this.state.disp, pct = target / LIMIT * 100;
+    cancelAnimationFrame(this.raf);
+    if (this.reduced) { this.setState({ disp: target, fioPct: pct }); return; }
+    this.setState({ fioPct: pct });
+    const t0 = performance.now(), dur = 1100;
+    const step = now => {
+      const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 4);
+      this.setState({ disp: from + (target - from) * e });
+      if (k < 1) this.raf = requestAnimationFrame(step);
+    };
+    this.raf = requestAnimationFrame(step);
+  }
+  showToast(t) {
+    clearTimeout(this.toastT);
+    this.setState({ toast: t });
+    if (!this.props.still) this.toastT = setTimeout(() => this.setState({ toast: null }), 5000);
+  }
+  snapshot() { const { entries, fat, pending } = this.state; return { entries, fat, pending }; }
+
+  confirm() {
+    const d = this.state.draft, v = parseInt(d.digits || '0', 10) / 100;
+    if (!v) { this.setState({ valErr: true }); return; }
+    const snap = this.snapshot();
+    const day = parseInt(d.data, 10) || 24, mon = parseInt((d.data.split('/')[1] || '11'), 10) || 11;
+    const e = { id: d.editId || Date.now(), nome: d.desc || 'Lançamento', cat: d.cat, d: day, m: mon, valor: v, tipo: d.tipo };
+    let entries, fat = this.state.fat;
+    if (d.editId) {
+      const old = this.state.entries.find(x => x.id === d.editId);
+      if (old && old.tipo === 'entrada') fat -= old.valor;
+      entries = this.state.entries.map(x => x.id === d.editId ? e : x);
+    } else entries = [e, ...this.state.entries];
+    if (e.tipo === 'entrada') fat += v;
+    entries.sort((a, b) => (b.m - a.m) || (b.d - a.d));
+    const pending = d.manual || d.editId ? this.state.pending : Math.max(0, this.state.pending - 1);
+    const back = d.editId ? 'lancamentos' : 'painel';
+    this.go(back, { entries, fat, pending, empty: false, openId: null });
+    this.undoSnap = snap;
+    this.showToast({ msg: d.editId ? 'Lançamento atualizado' : 'Lançamento salvo', sub: fat > LIMIT ? `Passou ${brl(fat - LIMIT)} do teto` : `Faltam ${brl(LIMIT - fat)} no fio`, undo: true, kind: 'ok' });
+  }
+  del(e) {
+    const snap = this.snapshot();
+    const entries = this.state.entries.filter(x => x.id !== e.id);
+    const fat = e.tipo === 'entrada' ? this.state.fat - e.valor : this.state.fat;
+    this.undoSnap = snap;
+    this.setState({ entries, fat, openId: null, disp: fat });
+    this.showToast({ msg: 'Lançamento excluído', sub: e.nome, undo: true, kind: 'err' });
+  }
+  undo() {
+    if (!this.undoSnap) return;
+    this.setState({ ...this.undoSnap, toast: null }, () => { if (this.state.screen === 'painel') this.runFio(); else this.setState({ disp: this.state.fat }); });
+    this.undoSnap = null;
+  }
+  ask(qa, text) {
+    if (this.state.typing) return;
+    const q = text || qa.q;
+    this.setState(s => ({ msgs: [...s.msgs, { from: 'me', text: q }], typing: true, chatText: '' }));
+    this.typeT = setTimeout(() => {
+      const ans = qa ? { from: 'ia', text: qa.a, fio: qa.fio, chips: qa.chips } : { from: 'ia', text: 'Não tenho uma resposta segura para isso. Tente com outras palavras, ou leve a dúvida a um contador.' };
+      this.setState(s => ({ msgs: [...s.msgs, ans], typing: false }));
+    }, 1100);
+  }
+
+  setDraft(patch) { this.setState(s => ({ draft: { ...s.draft, ...patch } })); }
+
+  renderVals() {
+    const s = this.state, still = this.props.still;
+    const scr = s.screen;
+    const ease = 'cubic-bezier(.2,.7,.2,1)';
+    const on = 'var(--acc)', onFg = 'var(--on-acc)';
+    const seg = act => ({ bg: act ? 'var(--s3)' : 'transparent', fg: act ? 'var(--t1)' : 'var(--t3)' });
+    const is = {}; ['onb1', 'onb2', 'onb3', 'painel', 'adicionar', 'gravando', 'lendo', 'iafail', 'conferir', 'lancamentos', 'chat', 'perfil'].forEach(k => is[k] = scr === k);
+    const tabs = ['painel', 'lancamentos', 'chat', 'perfil'];
+    const nav = {}; tabs.forEach(t => nav[t] = { bg: scr === t ? 'oklch(0.78 0.12 240 / 0.16)' : 'transparent', fg: scr === t ? 'var(--acc-ink)' : 'var(--t2)' });
+
+    // fio
+    const pct = s.fat / LIMIT * 100, st = pct > 100 ? 'over' : pct >= 80 ? 'warn' : 'ok';
+    const col = { ok: 'var(--ok)', warn: 'var(--warn)', over: 'var(--err)' }[st];
+    const shown = Math.min(s.fioPct, SC);
+    const proj = Math.round(s.fat * 365 / 328 / 100) * 100;
+    const fio = {
+      color: col, tint: `color-mix(in oklch, ${col} 16%, transparent)`,
+      off: (100 - shown / SC * 100).toFixed(2), dx: (shown / SC * W).toFixed(1),
+      tr: `stroke-dashoffset 1100ms ${ease}, stroke .4s`, trDot: `transform 1100ms ${ease}, fill .4s`,
+      status: s.empty ? 'Começando' : { ok: 'Com folga', warn: 'Atenção', over: 'Estourou' }[st],
+      msg: st === 'over' ? `Passou ${brl(s.fat - LIMIT)}` : `Faltam ${brl(LIMIT - s.fat)}`,
+      proj: s.empty ? 'Assim que entrar o primeiro valor, o fio começa a andar.' : st === 'over' ? 'Calma: tem caminho. Veja abaixo o que fazer agora.' : st === 'warn' ? `No ritmo atual, você fecha 2026 perto de ${brl(proj)}. Cabe, mas com pouca folga.` : `No ritmo atual, você fecha 2026 perto de ${brl(proj)}. Cabe no MEI com folga.`,
+      isWarn: st === 'warn' && !s.empty, isOver: st === 'over'
+    };
+
+    const fmtE = e => ({ ...e, valorTxt: (e.tipo === 'entrada' ? '+ ' : '− ') + brl(e.valor), color: e.tipo === 'entrada' ? 'var(--ok)' : 'var(--t1)', meta: `${e.cat} · ${String(e.d).padStart(2, '0')}/${e.m}`, day: String(e.d).padStart(2, '0'), mon: MON[e.m] || '' });
+
+    // lancamentos
+    const filtered = s.entries.filter(e => (s.filter === 'todos' || (s.filter === 'entradas' ? e.tipo === 'entrada' : e.tipo === 'saida')) && (!s.selDay || (e.m === 11 && e.d === s.selDay)));
+    const groups = [11, 10].map(m => {
+      const items = filtered.filter(e => e.m === m);
+      const ent = items.filter(e => e.tipo === 'entrada').reduce((a, e) => a + e.valor, 0);
+      return { mes: MES[m], total: `entrou ${brl(ent)}`, items: items.map((e, i) => ({ ...fmtE(e), sep: i ? '1px solid var(--line)' : '0', open: s.openId === e.id, toggle: () => this.setState({ openId: s.openId === e.id ? null : e.id }), edit: () => this.go('conferir', { draft: { digits: String(Math.round(e.valor * 100)), desc: e.nome, data: `${String(e.d).padStart(2, '0')}/${String(e.m).padStart(2, '0')}/2026`, tipo: e.tipo, cat: e.cat, manual: true, source: '', doubt: false, editId: e.id }, valErr: false }), del: () => this.del(e) })) };
+    }).filter(g => g.items.length);
+    const daysWith = new Set(s.entries.filter(e => e.m === 11).map(e => e.d));
+    const first = new Date(2026, 10, 1).getDay();
+    const cells = [...Array(first).fill(null), ...Array.from({ length: 30 }, (_, i) => i + 1)];
+    while (cells.length % 7) cells.push(null);
+    let weeks = [];
+    for (let i = 0; i < cells.length; i += 7) weeks.push({ days: cells.slice(i, i + 7).map(n => {
+      const sel = n && s.selDay === n, today = n === 24;
+      return { n: n || '', blank: !n, bg: sel ? on : 'transparent', fg: sel ? onFg : n > 24 ? 'var(--t3)' : 'var(--t1)', ring: today && !sel ? 'inset 0 0 0 1.5px var(--line-strong)' : 'none', dot: n && daysWith.has(n) ? (sel ? onFg : 'var(--acc)') : 'transparent', pick: () => n && this.setState({ selDay: s.selDay === n ? null : n }) };
+    }) });
+    if (!s.calOpen) { const target = s.selDay || 24; weeks = weeks.filter(w => w.days.some(d => d.n === target)); }
+
+    // draft
+    const d = s.draft;
+    const dateDoubt = d.doubt;
+    const failMap = {
+      '503': { code: 'IA fora do ar · 503', title: 'A IA não respondeu agora', body: 'Pode ser instabilidade do serviço. Você não perde nada: preencha na mão ou tente de novo em alguns minutos.', kept: 'Sua foto ficou guardada neste aparelho', secondLabel: 'Tentar de novo', second: () => this.go('lendo') },
+      '429': { code: 'Limite diário da IA · 429', title: 'Você usou todas as leituras de hoje', body: 'O limite volta amanhã, à meia-noite. Enquanto isso, o app segue funcionando com preenchimento manual.', kept: 'Limite e DAS continuam sendo calculados normalmente', secondLabel: 'Voltar ao painel', second: () => this.go('painel') }
+    };
+
+    const lab = [
+      { label: 'Primeira vez (vazio)', c: 'var(--t3)', run: () => this.go('painel', { empty: true, fat: 0, entries: [], pending: 0, disp: 0, loading: false, netErr: false }) },
+      { label: 'Carregando', c: 'var(--t3)', run: () => this.go('painel', { loading: true, netErr: false }) },
+      { label: 'Sem internet', c: 'var(--err)', run: () => this.go('painel', { netErr: true, loading: false }) },
+      { label: 'IA fora do ar (503)', c: 'var(--warn)', run: () => this.go('iafail', { fail: '503' }) },
+      { label: 'Limite diário da IA (429)', c: 'var(--warn)', run: () => this.go('iafail', { fail: '429' }) },
+      { label: 'Limite em 80%', c: 'var(--warn)', run: () => this.go('painel', { fat: 68040, empty: false, loading: false, netErr: false }) },
+      { label: 'Limite estourado', c: 'var(--err)', run: () => this.go('painel', { fat: 84240, empty: false, loading: false, netErr: false }) },
+      { label: 'Voltar ao normal', c: 'var(--ok)', run: () => this.go('painel', { fat: 34020, empty: false, loading: false, netErr: false, entries: ENTRIES.map(e => ({ ...e })), pending: 2 }) }
+    ];
+
+    const nx = (badge, title, sub, run, color) => ({ badge, title, sub, run, color: color || 'var(--acc)', bg: color ? `color-mix(in oklch, ${color} 11%, var(--s1))` : 'oklch(0.78 0.12 240 / 0.10)', border: color ? `color-mix(in oklch, ${color} 45%, transparent)` : 'oklch(0.78 0.12 240 / 0.40)' });
+    const next = s.empty ? nx('+', 'Mande seu primeiro lançamento', 'Uma foto de recibo já basta. Toque aqui ou em Adicionar.', () => this.go('adicionar', { writeText: '' }))
+      : st === 'over' ? nx('!', 'Veja o que fazer agora', 'Passou do teto. Tem caminho, e a gente explica.', () => { this.go('chat'); setTimeout(() => this.ask(QA[2]), 380); }, 'var(--err)')
+      : st === 'warn' ? nx('!', 'Veja o que fazer com 80%', 'Entenda o que acontece se passar do teto.', () => { this.go('chat'); setTimeout(() => this.ask(QA[2]), 380); }, 'var(--warn)')
+      : s.pending > 0 ? nx(String(s.pending), s.pending === 1 ? 'Confira 1 rascunho' : `Confira ${s.pending} rascunhos`, 'A IA já leu. Falta só você conferir.', () => this.go('conferir', { draft: DRAFT_AI(), valErr: false }))
+      : nx('20', 'Seu DAS vence em 26 dias', 'Valor e código de pagamento ficam prontos aqui.', () => this.setState({ sheet: HELP.das }), 'var(--ok)');
+    const TOUR = [
+      { title: 'Este é o seu Fio do Limite', body: 'Ele anda conforme você fatura. Verde é folga, âmbar é atenção, vermelho é passou do teto do MEI.', hl: { l: 20, t: 164, w: 350, h: 342, r: 26 }, top: '524px', bottom: 'auto' },
+      { title: 'Tudo começa no Adicionar', body: 'Foto, áudio, print ou texto. A IA monta o rascunho e você confirma.', hl: { l: 216, t: 674, w: 158, h: 66, r: 22 }, top: 'auto', bottom: '190px' },
+      { title: 'Dúvida? Pergunte no chat', body: 'Respostas curtas, sempre com a lei que diz aquilo. Não substitui um contador.', hl: { l: 195, t: 764, w: 90, h: 60, r: 20 }, top: 'auto', bottom: '100px' }
+    ];
+    const tv = s.tour != null ? TOUR[s.tour] : TOUR[0];
+    const tourV = { ...tv, n: (s.tour || 0) + 1, cta: s.tour >= 2 ? 'Começar a usar' : 'Próxima dica', d1: 'var(--acc)', d2: s.tour >= 1 ? 'var(--acc)' : 'var(--line-strong)', d3: s.tour >= 2 ? 'var(--acc)' : 'var(--line-strong)' };
+    const onbV = parseInt(s.onbDigits || '0', 10) / 100, onbP = onbV / LIMIT * 100;
+    const onbCol = onbP > 100 ? 'var(--err)' : onbP >= 80 ? 'var(--warn)' : 'var(--ok)';
+    const writeOk = s.writeText.trim().length > 2;
+    const t = s.toast;
+    const labels = { onb1: 'Onboarding 1', onb2: 'Onboarding 2', onb3: 'Onboarding 3', painel: 'Painel', adicionar: 'Adicionar', gravando: 'Gravando áudio', lendo: 'Lendo', iafail: 'IA indisponível', conferir: 'Conferir rascunho', lancamentos: 'Lançamentos', chat: 'Chat', perfil: 'Perfil' };
+
+    return {
+      noise: NOISE, is, nav, screenLabel: labels[scr],
+      enterY: s.entering ? 14 : 0, enterO: s.entering ? 0.4 : 1, enterTr: s.entering ? 'none' : `transform 320ms ${ease}, opacity 320ms ${ease}`,
+      showNav: tabs.includes(scr),
+      // onboarding
+      acts: ACTS.map((a, i) => ({ ...a, pick: () => this.setState({ act: i }), border: s.act === i ? 'var(--acc)' : 'var(--line-strong)', bg: s.act === i ? 'oklch(0.78 0.12 240 / 0.10)' : 'oklch(0.20 0.03 255 / 0.8)', dot: s.act === i ? 'var(--acc)' : 'transparent' })),
+      onb1Off: s.act == null, onb1Bg: s.act == null ? 'var(--s3)' : on, onb1Fg: s.act == null ? 'var(--t3)' : onFg,
+      toOnb1: () => this.go('onb1'), toOnb2: () => this.go('onb2'), toOnb3: () => this.go('onb3'), toOnb3Zero: () => this.go('onb3', { onbDigits: '' }),
+      onbFmt: num(onbV), onOnbFat: e => this.setState({ onbDigits: e.target.value.replace(/\D/g, '').replace(/^0+/, '').slice(0, 9) }),
+      onbPct: Math.round(onbP) + '% do teto',
+      onbFio: { color: onbCol, off: (100 - Math.min(onbP, SC) / SC * 100).toFixed(2), dx: (Math.min(onbP, SC) / SC * W).toFixed(1), msg: onbP > 100 ? `Passou ${brl(onbV - LIMIT)} do teto` : `Faltam ${brl(LIMIT - onbV)} para o teto` },
+      acceptAI: () => this.go('painel', { ai: true, fat: onbV, disp: 0, tour: s.toured ? null : 0, toured: true }),
+      refuseAI: () => this.go('painel', { ai: false, fat: onbV, disp: 0, tour: s.toured ? null : 0, toured: true }),
+      helpDAS: () => this.setState({ sheet: HELP.das }), helpCNAE: () => this.setState({ sheet: HELP.cnae }),
+      discardLabel: d.editId ? 'Cancelar edição' : 'Descartar rascunho',
+      next, hasTour: s.tour != null && scr === 'painel', tour: tourV,
+      nextTour: () => this.setState({ tour: s.tour >= 2 ? null : s.tour + 1 }), skipTour: () => this.setState({ tour: null }),
+      // painel
+      netErr: s.netErr, loading: s.loading, notLoading: !s.loading, empty: s.empty, notEmpty: !s.empty,
+      retryNet: () => { this.setState({ netErr: false }); this.showToast({ msg: 'Conectado de novo', sub: 'Painel atualizado agora', kind: 'ok' }); },
+      heroCount: brl(s.disp), fio, trackDash: s.empty ? '2 6' : 'none',
+      hasPending: s.pending > 0, pending: s.pending, pendingTitle: s.pending === 1 ? '1 rascunho para conferir' : `${s.pending} rascunhos para conferir`,
+      openPending: () => this.go('conferir', { draft: DRAFT_AI(), valErr: false }),
+      recent: s.entries.slice(0, 3).map(fmtE),
+      askOver: () => { this.go('chat'); setTimeout(() => this.ask(QA[2]), 380); },
+      tilt: e => { if (e.pointerType === 'touch' && !e.isPrimary) return; const el = e.currentTarget, r = el.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top; el.style.setProperty('--x', x + 'px'); el.style.setProperty('--y', y + 'px'); if (!this.reduced) el.style.transform = `perspective(900px) rotateX(${((0.5 - y / r.height) * 7).toFixed(2)}deg) rotateY(${((x / r.width - 0.5) * 9).toFixed(2)}deg)`; },
+      untilt: e => { e.currentTarget.style.transform = ''; },
+      // nav
+      goPainel: () => this.go('painel', { netErr: false }), goLanc: () => this.go('lancamentos'), goChat: () => this.go('chat'), goPerfil: () => this.go('perfil'),
+      goAdd: () => this.go('adicionar', { writeText: '' }),
+      // add
+      pickFoto: () => this.go(s.ai ? 'lendo' : 'iafail', { lendoKind: 'foto', fail: '503' }),
+      pickPrint: () => this.go(s.ai ? 'lendo' : 'iafail', { lendoKind: 'print', fail: '503' }),
+      pickAudio: () => this.go('gravando', { rec: 0 }),
+      pickWrite: () => this.writeRef.current && this.writeRef.current.focus(),
+      writeRef: this.writeRef, writeText: s.writeText, onWrite: e => this.setState({ writeText: e.target.value }),
+      writeOff: !writeOk, writeBg: writeOk ? on : 'var(--s3)', writeFg: writeOk ? onFg : 'var(--t3)',
+      sendWrite: () => writeOk && this.go('lendo', { lendoKind: 'texto' }),
+      goManual: () => this.go('conferir', { draft: DRAFT_MANUAL(), valErr: false }),
+      lendoTitle: { foto: 'Lendo sua foto…', print: 'Lendo seu print…', audio: 'Ouvindo seu áudio…', texto: 'Lendo o que você escreveu…' }[s.lendoKind],
+      recTxt: `0:${String(s.rec).padStart(2, '0')}`, bars: BARS,
+      cancelRec: () => this.go('adicionar'), stopRec: () => this.go('lendo', { lendoKind: 'audio' }),
+      fail: failMap[s.fail],
+      // draft
+      draft: d, draftTitle: d.editId ? 'Editar lançamento' : d.manual ? 'Novo lançamento' : 'Conferir rascunho',
+      draftFromAI: !d.manual, draftSource: d.source || 'Lido de uma foto',
+      draftNote: d.editId ? 'A alteração só vale quando você confirmar.' : d.manual ? 'Preenchido por você. Salva quando confirmar.' : 'Nada foi salvo ainda. Só entra no fio quando você confirmar.',
+      draftValor: num(parseInt(d.digits || '0', 10) / 100), valErr: s.valErr, valBorder: s.valErr ? 'var(--err)' : 'var(--line-strong)',
+      onDraftValor: e => { this.setDraft({ digits: e.target.value.replace(/\D/g, '').replace(/^0+/, '').slice(0, 9) }); this.setState({ valErr: false }); },
+      onDraftDesc: e => this.setDraft({ desc: e.target.value }),
+      onDraftData: e => this.setDraft({ data: e.target.value, doubt: false }),
+      okDate: () => this.setDraft({ doubt: false, data: d.data.replace('?', '2') }),
+      dateDoubt, dateLabel: dateDoubt ? 'Data · confira' : 'Data', dateLabelColor: dateDoubt ? 'var(--warn)' : 'var(--t2)',
+      dateBg: dateDoubt ? 'color-mix(in oklch, var(--warn) 10%, var(--s2))' : 'var(--s2)', dateBorder: dateDoubt ? 'var(--warn)' : 'var(--line-strong)',
+      tipos: [['entrada', 'Entrada'], ['saida', 'Saída']].map(([v, label]) => ({ label, pick: () => this.setDraft({ tipo: v }), ...seg(d.tipo === v) })),
+      cats: ['Serviço', 'Venda', 'Material', 'Outro'].map(c => ({ label: c, pick: () => this.setDraft({ cat: c }), border: d.cat === c ? 'var(--acc)' : 'var(--line-strong)', bg: d.cat === c ? 'oklch(0.78 0.12 240 / 0.14)' : 'var(--s2)', fg: d.cat === c ? 'var(--acc-ink)' : 'var(--t1)' })),
+      confirm: () => this.confirm(),
+      discard: () => { this.go(d.editId ? 'lancamentos' : 'painel'); if (!d.editId) this.showToast({ msg: 'Rascunho descartado', sub: 'Nada foi salvo', kind: 'neutral' }); },
+      goBackFromDraft: () => this.go(d.editId ? 'lancamentos' : 'painel'),
+      // lancamentos
+      filters: [['todos', 'Todos'], ['entradas', 'Entradas'], ['saidas', 'Saídas']].map(([v, label]) => ({ label, pick: () => this.setState({ filter: v }), ...seg(s.filter === v) })),
+      weeks, calLabel: s.calOpen ? 'Recolher' : 'Ver mês', toggleCal: () => this.setState({ calOpen: !s.calOpen }),
+      hasSel: !!s.selDay, selDay: s.selDay, clearDay: () => this.setState({ selDay: null }),
+      groups, noGroups: !groups.length,
+      // chat
+      chatRef: this.chatRef,
+      msgs: s.msgs.map(m => m.from === 'me'
+        ? { ...m, justify: 'flex-end', bg: 'oklch(0.78 0.12 240 / 0.16)', border: 'oklch(0.78 0.12 240 / 0.35)', fg: 'var(--t1)', radius: '20px 20px 6px 20px', pad: '12px 16px', fio: false, hasChips: false, chips: [] }
+        : { ...m, justify: 'flex-start', bg: 'var(--s1)', border: 'var(--line)', fg: 'var(--t1)', radius: '20px 20px 20px 6px', pad: '14px 16px', fio: !!m.fio, hasChips: !!(m.chips && m.chips.length), chips: (m.chips || []).map(k => ({ label: CHIPS[k].label, open: () => this.setState({ sheet: CHIPS[k] }) })) }),
+      typing: s.typing,
+      sugs: QA.filter(q => !s.msgs.some(m => m.text === q.q)).map(q => ({ q: q.q, ask: () => this.ask(q) })),
+      chatText: s.chatText, onChat: e => this.setState({ chatText: e.target.value }),
+      sendChat: () => { const t = s.chatText.trim(); if (t) this.ask(matchQ(t), t); },
+      chatKey: e => { if (e.key === 'Enter') { const t = s.chatText.trim(); if (t) this.ask(matchQ(t), t); } },
+      hasSheet: !!s.sheet, sheet: s.sheet || {}, closeSheet: () => this.setState({ sheet: null }), stop: e => e.stopPropagation(),
+      // perfil
+      actName: s.act != null ? `${ACTS[s.act].nome} · MEI` : 'Cabeleireiro(a) · MEI',
+      aiSub: s.ai ? 'Ativado · você confirma tudo' : 'Desligado · preenchimento manual',
+      aiTrack: s.ai ? 'var(--acc)' : 'var(--s3)', aiKnob: s.ai ? 22 : 0, toggleAI: () => this.setState({ ai: !s.ai }),
+      restartOnb: () => this.go('onb1', { act: null }),
+      lab,
+      // toast
+      hasToast: !!t, toastBottom: tabs.includes(scr) ? (scr === 'painel' ? 180 : 106) : 120,
+      toast: t ? { ...t, hasUndo: !!t.undo, icon: t.kind === 'err' ? '−' : t.kind === 'neutral' ? '·' : '✓', dotBg: t.kind === 'err' ? 'var(--err)' : t.kind === 'neutral' ? 'var(--t3)' : 'var(--ok)' } : {},
+      undo: () => this.undo()
+    };
+  }
+}
+</script>
+</body>
+</html>
