@@ -11,7 +11,7 @@ export function FormConsentimento() {
 
   return (
     <form action={despachar} onSubmit={aoEnviar} noValidate aria-busy={pendente} className="flex flex-col gap-4">
-      <CaixasConsentimento erroTermos={erro?.campos?.aceiteTermos} />
+      <CaixasConsentimento erros={erro?.campos} />
       {erro && <Aviso alerta={!erro.campos}>{erro.mensagem}</Aviso>}
       <BotaoEnviar pendente={pendente}>Continuar</BotaoEnviar>
     </form>

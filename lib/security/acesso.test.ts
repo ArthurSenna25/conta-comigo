@@ -3,12 +3,14 @@ import { VERSAO_CONSENTIMENTO } from "@/lib/contracts";
 import { consentimentoVigente, destinoDoAcesso, finalidadesDoAceite, type AceiteRegistrado } from "./acesso";
 
 describe("finalidadesDoAceite: o que o cadastro grava em consentimentos", () => {
-  it("caixa de termos grava as DUAS finalidades obrigatórias (termos_uso e privacidade)", () => {
-    expect(finalidadesDoAceite({ aceiteTermos: true, aceiteEnvioIa: false })).toEqual(["termos_uso", "privacidade"]);
+  const marcado = { aceiteTermosUso: true, aceitePrivacidade: true, aceiteEnvioIa: false } as const;
+
+  it("cada caixa grava só a sua finalidade (termos_uso e privacidade separadas)", () => {
+    expect(finalidadesDoAceite(marcado)).toEqual(["termos_uso", "privacidade"]);
   });
 
   it("envio_ia só entra se a caixa opcional estiver marcada", () => {
-    expect(finalidadesDoAceite({ aceiteTermos: true, aceiteEnvioIa: true })).toEqual([
+    expect(finalidadesDoAceite({ ...marcado, aceiteEnvioIa: true })).toEqual([
       "termos_uso",
       "privacidade",
       "envio_ia",
@@ -16,7 +18,7 @@ describe("finalidadesDoAceite: o que o cadastro grava em consentimentos", () => 
   });
 
   it("o que o cadastro grava torna o consentimento vigente (sem deixar o usuário trancado)", () => {
-    const gravado = finalidadesDoAceite({ aceiteTermos: true, aceiteEnvioIa: false }).map((finalidade) => ({
+    const gravado = finalidadesDoAceite(marcado).map((finalidade) => ({
       finalidade,
       versao: VERSAO_CONSENTIMENTO,
       revogadoEm: null,

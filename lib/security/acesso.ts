@@ -16,11 +16,16 @@ export type EstadoAcesso = {
 const OBRIGATORIAS: FinalidadeConsentimento[] = ["termos_uso", "privacidade"];
 
 /**
- * O que o cadastro grava em `consentimentos`. A caixa dos termos cobre as DUAS finalidades obrigatórias:
- * gravar só uma deixaria `consentimentoVigente` falso e o usuário trancado em /consentimento.
+ * O que o cadastro grava em `consentimentos`: cada caixa grava só a sua finalidade. O contrato já exige as
+ * duas obrigatórias; sem uma delas `consentimentoVigente` seria falso e o usuário ficaria preso em /consentimento.
  */
 export function finalidadesDoAceite(c: ConsentimentoInput): FinalidadeConsentimento[] {
-  return [...OBRIGATORIAS, ...(c.aceiteEnvioIa ? (["envio_ia"] as const) : [])];
+  // `aceiteTermosUso` e `aceitePrivacidade` são `true` por contrato: cada um mapeia 1:1 a sua finalidade.
+  return [
+    ...(c.aceiteTermosUso ? (["termos_uso"] as const) : []),
+    ...(c.aceitePrivacidade ? (["privacidade"] as const) : []),
+    ...(c.aceiteEnvioIa ? (["envio_ia"] as const) : []),
+  ];
 }
 
 /** Vigente = termos e privacidade aceitos na versão atual e não revogados. `envio_ia` é opcional. */

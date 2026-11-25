@@ -11,19 +11,28 @@ const form = (campos: Record<string, string | File>) => {
 
 describe("lerCadastro: caixa de formulário vira boolean, ausência vira false", () => {
   it("marcada ('on') vira true", () => {
-    const r = lerCadastro(form({ email: "a@b.com", senha: "12345678", aceiteTermos: "on", aceiteEnvioIa: "on" }));
-    expect(r).toEqual({ email: "a@b.com", senha: "12345678", aceiteTermos: true, aceiteEnvioIa: true });
+    const r = lerCadastro(form({ email: "a@b.com", senha: "12345678", aceiteTermosUso: "on", aceitePrivacidade: "on", aceiteEnvioIa: "on" }));
+    expect(r).toEqual({
+      email: "a@b.com",
+      senha: "12345678",
+      aceiteTermosUso: true,
+      aceitePrivacidade: true,
+      aceiteEnvioIa: true,
+    });
   });
 
   it("desmarcada (campo ausente) vira false: nada vem pré-marcado", () => {
     const r = lerCadastro(form({ email: "a@b.com", senha: "12345678" }));
-    expect(r.aceiteTermos).toBe(false);
+    expect(r.aceiteTermosUso).toBe(false);
+    expect(r.aceitePrivacidade).toBe(false);
     expect(r.aceiteEnvioIa).toBe(false);
   });
 
   it("só o valor exato 'on' conta: 'true', '1' e 'false' não marcam a caixa", () => {
     for (const valor of ["true", "1", "false", "ON", ""]) {
-      expect(lerCadastro(form({ aceiteTermos: valor })).aceiteTermos).toBe(false);
+      const r = lerCadastro(form({ aceiteTermosUso: valor, aceitePrivacidade: valor }));
+      expect(r.aceiteTermosUso).toBe(false);
+      expect(r.aceitePrivacidade).toBe(false);
     }
   });
 
@@ -34,13 +43,13 @@ describe("lerCadastro: caixa de formulário vira boolean, ausência vira false",
   });
 
   it("o resultado passa pelo contrato CadastroInput", () => {
-    const r = lerCadastro(form({ email: " A@B.com ", senha: "12345678", aceiteTermos: "on" }));
+    const r = lerCadastro(form({ email: " A@B.com ", senha: "12345678", aceiteTermosUso: "on", aceitePrivacidade: "on" }));
     expect(CadastroInput.parse(r).email).toBe("a@b.com");
   });
 
   it("ignora campos extras (não deixa o cliente injetar aceite de outra finalidade)", () => {
-    const r = lerCadastro(form({ email: "a@b.com", senha: "12345678", aceiteTermos: "on", finalidade: "x" }));
-    expect(Object.keys(r).sort()).toEqual(["aceiteEnvioIa", "aceiteTermos", "email", "senha"]);
+    const r = lerCadastro(form({ email: "a@b.com", senha: "12345678", aceiteTermosUso: "on", finalidade: "x" }));
+    expect(Object.keys(r).sort()).toEqual(["aceiteEnvioIa", "aceitePrivacidade", "aceiteTermosUso", "email", "senha"]);
   });
 });
 
@@ -49,8 +58,12 @@ describe("lerLogin e lerConsentimento", () => {
     expect(lerLogin(form({ email: "a@b.com", senha: "x", next: "/painel" }))).toEqual({ email: "a@b.com", senha: "x" });
   });
 
-  it("lerConsentimento devolve só as duas caixas", () => {
-    expect(lerConsentimento(form({ aceiteTermos: "on" }))).toEqual({ aceiteTermos: true, aceiteEnvioIa: false });
+  it("lerConsentimento devolve só as três caixas, cada uma independente", () => {
+    expect(lerConsentimento(form({ aceiteTermosUso: "on" }))).toEqual({
+      aceiteTermosUso: true,
+      aceitePrivacidade: false,
+      aceiteEnvioIa: false,
+    });
   });
 });
 
@@ -60,9 +73,10 @@ describe("camposDoErro: primeira mensagem por campo, em texto fixo do contrato",
     expect(r.success).toBe(false);
     if (r.success) return;
     const campos = camposDoErro(r.error);
-    expect(Object.keys(campos).sort()).toEqual(["aceiteTermos", "email", "senha"]);
+    expect(Object.keys(campos).sort()).toEqual(["aceitePrivacidade", "aceiteTermosUso", "email", "senha"]);
     expect(campos.senha).toBe("Use ao menos 8 caracteres");
-    expect(campos.aceiteTermos).toMatch(/^Aceite os Termos/);
+    expect(campos.aceiteTermosUso).toMatch(/^Aceite os Termos de Uso/);
+    expect(campos.aceitePrivacidade).toMatch(/^Aceite a Política de Privacidade/);
   });
 
   it("não ecoa o valor digitado (e-mail e senha nunca voltam na mensagem)", () => {

@@ -13,7 +13,8 @@ const caixa = (fd: FormData, nome: string): boolean => fd.get(nome) === "on";
 export const lerLogin = (fd: FormData) => ({ email: texto(fd, "email"), senha: texto(fd, "senha") });
 
 export const lerConsentimento = (fd: FormData) => ({
-  aceiteTermos: caixa(fd, "aceiteTermos"),
+  aceiteTermosUso: caixa(fd, "aceiteTermosUso"),
+  aceitePrivacidade: caixa(fd, "aceitePrivacidade"),
   aceiteEnvioIa: caixa(fd, "aceiteEnvioIa"),
 });
 
