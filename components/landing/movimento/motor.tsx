@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
-import { linhaDoCta, parallax, prenderSigaOFio, revelar } from "./cenas";
+import { flutuar, linhaDoCta, parallax, prenderSigaOFio, revelar, sairDoPalco } from "./cenas";
 import { ligarFioEstatico, ligarFioScrub } from "./fio-fundo";
-import { holofote, inclinar } from "./ponteiro";
+import { holofote, ima, inclinar } from "./ponteiro";
 import { aplicarClasse, useEstatico } from "./preferencias";
 import { ligarLenis } from "./rolagem";
 import { CONSULTA_REDUZIDO } from "./script-inicial";
@@ -113,8 +113,12 @@ async function montar(): Promise<() => void> {
     if (c.preso) paradas.push(prenderSigaOFio(ScrollTrigger));
     revelar(gsap, c.md ? 40 : 18);
     linhaDoCta(gsap);
-    if (c.desktop) parallax(gsap);
-    if (c.mouse) paradas.push(inclinar(gsap), holofote());
+    if (c.desktop) {
+      parallax(gsap);
+      paradas.push(flutuar(gsap));
+    }
+    paradas.push(sairDoPalco(ScrollTrigger));
+    if (c.mouse) paradas.push(inclinar(gsap), holofote(), ima(gsap));
     return () => paradas.forEach((p) => p());
   });
   try {

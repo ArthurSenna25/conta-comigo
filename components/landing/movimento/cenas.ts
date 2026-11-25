@@ -125,3 +125,45 @@ export function linhaDoCta(gsap: Gsap): void {
     },
   );
 }
+
+/** Fração do scroll do herói em que o palco termina de sair (05 L136: "até 75%"). */
+const FIM_SAIDA = 0.75;
+
+/** Saída do palco (05 L136): y 0→−90px, scale 1→.92, opacity 1→0 (×1.25). `p` = progresso 0..1 até FIM_SAIDA do herói. */
+export function saidaDoPalco(p: number): { y: number; scale: number; opacity: number } {
+  const t = Math.max(0, Math.min(1, p));
+  return { y: -90 * t, scale: 1 - 0.08 * t, opacity: Math.max(0, 1 - t * 1.25) };
+}
+
+/** Palco do herói sai com o scroll (scrub). Nada muda no carregamento: só aplica quando o scroll anda. */
+export function sairDoPalco(ScrollTrigger: typeof ST): () => void {
+  const hero = document.querySelector<HTMLElement>('[data-movimento="hero"]');
+  const palco = document.querySelector<HTMLElement>('[data-movimento="hero-palco"]');
+  if (!hero || !palco) return () => {};
+  const gatilho = ScrollTrigger.create({
+    trigger: hero,
+    start: "top top",
+    end: () => `+=${hero.offsetHeight * FIM_SAIDA}`,
+    scrub: true,
+    onUpdate: (s) => {
+      const { y, scale, opacity } = saidaDoPalco(s.progress);
+      palco.style.transform = `translate3d(0, ${y}px, 0) scale(${scale})`;
+      palco.style.opacity = String(opacity);
+    },
+  });
+  return () => {
+    gatilho.kill();
+    palco.style.removeProperty("transform");
+    palco.style.removeProperty("opacity");
+  };
+}
+
+/** Flutuação contínua do celular do herói (05 L138, 06 L47): y 0↔−12, 3.4s sine.inOut yoyo. */
+export function flutuar(gsap: Gsap): () => void {
+  const alvos = todos('[data-movimento~="flutuar"]');
+  const tweens = alvos.map((el) => gsap.to(el, { y: -12, duration: 3.4, ease: "sine.inOut", yoyo: true, repeat: -1 }));
+  return () => {
+    tweens.forEach((t) => t.kill());
+    gsap.set(alvos, { clearProps: "transform" });
+  };
+}
