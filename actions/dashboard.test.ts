@@ -53,6 +53,12 @@ describe("obterDashboard", () => {
     }
   });
 
+  it("perfil salvo com data inválida: o engine rejeita e a action devolve erro tratado, sem lançar", async () => {
+    for (const f of funcoesDoEngine) f.mockImplementation(() => { throw new RangeError("data de abertura posterior"); });
+    const r = await obterDashboard("2026-11");
+    expect(r).toMatchObject({ ok: false, erro: { codigo: "interno" } });
+  });
+
   it("monta a resposta com os números do engine (a action não calcula nada)", async () => {
     m.resumoMes.mockReturnValue(mockDashboard.resumoMes);
     m.statusLimiteMei.mockReturnValue({ usadoCentavos: 1, limiteCentavos: 8_100_000, pct: 0, faixa: "ok" });
