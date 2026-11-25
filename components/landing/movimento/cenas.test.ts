@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { passoAtual, preenchimentoDoTrilho } from "./cenas";
+import { passoAtual, preenchimentoDoTrilho, saidaDoPalco } from "./cenas";
 
 describe("passo do Siga o Fio", () => {
   it("divide o progresso em 4 passos e não passa do último", () => {
@@ -20,5 +20,21 @@ describe("preenchimento do trilho do Siga o Fio", () => {
   it("aguenta progresso fora de 0..1", () => {
     expect(preenchimentoDoTrilho(-1, 4)).toBe(0);
     expect(preenchimentoDoTrilho(2, 4)).toBe(1);
+  });
+});
+
+describe("saída do palco do herói", () => {
+  it("começa parado, termina em y −90 e scale .92, e some antes do fim", () => {
+    expect(saidaDoPalco(0)).toMatchObject({ scale: 1, opacity: 1 });
+    const fim = saidaDoPalco(1);
+    expect(fim.y).toBe(-90);
+    expect(fim.scale).toBeCloseTo(0.92);
+    expect(fim.opacity).toBe(0);
+    expect(saidaDoPalco(0.4).opacity).toBeCloseTo(0.5);
+  });
+
+  it("aguenta progresso fora de 0..1", () => {
+    expect(saidaDoPalco(-1).scale).toBe(1);
+    expect(saidaDoPalco(3).y).toBe(-90);
   });
 });

@@ -87,7 +87,9 @@ function Palco() {
       />
       <div data-movimento="hero-item abertura-celular" className="relative z-[2]">
         <div data-movimento="flutuar">
-          <Celular tela="painel" className="celular-hero" />
+          <div data-movimento="tilt">
+            <Celular tela="painel" className="celular-hero" />
+          </div>
         </div>
       </div>
     </div>
