@@ -85,7 +85,7 @@ function Palco() {
         valor="R$ 81,90"
         rodape={<span className="num text-[15px] text-t2">Vence em 20/12/2026</span>}
       />
-      <div data-movimento="hero-item" className="relative z-[2]">
+      <div data-movimento="hero-item abertura-celular" className="relative z-[2]">
         <div data-movimento="flutuar">
           <Celular tela="painel" className="celular-hero" />
         </div>
@@ -110,7 +110,7 @@ function CartaoFlutuante({ lado, rotulo, valor, rodape, fio = false }: CartaoFlu
   return (
     <div
       aria-hidden="true"
-      data-movimento="parallax"
+      data-movimento="parallax abertura"
       data-speed={lado === "esquerda" ? "0.18" : "0.24"}
       className={`absolute hidden [transform-style:preserve-3d] xl:block ${posicao}`}
     >
@@ -140,7 +140,7 @@ function Feixes() {
     <>
       <div
         aria-hidden="true"
-        data-movimento="parallax"
+        data-movimento="parallax abertura"
         data-speed="0.3"
         className="pointer-events-none absolute inset-x-0 top-0 bottom-1/4 opacity-75 [mask-image:linear-gradient(180deg,#000_55%,transparent)]"
       >

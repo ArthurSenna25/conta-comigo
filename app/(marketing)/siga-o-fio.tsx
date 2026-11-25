@@ -32,7 +32,7 @@ function Trilho({ alcancados }: { alcancados: number }) {
   const xs = [12, 104, 196, 288];
   const fim = xs[Math.max(0, alcancados - 1)];
   return (
-    <svg aria-hidden="true" viewBox="0 0 300 24" className="h-auto w-[min(300px,100%)] overflow-visible">
+    <svg aria-hidden="true" data-movimento="siga-trilho" viewBox="0 0 300 24" className="h-auto w-[min(300px,100%)] overflow-visible">
       <line x1={12} y1={12} x2={288} y2={12} strokeWidth={2} strokeLinecap="round" style={{ stroke: "var(--track)" }} />
       <line x1={12} y1={12} x2={fim} y2={12} strokeWidth={3} strokeLinecap="round" style={{ stroke: "var(--ok)" }} />
       {xs.map((x, i) => (
@@ -43,8 +43,8 @@ function Trilho({ alcancados }: { alcancados: number }) {
 }
 
 /**
- * Sem JS: os 4 passos ficam empilhados e visíveis. A etapa de movimento transforma a seção em
- * sticky (360/420vh) e troca os passos pelo scroll usando os ganchos data-movimento.
+ * Sem JS, no modo estático e abaixo de 900×720: os 4 passos ficam empilhados e visíveis. Acima disso,
+ * a ilha de movimento prende a seção ao scroll (pin) e troca os passos (cenas.ts + landing.css).
  */
 export function SigaOFio() {
   return (
