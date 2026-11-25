@@ -1,7 +1,9 @@
 /**
  * Dados de EXEMPLO da seção "O limite" (05-LANDING.md). Não são do usuário nem do lib/engine:
  * só ilustram o Fio. Valores em centavos.
- * Teto R$ 81.000,00: LC 123/2006, art. 18-A (R$ 6.750/mês × 12), conferido em 24/11/2026 (docs/handoff).
+ * Teto R$ 81.000,00: LC 123/2006, art. 18-A, § 1º, consultado em 24/11/2026 em planalto.gov.br
+ * (proporcional R$ 6.750,00/mês no § 2º, mesma data).
+ * §§ 1º e 2º trazem 'Vide LC 238/2026'; conferir art. 10 antes de qualquer menção.
  */
 export const TETO_EXEMPLO_CENTAVOS = 8_100_000;
 
