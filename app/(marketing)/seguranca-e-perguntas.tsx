@@ -50,7 +50,7 @@ export function Seguranca() {
   );
 }
 
-// PENDENTE (07 #3): a resposta 1 cita a regra dos 20% sem fonte conferida.
+// Resposta 1: LC 123/2006, art. 18-A, § 7º, III (a e b) e § 10, consultado em 24/11/2026 (detalhe em ia-e-chat.tsx).
 const PERGUNTAS = [
   [
     "O que acontece se eu passar do limite?",

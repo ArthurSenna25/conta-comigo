@@ -98,10 +98,14 @@ function CartaoRascunho() {
   );
 }
 
-// PENDENTE (07 #3): parágrafo, redação e data de consulta do § 7º. Não publicar como definitivo sem fonte.
+// Fonte: LC 123/2006, art. 18-A, § 7º, III (alíneas a e b) e § 10, consultado em 24/11/2026 em planalto.gov.br.
+// Excesso de até 20% do limite (R$ 81.000,00 → até R$ 97.200,00): desenquadra a partir de 1º de janeiro do ano
+// seguinte; a diferença é paga sem multa e juros, em parcela única, junto com o DAS de janeiro.
+// Acima de 20%: efeito retroativo a 1º de janeiro do ano do excesso.
 const FONTE_DESENQUADRAMENTO = {
   rotulo: "LC 123/2006, art. 18-A, § 7º",
   url: "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp123.htm",
+  consultadoEm: "2026-11-24",
 };
 
 export function ChatComFonte() {
