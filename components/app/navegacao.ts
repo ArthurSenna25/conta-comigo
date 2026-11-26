@@ -12,7 +12,7 @@ export const ABAS: readonly Destino[] = [
   { href: "/painel", rotulo: "Painel", ativo: true },
   { href: "/lancamentos", rotulo: "Lançamentos", ativo: true },
   { href: "/chat", rotulo: "Chat", ativo: true },
-  { href: "/perfil", rotulo: "Perfil", ativo: false },
+  { href: "/perfil", rotulo: "Perfil", ativo: true },
 ];
 
 /** Adicionar não é aba: é o FAB, só no painel. */
