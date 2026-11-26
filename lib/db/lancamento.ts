@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Lancamento, LancamentoInput } from "@/lib/contracts";
+import type { Lancamento, LancamentoInput, TipoLancamento } from "@/lib/contracts";
 import { camposDoLancamento, COLUNAS_LANCAMENTO, lancamentoParaLinha, linhaParaLancamento } from "./mapeamento";
 
 /** `max-rows` padrão do PostgREST/Supabase. */
@@ -54,6 +54,45 @@ export async function listarLancamentos(
   // PostgREST corta em 1000 linhas sem avisar: um painel com receita menor que a real é pior que um erro
   if (data.length >= LIMITE_LINHAS_API) throw new Error("falha ao listar lançamento (limite de linhas)");
   return data.map(linhaParaLancamento);
+}
+
+/**
+ * Leitura exclusiva do dashboard, com intervalo semiaberto e cursor por UUID.
+ * O cursor evita deslocamentos entre páginas, mas não garante uma visão transacional sob escritas concorrentes.
+ */
+export async function listarLancamentosDashboard(
+  db: SupabaseClient,
+  userId: string,
+  periodo: { de: string; ate: string },
+  tipo?: TipoLancamento,
+): Promise<Lancamento[]> {
+  const lancamentos: Lancamento[] = [];
+  let cursor: string | undefined;
+  for (;;) {
+    const consulta = db
+      .from("lancamentos")
+      .select(COLUNAS_LANCAMENTO)
+      .eq("user_id", userId)
+      .gte("data", periodo.de)
+      .lt("data", periodo.ate);
+    if (tipo) consulta.eq("tipo", tipo);
+    if (cursor !== undefined) consulta.lt("id", cursor);
+    const { data, error } = await consulta
+      .order("id", { ascending: false })
+      .limit(LIMITE_LINHAS_API);
+    if (error) throw falha("listar", error);
+    // O servidor pode impor um teto menor que o lote solicitado.
+    if (data.length === 0) return lancamentos;
+    for (const linha of data) {
+      const lancamento = linhaParaLancamento(linha);
+      const id = lancamento.id.toLowerCase();
+      if (cursor !== undefined && id >= cursor) {
+        throw new Error("falha ao listar lançamento (cursor sem progresso)");
+      }
+      lancamentos.push(lancamento);
+      cursor = id;
+    }
+  }
 }
 
 /** Edita um lançamento do usuário. null se não existe ou não é dele. O documento anexado não muda aqui. */

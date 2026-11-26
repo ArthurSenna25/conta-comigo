@@ -2,13 +2,10 @@ import { DataISO, type Alerta, type Lancamento } from "@/lib/contracts";
 import type { EstadoAlertas } from "./index";
 import { LIMIAR_100_MEI } from "./limiares-mei";
 import { proximoVencimentoDas } from "./proximo-vencimento-das";
+import { receitaAnualCentavos } from "./receita-anual";
 import { statusLimiteMei } from "./status-limite-mei";
 
 const MILISSEGUNDOS_POR_DIA = 86_400_000;
-const anoEmSaoPaulo = new Intl.DateTimeFormat("pt-BR", {
-  year: "numeric",
-  timeZone: "America/Sao_Paulo",
-});
 
 function alertaDas(hoje: string, dataAbertura: string): Alerta | undefined {
   const vencimento = proximoVencimentoDas(hoje);
@@ -34,20 +31,8 @@ function alertaDas(hoje: string, dataAbertura: string): Alerta | undefined {
 function alertaLimite(estado: EstadoAlertas, lancamentos: readonly Lancamento[]): Alerta | undefined {
   const { perfil, hoje } = estado;
   const ano = hoje.slice(0, 4);
-  const receitaInicial = anoEmSaoPaulo.format(new Date(perfil.criadoEm)) === ano
-    ? perfil.receitaInicialCentavos
-    : 0;
-  let receitasAnoCentavos = receitaInicial;
-  for (const lancamento of lancamentos) {
-    if (lancamento.tipo !== "receita" || lancamento.data.slice(0, 4) !== ano) continue;
-    receitasAnoCentavos += lancamento.valorCentavos;
-    if (!Number.isSafeInteger(receitasAnoCentavos)) {
-      throw new RangeError("A receita anual ultrapassa o limite de inteiros seguros em centavos");
-    }
-  }
-
   const { faixa, usadoCentavos, limiteCentavos } = statusLimiteMei({
-    receitasAnoCentavos,
+    receitasAnoCentavos: receitaAnualCentavos(perfil, lancamentos, hoje),
     dataAbertura: perfil.dataAbertura,
     hoje,
   });
