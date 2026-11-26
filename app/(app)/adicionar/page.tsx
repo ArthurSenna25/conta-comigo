@@ -11,7 +11,7 @@ export default async function PaginaAdicionar() {
   return (
     <div className="flex min-h-dvh flex-col">
       <FaixaDemo demo={demo} />
-      <Adicionar />
+      <Adicionar demo={demo} />
     </div>
   );
 }
