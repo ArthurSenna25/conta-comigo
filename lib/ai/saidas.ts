@@ -80,6 +80,26 @@ function minimizarMensagem(conteudo: string): string {
   return termos.filter((termo) => TERMOS_CHAT.has(termo)).join(" ");
 }
 
+/** Regras avaliadas no texto original, antes da projeção do vocabulário para o provedor. */
+function orientarPergunta(pergunta: string): string | null {
+  const texto = pergunta.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().replace(/\s+/g, " ");
+  if (/\b(?:irpf|pessoa fisica|despesas medicas)\b/.test(texto)) {
+    return "Não ofereço orientação individual de IRPF. Para sua declaração ou deduções, consulte um contador.";
+  }
+  if (/\b(?:invente|forje|fabrique)\b.*\b(?:fonte|lei|url|referencia)\b|\b(?:ignore|desconsidere|esqueca)\b.*\b(?:base juridica|fontes verificadas)\b/.test(texto)) {
+    return "Uso apenas fontes verificadas da base jurídica. Se a regra que você procura estiver fora da base, consulte um contador.";
+  }
+  if (/\b(?:calcule|calcular|simule|simular)\b.*\b(?:imposto|tributos?|das)\b/.test(texto)) {
+    return "Não faço cálculos tributários sob demanda. Confira o DAS no painel e, para apurar impostos do seu caso, consulte um contador.";
+  }
+  if (/\bsaldo\b.*\bsem (?:consultar|usar|acessar)\b/.test(texto)) {
+    return "Confira o saldo atualizado no painel. O saldo usa os lançamentos registrados no sistema.";
+  }
+  const assuntoDoChat = /\b(?:mei|irpf|das-mei|impostos?|tributos?|painel|saldo|receitas?|despesas?|fatur\w*|lancamentos?|desenquadramento|vencimento|estoque)\b/
+    .test(texto) || /\b(?:(?:meu|o|do|proximo) das|meu limite|meu teto|limite anual|limite proporcional|mes da abertura|ano de abertura)\b/.test(texto);
+  return assuntoDoChat ? null : "Posso ajudar com dúvidas sobre o MEI e os dados do seu painel. Você pode perguntar sobre o limite de faturamento, o DAS ou o saldo.";
+}
+
 export function prepararChat(mensagens: ChatRequest["mensagens"], contexto: ContextoChat) {
   const chat = ChatRequest.safeParse({ mensagens });
   const dados = Contexto.safeParse(contexto);
@@ -95,7 +115,7 @@ export function prepararChat(mensagens: ChatRequest["mensagens"], contexto: Cont
     indicadores: perfil.ehMei ? ["resumo", "limite", "das", "vencimento"] : ["resumo"],
     trechos: kb.map(({ fonte, texto }, indice) => ({ indice, titulo: fonte.titulo, texto })),
   });
-  return { texto, contexto: dados.data, periodoDiferente };
+  return { texto, contexto: dados.data, periodoDiferente, orientacao: orientarPergunta(ultima) };
 }
 
 const moeda = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
@@ -123,7 +143,7 @@ export function lerChat(json: unknown, { dashboard, perfil, kb }: ContextoChat):
   if (fonteIndicador && !trechos.includes(fonteIndicador)) trechos.unshift(fonteIndicador);
   const partes = trechos.map(({ texto }) => texto);
   if (indicador === "resumo") {
-    partes.unshift(`No mês ${resumoMes.mes}, suas receitas somam ${reais(resumoMes.receitaCentavos)}, as despesas somam ${reais(resumoMes.despesaCentavos)} e o saldo é de ${reais(resumoMes.saldoCentavos)}.`);
+    partes.unshift(`No mês ${resumoMes.mes}, suas receitas somam ${reais(resumoMes.receitaCentavos)}, as despesas somam ${reais(resumoMes.despesaCentavos)} e o saldo é de ${reais(resumoMes.saldoCentavos)}. Confira os dados atualizados no painel.`);
   }
   if (fonteIndicador && indicador === "limite") {
     partes.unshift(`No ano, você registrou ${reais(limiteMei.usadoCentavos)} em receitas. O limite do seu cadastro é ${reais(limiteMei.limiteCentavos)}.`);
@@ -132,7 +152,7 @@ export function lerChat(json: unknown, { dashboard, perfil, kb }: ContextoChat):
   if (fonteIndicador && indicador === "vencimento") {
     partes.unshift(`O próximo vencimento ordinário do DAS no seu painel é ${proximoDas.vencimento.split("-").reverse().join("/")}.`);
   }
-  if (!trechos.length) {
+  if (!trechos.length && indicador !== "resumo") {
     partes.push("Para esclarecer dúvidas fiscais sem base verificada no assistente, consulte um contador.");
   }
   const validada = ChatResponse.safeParse({ resposta: partes.join("\n\n"), fontes: trechos.map(({ fonte }) => fonte) });
