@@ -52,24 +52,25 @@ function Trilho({ alcancados }: { alcancados: number }) {
 }
 
 /**
- * Sem JS, no modo estático e abaixo de 900×720: os 4 passos ficam empilhados e visíveis. Acima disso,
+ * Abaixo de 900px os 4 passos viram um carrossel com scroll-snap (só CSS, landing.css). De 900px para cima,
+ * sem JS, no modo estático ou com altura < 720: ficam empilhados e visíveis. Acima disso,
  * a ilha de movimento prende a seção ao scroll (pin) e troca os passos (cenas.ts + landing.css).
  */
 export function SigaOFio() {
   return (
     <section id="como" aria-labelledby="titulo-como" data-fio="1" data-movimento="siga-o-fio" className="lp-secao">
-      <div className="lp-contido flex flex-col gap-[clamp(48px,8vw,96px)]">
+      <div className="lp-contido flex flex-col gap-[var(--lp-bloco)]">
         <h2 id="titulo-como" className="lp-kicker m-0">
           Siga o fio · o app funcionando
         </h2>
-        <ol className="flex flex-col gap-[clamp(56px,9vw,120px)]">
+        <ol className="lp-siga-lista">
           {PASSOS.map((p, i) => (
             <li key={p.kicker} data-movimento="siga-passo" className="lp-2col">
-              <div className="lp-sombra-texto flex flex-col gap-[18px]">
+              <div className="lp-sombra-texto flex flex-col gap-4 md:gap-[18px]">
                 <Trilho alcancados={i + 1} />
-                <div data-movimento="siga-texto" className="flex flex-col gap-3.5">
+                <div data-movimento="siga-texto" className="flex flex-col gap-2.5 md:gap-3.5">
                   <span className="text-base font-bold text-ok">{p.kicker}</span>
-                  <h3 className="num m-0 text-[clamp(30px,3.8vw,58px)] leading-[1.02] font-extrabold tracking-[-0.04em] text-balance">
+                  <h3 className="num m-0 text-[length:var(--lp-h3)] leading-[1.04] font-extrabold tracking-[-0.04em] text-balance">
                     {p.titulo}
                   </h3>
                   <p className="lp-corpo max-w-[460px]">{p.texto}</p>
@@ -85,6 +86,9 @@ export function SigaOFio() {
             </li>
           ))}
         </ol>
+        <p aria-hidden="true" className="lp-siga-dica m-0 -mt-2 text-sm font-semibold text-t3">
+          Deslize para ver os 4 passos <span className="text-acc-ink">→</span>
+        </p>
       </div>
     </section>
   );
