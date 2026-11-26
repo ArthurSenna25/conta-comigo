@@ -2,9 +2,9 @@ import { Celular, type TelaCelular } from "@/components/landing/celular";
 
 const PASSOS: { kicker: string; titulo: string; texto: string; tela: TelaCelular }[] = [
   {
-    kicker: "1 · Você tira a foto",
-    titulo: "Um toque em Foto. Pronto.",
-    texto: "Recibo amassado, nota do Pix, print. Do jeito que estiver à mão.",
+    kicker: "1 · Você anota",
+    titulo: "Uma frase do seu jeito. Pronto.",
+    texto: "“Recebi 350 da escova da Maria.” Foto, áudio e print chegam em breve.",
     tela: "adicionar",
   },
   {

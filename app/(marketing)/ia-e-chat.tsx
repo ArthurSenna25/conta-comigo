@@ -5,7 +5,7 @@ const PAPEIS = [
   {
     quem: "A IA",
     cor: "var(--acc-ink)",
-    oQue: "Lê a foto, o áudio ou o print e sugere valor, data, tipo e categoria. Se ficar em dúvida, avisa.",
+    oQue: "Lê o que você escreve e sugere valor, data, tipo e categoria. Se ficar em dúvida, avisa. Foto, áudio e print: em breve.",
   },
   {
     quem: "O código",
@@ -69,7 +69,7 @@ function CartaoRascunho() {
               Pronto para você conferir
             </span>
             <span aria-hidden="true" data-movimento="ia-status-lendo" className="invisible [grid-area:1/1]">
-              Lendo a foto… procurando valor, data e tipo
+              Lendo o texto… procurando valor, data e tipo
             </span>
           </span>
         </div>
@@ -80,9 +80,9 @@ function CartaoRascunho() {
       <div
         aria-hidden="true"
         data-movimento="ia-varredura"
-        className="flex h-[76px] items-center justify-center rounded-lg font-mono text-sm text-t2 [background:repeating-linear-gradient(135deg,var(--s2)_0_8px,var(--s3)_8px_16px)]"
+        className="flex h-[76px] items-center justify-center rounded-lg px-4 text-center text-[15px] leading-snug text-t2 [background:repeating-linear-gradient(135deg,var(--s2)_0_8px,var(--s3)_8px_16px)]"
       >
-        recibo.jpg
+        “recebi 350 da escova da Maria, dia 2 ou 3”
       </div>
       <dl className="m-0 grid grid-cols-2 gap-3">
         {CAMPOS.map((c) => (

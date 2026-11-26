@@ -33,11 +33,11 @@ export function Hero() {
           data-movimento="hero-linhas"
           className="num m-0 max-w-[12ch] text-[clamp(52px,9.2vw,150px)] leading-[0.92] font-extrabold tracking-[-0.055em] text-balance"
         >
-          Mande a foto. A gente cuida do resto.
+          Anote a venda. A gente cuida do resto.
         </h1>
         <p data-movimento="hero-item" className="lp-corpo max-w-[560px] text-[clamp(17px,1.4vw,20px)]">
-          A IA lê seu recibo, áudio ou print e monta o rascunho. Você confere, e o app calcula seu limite anual e o
-          DAS.
+          Escreva do seu jeito e a IA monta o rascunho. Você confere, e o app calcula seu limite anual e o DAS.{" "}
+          <span className="whitespace-nowrap text-t3">Foto, áudio e print: em breve.</span>
         </p>
         <div data-movimento="hero-item" className="flex flex-wrap items-center justify-center gap-3">
           <span className="lp-borda-conica" data-movimento="borda-conica">
