@@ -10,7 +10,7 @@
   .lp :where(section[id]) { scroll-margin-top: 80px; }
 
   /* ---- fundo fixo: gradiente → estrelas → Fio (SVG) → grão ---- */
-  .lp-fundo, .lp-estrelas, .lp-fio-fundo, .lp-grao {
+  .lp-fundo, .lp-estrelas, .lp-fio-fundo, .lp-fio-3d, .lp-grao {
     position: fixed;
     inset: 0;
     pointer-events: none;
@@ -35,6 +35,10 @@
   }
   .lp-fio-fundo { z-index: -1; width: 100%; height: 100%; opacity: 0.45; }
   .lp-fio-fundo path { fill: none; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+  /* Canvas WebGL (05 L17): criado pelo motor depois do SVG, nasce em opacity 0 e faz fade de 600ms (06: canvas).
+     Com ele montado, o SVG some (05 L157); modo leve/reduced nunca montam, então o SVG segue visível. */
+  .lp-fio-3d { z-index: -1; width: 100%; height: 100%; opacity: 0; transition: opacity 600ms var(--ease-cc); }
+  html.mv-webgl .lp-fio-fundo { visibility: hidden; }
   .lp-grao { z-index: var(--z-grain); background-image: url("/landing/textura-grao.svg"); opacity: 0.875; }
 
   /* ---- layout ---- */

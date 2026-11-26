@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { corDoFio, corDoLimite, faseDoFio, opacidadeDoFio, progressoNaJanela } from "./fio-fundo";
+import { corDoFio, corDoLimite, faseDoFio, opacidadeDoCanvas, opacidadeDoFio, progressoNaJanela, rgbDoFio } from "./fio-fundo";
 
 const SIGA = { topo: 100, base: 500 };
 const LIMITE = { topo: 700, base: 1100 };
@@ -15,6 +15,24 @@ describe("opacidade do Fio por seção (05: min(1, data-fio + 0.2))", () => {
   it("sem valor válido, fica cheio", () => {
     expect(opacidadeDoFio(undefined)).toBe(1);
     expect(opacidadeDoFio("abc")).toBe(1);
+  });
+});
+
+describe("opacidade do canvas WebGL (05 L19: valor cru de data-fio, sem somar 0.2)", () => {
+  it("usa o valor da seção, limitado a 0–1", () => {
+    expect(opacidadeDoCanvas("0.3")).toBe(0.3);
+    expect(opacidadeDoCanvas("1")).toBe(1);
+    expect(opacidadeDoCanvas("7")).toBe(1);
+    expect(opacidadeDoCanvas(undefined)).toBe(1);
+    expect(opacidadeDoCanvas("abc")).toBe(1);
+  });
+});
+
+describe("rgb do Fio (alimenta o canvas)", () => {
+  it("é a mesma cor do SVG, em canais", () => {
+    expect(rgbDoFio({ fase: "antes" })).toEqual([172, 214, 250]);
+    expect(rgbDoFio({ fase: "entre" })).toEqual([112, 226, 172]);
+    expect(rgbDoFio({ fase: "limite", pct: 90 })).toEqual([242, 192, 92]);
   });
 });
 

@@ -16,6 +16,7 @@
 - Arthur (25/11, `feat/landing-movimento`): camada de movimento em ilhas client (`components/landing/movimento`), gsap+ScrollTrigger e lenis por `import()` (JS inicial +7 KB gzip). Siga o Fio preso ≥900×720, O limite em scrub com nível do engine via `nivelDoFio`, modo leve (localStorage) e reduced motion estáticos, failsafe de 1,5 s. CLS 0 carregando e rolando (390/768/1280).
 - Mergeados em 25/11: #13 reserva atômica de IA · #15 recusa de data de abertura futura · #17 fundação de design · #18 landing estática · #19 `valorDas` (DAS 2026: R$ 82,05 comércio/indústria, R$ 86,05 serviços, R$ 87,05 misto; salário mínimo R$ 1.621; INSS R$ 81,05) · #20 camada de movimento da landing (gsap + lenis). `pnpm check` verde, 450 testes.
 - Mergeados em 25/11 (cont.): #22 vencimento do DAS (Murilo) · #23 landing (DAS de exemplo 82,05 e rodapé) · #24 `resumoMes` (Murilo).
+- Arthur (25/11, `feat/landing-fio-3d`): Fio 3D (Three.js) como camada por cima do SVG, só ≥1280 × ≥600 com `pointer: fine`, sem leve/reduced; `import("three")` em ociosidade (chunk 134,7 KB gzip, fora do JS inicial), destroy no revert do motor, SVG some quando o canvas monta. Dev: `three` + `@types/three`. Falta testar WebKit e fps em GPU real.
 ## Próximo
 Divisão de 24/11 (ver `docs/handoff/`). Cada um segue o "Falta" do seu handoff, um PR por item; só o Arthur faz merge; plano B em 27/11 12h.
 - **Arthur:** tokens e componentes (primeiro), landing (estrutura › movimento › fio 3D), variáveis da Vercel, demo do júri, revisão de todos os PRs.
