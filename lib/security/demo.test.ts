@@ -5,6 +5,10 @@ import {
   decidirSeed,
   ehContaDemo,
   limitesChamadasIa,
+  MENSAGEM_IA_DEMO_SO_TEXTO,
+  MENSAGEM_IA_DEMO_TEXTO_LONGO,
+  recusaEntradaIaDemo,
+  TEXTO_IA_DEMO_MAX,
   TETO_IA_DEMO_PADRAO_CENTAVOS,
   tetoDiarioIaCentavos,
 } from "./demo";
@@ -153,5 +157,17 @@ describe("decidirSeed: só apaga usuário que a própria demo criou", () => {
     ["marca como string", { app_metadata: { demo: "true" } }],
   ])("usuário real com o e-mail da demo (%s): aborta sem apagar", (_nome, existente) => {
     expect(decidirSeed(existente)).toBe("abortar");
+  });
+});
+
+describe("recusaEntradaIaDemo: demo pública manda só texto curto ao Free", () => {
+  it("recusa imagem e áudio", () => {
+    expect(recusaEntradaIaDemo({ kind: "imagem" })).toBe(MENSAGEM_IA_DEMO_SO_TEXTO);
+    expect(recusaEntradaIaDemo({ kind: "audio" })).toBe(MENSAGEM_IA_DEMO_SO_TEXTO);
+  });
+
+  it(`aceita texto até ${TEXTO_IA_DEMO_MAX} caracteres e recusa acima`, () => {
+    expect(recusaEntradaIaDemo({ kind: "texto", texto: "a".repeat(TEXTO_IA_DEMO_MAX) })).toBeNull();
+    expect(recusaEntradaIaDemo({ kind: "texto", texto: "a".repeat(TEXTO_IA_DEMO_MAX + 1) })).toBe(MENSAGEM_IA_DEMO_TEXTO_LONGO);
   });
 });

@@ -3,6 +3,7 @@ import { AUDIO_MAX_BYTES, IMAGEM_MAX_BYTES, IngestResponse } from "@/lib/contrac
 import { ErroIa } from "@/lib/ai/erro";
 import { POST } from "@/app/api/ingest/route";
 import { criarProcessarIngestao } from "@/app/api/ingest/processar";
+import { MENSAGEM_IA_DEMO_SO_TEXTO, MENSAGEM_IA_DEMO_TEXTO_LONGO, TEXTO_IA_DEMO_MAX } from "@/lib/security/demo";
 import { MENSAGEM_IA_SOMENTE_DEMO, respostaErro } from "@/lib/security/portao-api";
 
 const { autorizar, provider, reservarUsoIa } = vi.hoisted(() => ({
@@ -18,11 +19,11 @@ vi.mock("@/lib/ai/gemini", async () => ({
   ErroIa: (await import("@/lib/ai/erro")).ErroIa, criarGeminiProvider: provider,
 }));
 
-function formulario(kind: string, arquivo?: File) {
+function formulario(kind: string, arquivo?: File, texto = "Vendi hoje por R$ 50 no Pix.") {
   const form = new FormData();
   form.set("kind", kind);
   if (arquivo) form.set("arquivo", arquivo);
-  else form.set("texto", "Vendi hoje por R$ 50 no Pix.");
+  else form.set("texto", texto);
   return form;
 }
 
@@ -182,6 +183,34 @@ describe("/api/ingest com a reserva atômica de chamadas (reservar_uso_ia)", () 
     reservarUsoIa.mockResolvedValue(false);
     expect((await POST(pedido(formulario("texto")))).status).toBe(429);
     expect(reservarUsoIa).toHaveBeenCalledWith("usuario", { maxUsuario: 30, maxGlobal: 0 });
+  });
+
+  it.each([["imagem", "image/jpeg"], ["audio", "audio/wav"]] as const)(
+    "demo com %s: 400 só texto, sem provedor nem reserva", async (kind, mime) => {
+      autorizar.mockResolvedValue(acessoReal(true));
+      const arquivo = new File([new Uint8Array(64)], "x", { type: mime });
+      const resposta = await POST(pedido(formulario(kind, arquivo)));
+      expect(resposta.status).toBe(400);
+      expect(await resposta.json()).toEqual({ erro: { codigo: "invalido", mensagem: MENSAGEM_IA_DEMO_SO_TEXTO } });
+      expect(provider).not.toHaveBeenCalled();
+      expect(reservarUsoIa).not.toHaveBeenCalled();
+    },
+  );
+
+  it("demo com texto acima do teto: 400, sem provedor nem reserva", async () => {
+    autorizar.mockResolvedValue(acessoReal(true));
+    const resposta = await POST(pedido(formulario("texto", undefined, "a".repeat(TEXTO_IA_DEMO_MAX + 1))));
+    expect(resposta.status).toBe(400);
+    expect(await resposta.json()).toEqual({ erro: { codigo: "invalido", mensagem: MENSAGEM_IA_DEMO_TEXTO_LONGO } });
+    expect(provider).not.toHaveBeenCalled();
+    expect(reservarUsoIa).not.toHaveBeenCalled();
+  });
+
+  it("demo com texto no teto segue para a reserva e o provedor", async () => {
+    autorizar.mockResolvedValue(acessoReal(true));
+    reservarUsoIa.mockResolvedValue(true);
+    expect((await POST(pedido(formulario("texto", undefined, "a".repeat(TEXTO_IA_DEMO_MAX)))))).toHaveProperty("status", 200);
+    expect(reservarUsoIa).toHaveBeenCalledTimes(1);
   });
 
   it("modo mock não reserva nada", async () => {

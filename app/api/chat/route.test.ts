@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "@/app/api/chat/route";
 import { ErroIa } from "@/lib/ai/erro";
 import { mockChat, mockPerfil, mockDashboard } from "@/lib/contracts/mocks";
+import { MENSAGEM_IA_DEMO_TEXTO_LONGO, TEXTO_IA_DEMO_MAX } from "@/lib/security/demo";
 import { MENSAGEM_IA_SOMENTE_DEMO, respostaErro } from "@/lib/security/portao-api";
 
 const d = vi.hoisted(() => ({ acesso: vi.fn(), contexto: vi.fn(), kb: vi.fn(), reservar: vi.fn(), responder: vi.fn() }));
@@ -36,6 +37,21 @@ beforeEach(() => {
 });
 
 describe("POST /api/chat", () => {
+  it("demo: pergunta acima do teto de texto é recusada sem contexto nem reserva", async () => {
+    const longa = [{ role: "user", conteudo: "a".repeat(TEXTO_IA_DEMO_MAX + 1) }];
+    const res = await POST(req({ mensagens: longa }));
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({ erro: { codigo: "invalido", mensagem: MENSAGEM_IA_DEMO_TEXTO_LONGO } });
+    expect(d.contexto).not.toHaveBeenCalled();
+    expect(d.reservar).not.toHaveBeenCalled();
+  });
+
+  it("modo mock não aplica o teto da demo", async () => {
+    d.acesso.mockResolvedValue({ mock: true });
+    const res = await POST(req({ mensagens: [{ role: "user", conteudo: "a".repeat(TEXTO_IA_DEMO_MAX + 1) }] }));
+    expect(res.status).toBe(200);
+  });
+
   it("valida acesso e devolve o contrato, com uma reserva por tentativa", async () => {
     const request = req();
     d.responder.mockImplementation(async (novaTentativa: () => Promise<void>) => {
