@@ -35,7 +35,9 @@ const ICONE: Record<string, ReactNode> = {
   ),
 };
 
-const ITEM = "relative flex h-[58px] flex-1 flex-col items-center justify-center gap-1 rounded-[20px] text-sm font-bold no-underline";
+const ITEM =
+  "relative flex h-[58px] min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-[20px] text-sm font-bold no-underline " +
+  "transition-transform duration-150 ease-[var(--ease-cc)] focus-visible:outline-offset-[-2px]";
 
 /**
  * Tab bar do app (03-COMPONENTES.md § Tab bar). Some fora das rotas das abas. O espaço reservado embaixo e a
@@ -49,9 +51,14 @@ export function Abas() {
   return (
     <>
       <div aria-hidden="true" className="h-[calc(var(--abas-h)+34px)] shrink-0" />
+      {/* Esmaece o conteúdo que rola por baixo da barra em vez de o texto colidir com ela; com o FAB na tela (painel), sobe até ele. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-x-0 bottom-0 z-[var(--z-scrim)] h-[calc(var(--abas-h)+28px)] [body:has([data-fab])_&]:h-[calc(var(--abas-h)+84px)] bg-[linear-gradient(to_top,var(--bg)_55%,transparent)]"
+      />
       <nav
         aria-label="Principal"
-        className="fixed inset-x-3 bottom-[calc(14px+env(safe-area-inset-bottom))] z-[var(--z-tabbar)] mx-auto flex max-w-[456px] gap-1 rounded-[26px] border border-line-strong bg-[oklch(0.20_0.03_255/0.78)] p-1.5 shadow-[var(--shadow-nav)] backdrop-blur-[20px]"
+        className="fixed inset-x-3 bottom-[calc(14px+env(safe-area-inset-bottom))] z-[var(--z-tabbar)] mx-auto flex max-w-[456px] gap-1 rounded-[26px] border border-line-strong bg-[oklch(0.20_0.03_255/0.94)] p-1.5 shadow-[var(--shadow-nav)] backdrop-blur-[20px]"
       >
         {ABAS.map(({ href, rotulo, ativo }) => {
           const icone = (
@@ -77,7 +84,7 @@ export function Abas() {
               key={href}
               href={href}
               aria-current={eAtual ? "page" : undefined}
-              className={`${ITEM} ${eAtual ? "bg-[var(--acc-a16)] text-acc-ink" : "text-t2 hover:text-t1"}`}
+              className={`${ITEM} active:scale-96 ${eAtual ? "bg-[var(--acc-a16)] text-acc-ink" : "text-t2 hover:text-t1 active:bg-[var(--acc-a10)]"}`}
             >
               {icone}
               {rotulo}

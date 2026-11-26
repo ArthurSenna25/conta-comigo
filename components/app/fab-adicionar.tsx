@@ -1,15 +1,16 @@
 import Link from "next/link";
 import { ADICIONAR } from "./navegacao";
 
-// Direita 20 dentro da coluna de 480px, 22px acima da tab bar (≈108 do fundo, como no handoff).
+// Borda direita alinhada à da tab bar (inset 12px, coluna de 456px) e 12px acima dela; a safe-area já vem em --abas-h.
+// 48px de altura: alvo de toque folgado sem virar um bloco sobre o conteúdo.
 const POSICAO =
-  "fixed right-[max(20px,calc((100vw-480px)/2+20px))] bottom-[calc(var(--abas-h)+22px)] z-[var(--z-fab)] " +
-  "inline-flex h-[58px] items-center gap-2 rounded-[20px] pr-6 pl-[18px] text-[17px] font-bold no-underline";
+  "fixed right-[max(12px,calc((100vw-456px)/2))] bottom-[calc(var(--abas-h)+12px)] z-[var(--z-fab)] " +
+  "inline-flex h-12 items-center gap-1.5 rounded-2xl pr-5 pl-4 text-base font-bold no-underline";
 
 /** FAB Adicionar (03-COMPONENTES.md § Outros do app). Só no painel. Desligado: não renderiza (um botão desabilitado cobriria o conteúdo). */
 export function FabAdicionar() {
   const mais = (
-    <span aria-hidden="true" className="text-base leading-none">
+    <span aria-hidden="true" className="text-lg leading-none">
       +
     </span>
   );
@@ -17,7 +18,8 @@ export function FabAdicionar() {
   return (
     <Link
       href={ADICIONAR.href}
-      className={`${POSICAO} bg-acc text-on-acc shadow-[var(--shadow-fab)] transition-transform duration-150 ease-[var(--ease-cc)] active:scale-96`}
+      data-fab
+      className={`${POSICAO} bg-acc text-on-acc shadow-[var(--shadow-fab)] transition-transform duration-150 ease-[var(--ease-cc)] active:scale-96 active:brightness-92 focus-visible:outline-offset-4`}
     >
       {mais}
       {ADICIONAR.rotulo}

@@ -73,7 +73,7 @@
   --abas-h: calc(86px + env(safe-area-inset-bottom));
 
   /* z-index */
-  --z-bg: 0; --z-content: 1; --z-fab: 3; --z-tabbar: 4; --z-toast: 6; --z-sheet: 7; --z-tour: 9;
+  --z-bg: 0; --z-content: 1; --z-scrim: 2; --z-fab: 3; --z-tabbar: 4; --z-toast: 6; --z-sheet: 7; --z-tour: 9;
   --z-grain: 45; --z-menu: 49; --z-nav: 50; --z-progress: 60; --z-modal: 80; --z-intro: 100;
 
   /* movimento (ver 06) */
