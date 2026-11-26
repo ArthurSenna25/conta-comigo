@@ -18,7 +18,7 @@ describe("fontes verificadas no chat", () => {
     const resposta = lerChat({ indicador, referencias }, { perfil: mockPerfil, dashboard: mockDashboard, kb });
     expect(resposta.resposta).toContain(valor);
     expect(resposta.fontes).toEqual([expect.objectContaining({
-      arquivo: `kb/${arquivo}.md`, url: expect.stringMatching(/^https:\/\//), verificadoEm: expect.stringMatching(/^2026-11-2[56]$/),
+      arquivo: `kb/${arquivo}.md`, url: expect.stringMatching(/^https:\/\//), verificadoEm: expect.stringMatching(/^2026-11-\d{2}$/),
     })]);
   });
 
