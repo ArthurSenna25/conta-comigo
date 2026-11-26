@@ -26,10 +26,11 @@ export type EntradaLimite = {
 };
 
 export { resumoMes } from "./resumo-mes";
+export { receitaAnualCentavos } from "./receita-anual";
 
 export type EstadoAlertas = {
   perfil: Perfil;
-  /** Pelo menos os últimos 3 meses (despesa atípica compara com a média). */
+  /** Receitas do ano civil e lançamentos do período que deve gerar lembretes. */
   lancamentos: readonly Lancamento[];
   hoje: string;
 };

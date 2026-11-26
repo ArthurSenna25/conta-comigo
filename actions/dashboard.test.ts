@@ -13,12 +13,14 @@ const m = vi.hoisted(() => ({
   proximoVencimentoDas: vi.fn(),
   valorDas: vi.fn(),
   anoDaCompetenciaDas: vi.fn(),
+  receitaAnualCentavos: vi.fn(),
+  gerarAlertas: vi.fn(),
 }));
 vi.mock("server-only", () => ({}));
 vi.mock("./sessao", () => ({ exigirAcesso: m.exigirAcesso }));
 vi.mock("@/lib/db/cliente-servidor", () => ({ criarClienteServidor: async () => ({}) }));
 vi.mock("@/lib/db/perfil", () => ({ lerPerfil: m.lerPerfil }));
-vi.mock("@/lib/db/lancamento", () => ({ listarLancamentos: m.listarLancamentos }));
+vi.mock("@/lib/db/lancamento", () => ({ listarLancamentosDashboard: m.listarLancamentos }));
 vi.mock("@/lib/engine", () => ({
   resumoMes: m.resumoMes,
   statusLimiteMei: m.statusLimiteMei,
@@ -26,6 +28,8 @@ vi.mock("@/lib/engine", () => ({
   proximoVencimentoDas: m.proximoVencimentoDas,
   valorDas: m.valorDas,
   anoDaCompetenciaDas: m.anoDaCompetenciaDas,
+  receitaAnualCentavos: m.receitaAnualCentavos,
+  gerarAlertas: m.gerarAlertas,
 }));
 
 const funcoesDoEngine = [m.resumoMes, m.statusLimiteMei, m.projecaoAnual, m.proximoVencimentoDas, m.valorDas, m.anoDaCompetenciaDas];
@@ -37,6 +41,8 @@ beforeEach(() => {
   m.exigirAcesso.mockResolvedValue({ userId: "u1", demo: false, consentimentoVigente: true });
   m.lerPerfil.mockResolvedValue(mockPerfil);
   m.listarLancamentos.mockResolvedValue([]);
+  m.receitaAnualCentavos.mockReturnValue(0);
+  m.gerarAlertas.mockReturnValue([]);
 });
 
 describe("obterDashboard", () => {
@@ -95,6 +101,14 @@ describe("obterDashboard", () => {
 
   it("mês inválido: erro de validação", async () => {
     expect(await obterDashboard("novembro")).toMatchObject({ ok: false, erro: { codigo: "invalido" } });
+  });
+
+  it("preserva o bloqueio do portão antes de consultar perfil ou lançamentos", async () => {
+    const bloqueio = new Error("redirecionamento da sessão");
+    m.exigirAcesso.mockRejectedValue(bloqueio);
+    await expect(obterDashboard()).rejects.toBe(bloqueio);
+    expect(m.lerPerfil).not.toHaveBeenCalled();
+    expect(m.listarLancamentos).not.toHaveBeenCalled();
   });
 
   it("modo mock: devolve o dashboard de mock", async () => {

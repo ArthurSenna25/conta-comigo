@@ -3,12 +3,14 @@
 import { type Atividade, DashboardResponse, MesISO, type Resultado } from "@/lib/contracts";
 import { mockDashboard } from "@/lib/contracts/mocks";
 import { criarClienteServidor } from "@/lib/db/cliente-servidor";
-import { listarLancamentos } from "@/lib/db/lancamento";
+import { listarLancamentosDashboard } from "@/lib/db/lancamento";
 import { lerPerfil } from "@/lib/db/perfil";
 import {
   anoDaCompetenciaDas,
+  gerarAlertas,
   projecaoAnual,
   proximoVencimentoDas,
+  receitaAnualCentavos,
   resumoMes,
   statusLimiteMei,
   valorDas,
@@ -50,8 +52,7 @@ function dashboardVazio(mes: string, hoje: string): DashboardResponse {
 }
 
 /**
- * Painel do mês. Lê perfil e lançamentos (do ano, mais os últimos meses do ano anterior para os alertas) e entrega
- * ao lib/engine; esta action NÃO calcula nada. `mes` "YYYY-MM" (padrão: mês atual em Brasília).
+ * Painel do mês. `mes` "YYYY-MM" (padrão: mês atual em Brasília).
  */
 export async function obterDashboard(mes?: unknown): Promise<Resultado<DashboardResponse>> {
   const acesso = modoMock() ? null : await exigirAcesso();
@@ -66,27 +67,35 @@ export async function obterDashboard(mes?: unknown): Promise<Resultado<Dashboard
     const perfil = await lerPerfil(db, userId);
     if (!perfil) return erro("nao_encontrado");
     const ano = Number(hoje.slice(0, 4));
-    const anoDoMes = Number(parsed.data.slice(0, 4));
-    // cobre o ano corrente (limite do MEI), o mês pedido e os 3 meses anteriores a cada um (alertas)
-    const lancamentos = await listarLancamentos(db, userId, {
-      de: `${Math.min(ano, anoDoMes) - 1}-10-01`,
-      ate: `${Math.max(ano, anoDoMes) + 1}-01-01`,
-    });
+    const [anoSelecionado, mesSelecionado] = parsed.data.split("-");
+    const fimMes = mesSelecionado === "12"
+      ? `${String(Number(anoSelecionado) + 1).padStart(4, "0")}-01-01`
+      : `${anoSelecionado}-${String(Number(mesSelecionado) + 1).padStart(2, "0")}-01`;
 
-    const receitasAno = lancamentos
-      .filter((l) => l.tipo === "receita" && l.data.startsWith(String(ano)))
-      .reduce((soma, l) => soma + l.valorCentavos, 0);
-    const entrada = { receitasAnoCentavos: receitasAno + perfil.receitaInicialCentavos, dataAbertura: perfil.dataAbertura, hoje };
+    // Comprovantes: mês civil atual e os dois anteriores, até hoje inclusive.
+    const inicioLembretes = new Date(`${hoje.slice(0, 7)}-01`);
+    inicioLembretes.setUTCMonth(inicioLembretes.getUTCMonth() - 2);
+    const fimLembretes = new Date(hoje);
+    fimLembretes.setUTCDate(fimLembretes.getUTCDate() + 1);
+    const [receitas, despesasRecentes, lancamentosMes] = await Promise.all([
+      listarLancamentosDashboard(db, userId, { de: `${ano}-01-01`, ate: `${ano + 1}-01-01` }, "receita"),
+      listarLancamentosDashboard(db, userId, {
+        de: inicioLembretes.toISOString().slice(0, 10),
+        ate: fimLembretes.toISOString().slice(0, 10),
+      }, "despesa"),
+      listarLancamentosDashboard(db, userId, { de: `${parsed.data}-01`, ate: fimMes }),
+    ]);
+
+    const entrada = { receitasAnoCentavos: receitaAnualCentavos(perfil, receitas, hoje), dataAbertura: perfil.dataAbertura, hoje };
     const vencimento = proximoVencimentoDas(hoje);
     const valorDoDas = valorDasOuNulo(perfil.atividade, anoDaCompetenciaDas(vencimento));
     // sem valor oficial para a competência: painel vazio (só este RangeError; os demais seguem como erro interno)
     if (valorDoDas === null) return { ok: true, dados: dashboardVazio(parsed.data, hoje) };
     const resposta: DashboardResponse = {
-      resumoMes: resumoMes(lancamentos, parsed.data),
+      resumoMes: resumoMes(lancamentosMes, parsed.data),
       limiteMei: { ...statusLimiteMei(entrada), projecaoAnualCentavos: projecaoAnual(entrada) },
       proximoDas: { vencimento, valorCentavos: valorDoDas },
-      // TODO gerarAlertas (Murilo, até 26/11)
-      alertas: [],
+      alertas: gerarAlertas({ perfil, lancamentos: [...receitas, ...despesasRecentes], hoje }),
     };
     return { ok: true, dados: DashboardResponse.parse(resposta) };
   } catch (e) {
