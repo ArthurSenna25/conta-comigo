@@ -8,7 +8,7 @@ const CARTOES = [
   },
   {
     titulo: "Nada é salvo sem você",
-    texto: "Cada lançamento passa pelos seus olhos antes de entrar. Dá para descartar o rascunho antes de confirmar e conferir tudo em Lançamentos.",
+    texto: "Cada lançamento passa pelos seus olhos antes de entrar. O texto que você escreve vai à IA do Google (plano gratuito) para montar o rascunho; nenhum lançamento é salvo sem sua confirmação. Dá para descartar o rascunho antes de confirmar e conferir tudo em Lançamentos.",
     ponta: 40,
   },
   {
@@ -64,7 +64,7 @@ const PERGUNTAS = [
     "A IA calcula meu imposto?",
     "Não. A IA só lê o que você manda e monta um rascunho. Limite e DAS são calculados pelo código do app, com regras fixas.",
   ],
-  ["Algo é salvo sem eu ver?", "Nada. Cada lançamento só entra depois que você confirma. Antes disso você pode descartar o rascunho, e depois confere tudo em Lançamentos."],
+  ["Algo é salvo sem eu ver?", "Nada. O texto que você escreve vai à IA do Google (plano gratuito) para montar o rascunho; nenhum lançamento é salvo sem sua confirmação. Antes disso você pode descartar o rascunho, e depois confere tudo em Lançamentos."],
   ["Posso apagar meus dados?", "O pedido de exclusão de dados é tratado conforme a LGPD. Ainda não há botão de exclusão no app."],
   [
     "Substitui meu contador?",
