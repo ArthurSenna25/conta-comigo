@@ -58,6 +58,20 @@ export async function POST(req: Request): Promise<Response> {
     const { resultado } = await provider.responder(mensagens, contexto);
     return Response.json(ChatResponse.parse(resultado), { headers: { "cache-control": "no-store" } });
   } catch (erro) {
-    return respostaErro(erro instanceof ErroIa && erro.codigo === "limite_ia" ? "limite_ia" : "ia_indisponivel");
+    if (!(erro instanceof ErroIa)) return respostaErro("ia_indisponivel");
+    switch (erro.motivo) {
+      case "cota":
+        return respostaErro("limite_ia", "O limite diário de uso da IA foi atingido. Tente novamente quando ele for renovado ou preencha manualmente.");
+      case "cota_provedor":
+        return respostaErro("limite_ia", erro.message);
+      case "tempo":
+        return respostaErro("ia_indisponivel", "A IA demorou mais que o esperado. Tente novamente ou preencha manualmente.");
+      case "rede":
+        return respostaErro("ia_indisponivel", "Falha temporária na conexão com a IA. Tente novamente em alguns instantes ou preencha manualmente.");
+      case "indisponivel":
+        return respostaErro("ia_indisponivel", "A IA está temporariamente indisponível. Tente novamente em alguns instantes ou preencha manualmente.");
+      default:
+        return respostaErro("ia_indisponivel");
+    }
   }
 }

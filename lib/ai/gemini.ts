@@ -70,7 +70,7 @@ function traduzirFalha(erro: unknown, sinal: AbortSignal): ErroIa {
   if (erro instanceof ErroIa) return erro;
   if (erro instanceof Error && ["TimeoutError", "AbortError"].includes(erro.name)) return new ErroIa("tempo");
   const status = statusHttp(erro);
-  if (status === 429) return new ErroIa("cota");
+  if (status === 429) return new ErroIa("cota_provedor");
   if (status === 408 || status === 504) return new ErroIa("tempo");
   if (status === 401 || status === 403 ||
       (status === 400 && erro instanceof Error && /API_KEY_INVALID|API key not valid/i.test(erro.message))) {

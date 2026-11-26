@@ -73,13 +73,22 @@ describe("POST /api/chat", () => {
     expect(d.contexto).not.toHaveBeenCalled();
   });
 
-  it.each([["controle", 503], ["cota", 429], ["tempo", 503], ["resposta", 503]] as const)(
-    "mapeia %s para %s", async (motivo, status) => {
+  it.each([
+    ["controle", 503, "ia_indisponivel", "indisponível"],
+    ["cota", 429, "limite_ia", "quando ele for renovado"],
+    ["cota_provedor", 429, "limite_ia", "mais tarde"],
+    ["tempo", 503, "ia_indisponivel", "demorou mais que o esperado"],
+    ["rede", 503, "ia_indisponivel", "conexão"],
+    ["indisponivel", 503, "ia_indisponivel", "temporariamente indisponível"],
+    ["resposta", 503, "ia_indisponivel", "indisponível"],
+  ] as const)(
+    "mapeia %s para %s", async (motivo, status, codigo, orientacao) => {
       if (motivo === "controle" || motivo === "cota") d.reservar.mockRejectedValue(new ErroIa(motivo));
       else d.responder.mockRejectedValue(new ErroIa(motivo));
       const res = await POST(req());
       expect(res.status).toBe(status);
-      expect((await res.json()).erro.mensagem).toContain("manualmente");
+      expect(res.headers.get("cache-control")).toBe("no-store");
+      expect(await res.json()).toEqual({ erro: { codigo, mensagem: expect.stringContaining(orientacao) } });
     },
   );
 
