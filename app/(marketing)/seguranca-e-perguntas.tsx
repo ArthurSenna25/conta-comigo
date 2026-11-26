@@ -2,18 +2,18 @@ import { FioCurto } from "@/components/landing/simbolos";
 
 const CARTOES = [
   {
-    titulo: "Você apaga quando quiser",
-    texto: "Um toque no Perfil e seus lançamentos somem. Sem formulário, sem esperar.",
+    titulo: "Seus dados, seus direitos",
+    texto: "Pedidos de exclusão de dados são tratados conforme a LGPD.",
     ponta: 20,
   },
   {
     titulo: "Nada é salvo sem você",
-    texto: "Cada lançamento passa pelos seus olhos antes de entrar. E dá para desfazer.",
+    texto: "Cada lançamento passa pelos seus olhos antes de entrar. Dá para descartar o rascunho antes de confirmar e conferir tudo em Lançamentos.",
     ponta: 40,
   },
   {
     titulo: "A IA é opcional",
-    texto: "Não quer IA? Recuse no cadastro ou desligue no Perfil. O app segue calculando tudo.",
+    texto: "Ela só roda quando você escreve e envia. Nesta versão de avaliação, só funciona na conta demo. O app segue calculando tudo.",
     ponta: 60,
   },
 ];
@@ -64,8 +64,8 @@ const PERGUNTAS = [
     "A IA calcula meu imposto?",
     "Não. A IA só lê o que você manda e monta um rascunho. Limite e DAS são calculados pelo código do app, com regras fixas.",
   ],
-  ["Algo é salvo sem eu ver?", "Nada. Cada lançamento só entra depois que você confirma. E dá para desfazer logo depois."],
-  ["Posso apagar meus dados?", "Sim, quando quiser, pelo Perfil. Apagou, sumiu."],
+  ["Algo é salvo sem eu ver?", "Nada. Cada lançamento só entra depois que você confirma. Antes disso você pode descartar o rascunho, e depois confere tudo em Lançamentos."],
+  ["Posso apagar meus dados?", "O pedido de exclusão de dados é tratado conforme a LGPD. Ainda não há botão de exclusão no app."],
   [
     "Substitui meu contador?",
     "Não. O Conta Comigo organiza a papelada do dia a dia e explica as regras do MEI. Para decisões maiores, fale com um contador.",

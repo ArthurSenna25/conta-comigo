@@ -5,7 +5,7 @@ import { Celular } from "@/components/landing/celular";
 import { BotaoExperimente } from "@/components/landing/experimente/botao-experimente";
 import { FioCurto } from "@/components/landing/simbolos";
 
-const GARANTIAS = ["Nada é salvo sem você confirmar", "IA opcional", "Você apaga quando quiser"];
+const GARANTIAS = ["Nada é salvo sem você confirmar", "IA opcional", "Dados tratados conforme a LGPD"];
 
 /** CTAs: no celular, coluna de botões da mesma largura; a partir de 640px, linha centralizada. */
 export const GRUPO_CTA =
