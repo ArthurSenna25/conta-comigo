@@ -80,6 +80,11 @@ const TERMOS_CHAT = new Set((
 /** Resposta honesta quando a pergunta está fora da base verificada do chat. */
 export const SEM_FONTE_CONFIAVEL = "Não tenho fonte confiável sobre isso nesta versão.";
 
+/** Saudação fixa: mesmo texto e perguntas de exemplo da tela do chat. Não chama a IA. */
+export const SAUDACAO_CHAT =
+  "Olá! Tiro dúvidas sobre o MEI com base em fontes oficiais e nos números do seu painel. Experimente uma destas perguntas:\n\n" +
+  "- Quando vence o DAS?\n- Qual o limite do MEI em 2027?\n- Posso contratar empregado?";
+
 function minimizarMensagem(conteudo: string): string {
   const termos: string[] = conteudo.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().match(/[a-z]+|\d+/g) ?? [];
   if (perguntaSobreExcessoMei(conteudo)) termos.unshift("excesso");
@@ -96,6 +101,8 @@ export function perguntaSobreExcessoMei(pergunta: string): boolean {
 /** Regras avaliadas no texto original, antes da projeção do vocabulário para o provedor. */
 function orientarPergunta(pergunta: string): string | null {
   const texto = pergunta.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().replace(/\s+/g, " ");
+  const soLetras = texto.replace(/[^a-z ]/g, " ").replace(/ +/g, " ").trim();
+  if (/^(?:(?:ola|oi|oie|opa|hey|hello|e ai|bom dia|boa tarde|boa noite|tudo bem|tudo bom)(?: |$))+$/.test(soLetras)) return SAUDACAO_CHAT;
   if (/\b(?:irpf|imposto (?:de|sobre a) renda|declaracao de (?:imposto de )?renda)\b/.test(texto)
     || /\bdedu[a-z]*\b.*\bdespesas medicas\b|\bdespesas medicas\b.*\bdedu[a-z]*\b/.test(texto)) {
     return "Não ofereço orientação individual de IRPF. Para sua declaração ou deduções, consulte um contador.";
