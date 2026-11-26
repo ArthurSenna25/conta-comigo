@@ -135,15 +135,16 @@ export function Adicionar({ demo }: { demo: boolean }) {
           type="button"
           disabled={!liberado}
           onClick={() => void enviar()}
-          className={`${BOTAO.primario} h-14 w-full rounded-2xl text-[17px] disabled:cursor-not-allowed disabled:bg-s3 disabled:text-t3 disabled:brightness-100 disabled:active:scale-100`}
+          className={`${BOTAO.primario} h-14 w-full rounded-2xl text-[17px]`}
         >
           Enviar para a IA
         </button>
-        <div className="grid grid-cols-2 gap-2">
-          <Link href="/painel" className={`${BOTAO.fantasma} text-t2`}>
+        {/* Cada link no tamanho do texto: em 360px "Preencher na mão" não cabia na meia coluna e quebrava. */}
+        <div className="flex justify-between gap-2">
+          <Link href="/painel" className={`${BOTAO.fantasma} px-4 text-t2`}>
             Cancelar
           </Link>
-          <Link href={MANUAL} className={BOTAO.fantasma}>
+          <Link href={MANUAL} className={`${BOTAO.fantasma} px-4`}>
             Preencher na mão
           </Link>
         </div>

@@ -106,7 +106,7 @@ export function GerenciarLancamento({ item, modo, hoje, fechar, concluir }: Prop
         )}
         {erro && <Aviso alerta>{erro.mensagem}</Aviso>}
         <div className="grid grid-cols-2 gap-2">
-          <button type="button" className={`${BOTAO.secundario} px-2 disabled:opacity-60`} disabled={pendente} onClick={fechar}>Cancelar</button>
+          <button type="button" className={`${BOTAO.secundario} px-2`} disabled={pendente} onClick={fechar}>Cancelar</button>
           <button type="submit" aria-disabled={pendente}
             className={`${removendo ? `${BOTAO.secundario} border-err/45 text-err` : BOTAO.primario} px-2 aria-disabled:opacity-60`}>
             {pendente ? "Aguarde…" : removendo ? "Excluir" : "Salvar"}

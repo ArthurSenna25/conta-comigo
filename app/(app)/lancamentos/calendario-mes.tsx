@@ -25,8 +25,8 @@ export function CalendarioMes({ mes, hoje, dia, diasComLancamento, selecionarDia
   const fim = expandido ? Math.ceil(quantidade / 7) * 7 : inicio + 7;
 
   return (
-    <section aria-label="Filtrar por data" className="grid gap-2 rounded-2xl border border-line bg-s1 p-3">
-      <div className="grid grid-cols-[44px_1fr_44px] items-center gap-2">
+    <section aria-label="Filtrar por data" className="grid gap-2 rounded-2xl border border-line bg-s1 px-1 py-3 xs:px-3">
+      <div className="grid grid-cols-[44px_1fr_44px] items-center gap-2 px-2 xs:px-0">
         {mes > "0001-01" ? (
           <Link href={`/lancamentos?mes=${deslocarMes(mes, -1)}`} prefetch={false} aria-label="Mês anterior"
             className={`${BOTAO.fantasma} px-0`} onClick={() => selecionarDia(null)}>

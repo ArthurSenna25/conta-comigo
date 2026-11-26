@@ -250,8 +250,9 @@ export function Conferir({ manual, hoje }: ConferirProps) {
               {falha.mensagem}
             </p>
           )}
-          <div className="grid grid-cols-[1fr_1.5fr] gap-2">
-            <button type="button" onClick={descartar} disabled={pendente} className={`${BOTAO.fantasma} px-2 disabled:text-t3`}>
+          {/* O primário nunca quebra (min max-content); o secundário cede espaço e quebra em 2 linhas se precisar. */}
+          <div className="grid grid-cols-[minmax(0,2fr)_minmax(max-content,3fr)] gap-2">
+            <button type="button" onClick={descartar} disabled={pendente} className={`${BOTAO.fantasma} px-2 text-center leading-5`}>
               {manual ? "Cancelar" : "Descartar rascunho"}
             </button>
             {falha?.ambigua && !pendente ? (
@@ -335,7 +336,7 @@ function CampoValor({ centavos, duvidoso, erro: erroForm, onChange }: { centavos
             if (r.ok) onChange(r.centavos);
           }}
           {...aria("valor", erro)}
-          className="num w-full min-w-0 bg-transparent text-[28px] font-extrabold text-t1 tabular-nums placeholder:text-t3 focus:outline-none"
+          className="num h-full w-full min-w-0 bg-transparent text-[28px] font-extrabold text-t1 tabular-nums placeholder:text-t3 focus:outline-none"
         />
       </div>
     </Rotulado>
