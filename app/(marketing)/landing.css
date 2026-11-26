@@ -6,8 +6,12 @@
     overflow-x: clip;
     font-size: 17px;
     isolation: isolate;
+    /* Base do cabeçalho fixo: top (14px ou a área segura) + 64px da barra. Âncoras e o Siga o Fio preso
+       se medem por aqui, então nenhum título fica atrás da barra em qualquer largura. */
+    --lp-nav-topo: max(14px, env(safe-area-inset-top));
+    --lp-nav-fim: calc(var(--lp-nav-topo) + 64px);
   }
-  .lp :where(section[id]) { scroll-margin-top: 80px; }
+  .lp :where([id]) { scroll-margin-top: calc(var(--lp-nav-fim) + 16px); }
 
   /* ---- fundo fixo: gradiente → estrelas → Fio (SVG) → grão ---- */
   .lp-fundo, .lp-estrelas, .lp-fio-fundo, .lp-fio-3d, .lp-grao {
@@ -141,7 +145,7 @@
   /* ---- nav ---- */
   .lp-nav {
     position: fixed;
-    top: 14px;
+    top: var(--lp-nav-topo);
     inset-inline: 12px;
     z-index: var(--z-nav);
     max-width: 1180px;
@@ -265,12 +269,13 @@ html.mv-abertura [data-movimento~="abertura-celular"] { transform: translateY(60
 html.mv-abrindo [data-movimento~="abertura"] { transition: opacity 800ms var(--ease-cc) 80ms; }
 html.mv-abrindo [data-movimento~="abertura-celular"] { transition: transform 800ms var(--ease-cc); }
 
-/* Siga o Fio preso ao scroll (≥900×720, classe posta pelo JS) */
+/* Siga o Fio preso ao scroll (≥900×720, classe posta pelo JS). `safe center`: se o conteúdo passar da
+   altura (zoom de texto, barra do Safari), ele encosta no topo em vez de subir para trás do cabeçalho. */
 .lp-secao.lp-siga-preso {
   display: flex;
-  align-items: center;
-  min-height: 100vh;
-  padding-block: 88px 24px;
+  align-items: safe center;
+  min-height: 100svh;
+  padding-block: calc(var(--lp-nav-fim) + 24px) 24px;
 }
 .lp-siga-preso > .lp-contido { gap: 28px; }
 .lp-siga-preso ol { display: grid; }
