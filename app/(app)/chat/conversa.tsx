@@ -1,0 +1,166 @@
+"use client";
+
+import Link from "next/link";
+import { ArrowUp, Sparkles } from "lucide-react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+import { BOTAO } from "@/components/botao";
+import { ChipFonte, fonteValida } from "@/components/chip-fonte";
+import type { ChatResponse } from "@/lib/contracts";
+import { enviarPergunta } from "./requisicao";
+
+const SUGESTOES = ["Qual é o meu limite?", "Quando vence o DAS?", "E se eu passar do limite?"];
+const LIMITE_PERGUNTA = 1000;
+type Troca = { pergunta: string; retorno: ChatResponse };
+type Falha = { mensagem: string; status?: number };
+
+function Fontes({ fontes }: { fontes: ChatResponse["fontes"] }) {
+  if (!fontes.length) return null;
+  return (
+    <div className="mt-4 border-t border-line pt-3">
+      <p className="mb-2 text-sm font-semibold text-t2">Fontes jurídicas</p>
+      <ul className="grid gap-2">
+        {fontes.map(({ arquivo, titulo, url, verificadoEm }) => {
+          const data = verificadoEm.split("-").reverse().join("/");
+          return (
+            <li key={arquivo} className="min-w-0 space-y-1 [overflow-wrap:anywhere] [&>button]:h-auto [&>button]:min-h-11 [&>button]:max-w-full [&>button]:py-2 [&>button]:text-left">
+              {url && fonteValida(url, verificadoEm) ?
+                <ChipFonte rotulo={titulo} resumo="Consulte a publicação oficial que fundamenta esta resposta." url={url} consultadoEm={verificadoEm} /> :
+                <span className="text-sm">{titulo}</span>}
+              <p className="text-xs text-t3">Verificada em <time dateTime={verificadoEm}>{data}</time></p>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
+export function Conversa() {
+  const [historico, setHistorico] = useState<Troca[]>([]);
+  const [rascunho, setRascunho] = useState("");
+  const [pendente, setPendente] = useState<string | null>(null);
+  const [falha, setFalha] = useState<Falha | null>(null);
+  const chamada = useRef<AbortController | null>(null);
+  const fim = useRef<HTMLDivElement>(null);
+  const campo = useRef<HTMLTextAreaElement>(null);
+  const form = useRef<HTMLFormElement>(null);
+
+  useEffect(() => () => chamada.current?.abort(), []);
+  useEffect(() => {
+    if (pendente || historico.length || falha) fim.current?.scrollIntoView({ block: "nearest" });
+  }, [pendente, historico.length, falha]);
+
+  async function enviar(pergunta: string) {
+    const texto = pergunta.trim();
+    if (!texto || chamada.current) return;
+    const controle = new AbortController();
+    chamada.current = controle;
+    setRascunho(texto);
+    setFalha(null);
+    setPendente(texto);
+    try {
+      const retorno = await enviarPergunta(texto, historico.map((troca) => troca.pergunta), controle.signal);
+      if (controle.signal.aborted) return;
+      if (retorno.ok) {
+        setHistorico((atual) => [...atual, { pergunta: texto, retorno: retorno.dados }]);
+        setRascunho("");
+      } else {
+        setFalha(retorno);
+      }
+    } finally {
+      chamada.current = null;
+      if (!controle.signal.aborted) {
+        setPendente(null);
+        campo.current?.focus({ preventScroll: true });
+      }
+    }
+  }
+
+  function aoEnviar(evento: FormEvent<HTMLFormElement>) {
+    evento.preventDefault();
+    void enviar(rascunho);
+  }
+
+  return (
+    <>
+      <section aria-label="Conversa com o assistente" className="min-w-0 flex-1 space-y-4">
+        {historico.length === 0 && !pendente && !falha && (
+          <div className="rounded-2xl border border-line bg-s1 p-4 sm:p-5">
+            <p className="font-semibold text-t1">Pergunte do seu jeito</p>
+            <p className="mt-1 text-sm text-t2">Posso ajudar com o DAS, o limite do MEI ou os números do seu painel.</p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {SUGESTOES.map((sugestao) => (
+                <button key={sugestao} type="button" onClick={() => void enviar(sugestao)}
+                  className="min-h-11 rounded-lg border border-line-strong bg-s2 px-3 text-left text-sm font-semibold text-acc-ink hover:bg-s3">
+                  {sugestao}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        <div role="log" aria-label="Mensagens" aria-relevant="additions" className="space-y-5">
+          {historico.map(({ pergunta, retorno }, i) => (
+            <div key={i} className="space-y-3">
+              <Pergunta texto={pergunta} />
+              <article className="rounded-2xl border border-line bg-s1 p-4 sm:p-5">
+                <h2 className="mb-2 flex items-center gap-2 text-sm font-semibold text-acc-ink">
+                  <Sparkles size={15} aria-hidden="true" /> Assistente
+                </h2>
+                <p className="leading-relaxed wrap-anywhere whitespace-pre-wrap">{retorno.resposta}</p>
+                <Fontes fontes={retorno.fontes} />
+              </article>
+            </div>
+          ))}
+          {pendente && <Pergunta texto={pendente} />}
+        </div>
+        <p role="status" className={pendente ? "rounded-xl border border-line bg-s1 p-4 text-sm text-t2" : "sr-only"}>
+          {pendente ? "Preparando a resposta…" : ""}
+        </p>
+        {falha && (
+          <div className="rounded-xl border border-line-strong bg-s2 p-4">
+            <p role="alert" className="text-sm font-medium text-t1">{falha.mensagem}</p>
+            {falha.status === 403 && <p className="mt-1 text-sm text-t2">Confira seu acesso à demo e o consentimento para uso da IA.</p>}
+            {falha.status !== 401 && falha.status !== 403 && (
+              <p className="mt-1 text-sm text-t2">Se precisar registrar uma receita ou despesa, volte ao painel para continuar pelo fluxo de lançamentos.</p>
+            )}
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              {falha.status === 401 ? <Link href="/entrar?next=%2Fchat" className={BOTAO.fantasma}>Entrar novamente</Link> :
+                falha.status === 403 ? <Link href="/consentimento" className={BOTAO.fantasma}>Conferir consentimento</Link> :
+                  <button type="button" onClick={() => void enviar(rascunho)} disabled={!rascunho.trim()} className={BOTAO.fantasma}>Tentar novamente</button>}
+              <Link href="/painel" className={BOTAO.fantasma}>Continuar no painel</Link>
+            </div>
+          </div>
+        )}
+        <div ref={fim} aria-hidden="true" />
+      </section>
+      <form ref={form} onSubmit={aoEnviar} className="sticky bottom-0 border-t border-line bg-bg pt-3 pb-3">
+        <label htmlFor="pergunta-chat" className="mb-2 block text-sm font-semibold">Sua pergunta</label>
+        <div className="flex items-end gap-2">
+          <textarea ref={campo} id="pergunta-chat" value={rascunho} maxLength={LIMITE_PERGUNTA} rows={2}
+            placeholder="Escreva sua dúvida" readOnly={pendente !== null}
+            onChange={(evento) => setRascunho(evento.target.value)}
+            onKeyDown={(evento) => {
+              if (evento.key === "Enter" && !evento.shiftKey && !evento.nativeEvent.isComposing) {
+                evento.preventDefault();
+                form.current?.requestSubmit();
+              }
+            }}
+            className="min-h-[52px] min-w-0 flex-1 resize-y rounded-xl border border-line-strong bg-s2 px-3 py-3 text-base text-t1 placeholder:text-t3" />
+          <button type="submit" aria-label="Enviar pergunta" disabled={!rascunho.trim() || pendente !== null}
+            className="grid size-[52px] shrink-0 place-items-center rounded-xl bg-acc text-on-acc hover:brightness-110 disabled:bg-s3 disabled:text-t3">
+            <ArrowUp size={24} aria-hidden="true" />
+          </button>
+        </div>
+      </form>
+    </>
+  );
+}
+
+function Pergunta({ texto }: { texto: string }) {
+  return (
+    <div className="ml-auto max-w-[85%] rounded-2xl border border-line-strong bg-s2 px-4 py-3 wrap-anywhere">
+      <p className="text-xs font-semibold text-t3">Você</p>
+      <p className="mt-1 whitespace-pre-wrap">{texto}</p>
+    </div>
+  );
+}
