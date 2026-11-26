@@ -3,7 +3,7 @@ import { CtaFinal, Rodape } from "./cta-e-rodape";
 import { Hero } from "./hero";
 import { ChatComFonte, IaSoRascunha } from "./ia-e-chat";
 import { Limite } from "./limite";
-import { Nav } from "./nav";
+import { CtaFixo, Nav } from "./nav";
 import { Perguntas, Seguranca } from "./seguranca-e-perguntas";
 import { SigaOFio } from "./siga-o-fio";
 import { MotorMovimento } from "@/components/landing/movimento/motor";
@@ -52,6 +52,7 @@ export function Landing() {
         <CtaFinal />
       </main>
       <Rodape />
+      <CtaFixo />
       <MotorMovimento />
     </div>
   );

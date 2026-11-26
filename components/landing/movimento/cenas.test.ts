@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { passoAtual, preenchimentoDoTrilho, saidaDoPalco } from "./cenas";
+import { mostrarCtaFixo, passoAtual, preenchimentoDoTrilho, saidaDoPalco } from "./cenas";
 
 describe("passo do Siga o Fio", () => {
   it("divide o progresso em 4 passos e não passa do último", () => {
@@ -36,5 +36,21 @@ describe("saída do palco do herói", () => {
   it("aguenta progresso fora de 0..1", () => {
     expect(saidaDoPalco(-1).scale).toBe(1);
     expect(saidaDoPalco(3).y).toBe(-90);
+  });
+});
+
+describe("CTA fixo do celular", () => {
+  const tela = 800;
+  it("fica escondido enquanto os CTAs do herói estão na tela", () => {
+    expect(mostrarCtaFixo({ fimCtasHeroi: 10, topoCtaFinal: 5000, alturaTela: tela })).toBe(false);
+  });
+
+  it("aparece entre o herói e o CTA final", () => {
+    expect(mostrarCtaFixo({ fimCtasHeroi: -1, topoCtaFinal: 5000, alturaTela: tela })).toBe(true);
+  });
+
+  it("some quando o CTA final entra na tela e não volta no rodapé", () => {
+    expect(mostrarCtaFixo({ fimCtasHeroi: -4000, topoCtaFinal: tela - 1, alturaTela: tela })).toBe(false);
+    expect(mostrarCtaFixo({ fimCtasHeroi: -6000, topoCtaFinal: -900, alturaTela: tela })).toBe(false);
   });
 });

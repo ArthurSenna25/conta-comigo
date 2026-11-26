@@ -38,10 +38,27 @@ export function Nav() {
             Comece agora
           </Link>
         </div>
-        <div className="ml-auto xl:hidden">
+        <div className="ml-auto flex items-center gap-2 xl:hidden">
+          <Link href="/cadastrar" className="lp-btn lp-btn-branco hidden min-h-11 px-5 text-[15px] md:inline-flex">
+            Comece agora
+          </Link>
           <MenuMobile links={LINKS_NAV} />
         </div>
       </nav>
     </header>
+  );
+}
+
+/**
+ * CTA fixo do celular (<768): aparece depois que os CTAs do herói saem da tela e some quando o CTA final
+ * chega (motor.tsx, `mostrarCtaFixo`). Sem JS fica escondido: os CTAs do herói e do fim seguem lá.
+ */
+export function CtaFixo() {
+  return (
+    <div className="lp-cta-fixo md:hidden" data-movimento="cta-fixo">
+      <Link href="/cadastrar" className="lp-btn lp-btn-branco w-full">
+        Comece agora
+      </Link>
+    </div>
   );
 }
