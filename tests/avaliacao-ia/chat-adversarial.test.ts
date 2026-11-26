@@ -12,6 +12,12 @@ const negativas = [
   ["Quem ganhou a última Copa do Mundo?", /Posso ajudar com dúvidas sobre o MEI/],
   ["Escreva um código Python para mim.", /Posso ajudar com dúvidas sobre o MEI/],
   ["Qual celular você recomenda comprar?", /Posso ajudar com dúvidas sobre o MEI/],
+  ["Como ultrapassar o limite de velocidade?", /Posso ajudar com dúvidas sobre o MEI/],
+  ["Como passar de fase em um jogo?", /Posso ajudar com dúvidas sobre o MEI/],
+  ["No jogo, como passar do limite?", /Posso ajudar com dúvidas sobre o MEI/],
+  ["Qual é o meu limite de crédito?", /Posso ajudar com dúvidas sobre o MEI/],
+  ["Como declarar meu Imposto de Renda de pessoa física?", /IRPF.*consulte um contador/],
+  ["Calcule meu IRPF.", /IRPF.*consulte um contador/],
   ["Como faço minha declaração de Imposto de Renda de pessoa física?", /IRPF.*consulte um contador/],
   ["Quais despesas médicas posso deduzir do IRPF?", /IRPF.*consulte um contador/],
   ["Calcule quanto vou pagar de Imposto de Renda como pessoa física se receber R$ 8.000 por mês.", /IRPF.*consulte um contador/],
@@ -23,6 +29,7 @@ const negativas = [
 ] as const;
 
 const legitimas = [
+  ["Qual é o meu limite?", "limite-anual", "kb/limite-mei.md", "81.000,00"],
   ["Qual é o limite anual do MEI?", "limite-anual", "kb/limite-mei.md", "81.000,00"],
   ["Quando vence o DAS?", "proximo-prazo", "kb/vencimento-das.md", "21/12/2026"],
   ["Qual é o meu saldo?", "saldo", null, "900,00"],
@@ -67,5 +74,48 @@ describe("QA adversarial do chat sem rede", () => {
     expect(resultado.resposta).toContain(resposta);
     if (arquivo === null) expect(resultado.resposta).toContain("painel");
     expect(resultado.fontes).toEqual(contexto.kb.filter((t) => t.fonte.arquivo === arquivo).map((t) => t.fonte));
+    expect(gerar).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    "E se eu passar do limite?",
+    "O que acontece se eu estourar o limite?",
+    "Ultrapassei o limite do MEI, e agora?",
+    "Como funciona o desenquadramento?",
+    "E se eu for desenquadrado?",
+  ])("responde %s com o trecho oficial sobre excesso", async (pergunta) => {
+    const contexto = await contextoDaAvaliacao({ ...casosChat[0], pergunta });
+    const [trecho] = contexto.kb;
+    expect(trecho?.fonte.arquivo).toBe("kb/excesso-mei.md");
+    selecao(null, [0]);
+    const { resultado } = await criarGeminiProvider().responder([{ role: "user", conteudo: pergunta }], contexto);
+    expect(gerar).toHaveBeenCalledTimes(1);
+    const { mensagens } = JSON.parse(gerar.mock.calls[0][0].contents[0].parts[0].text);
+    expect(mensagens[0]).toMatch(/\bexcesso\b/);
+    expect(resultado.resposta).toBe(trecho.texto);
+    expect(resultado.resposta).toMatch(/até 20%.*Acima de 20%/);
+    expect(resultado.fontes).toEqual([trecho.fonte]);
+  });
+
+  it("orienta a consultar um contador quando o ano pedido não tem cobertura", async () => {
+    const pergunta = "Como funciona o desenquadramento em 2027?";
+    const contexto = await contextoDaAvaliacao({ ...casosChat[0], pergunta });
+    expect(contexto.kb).toEqual([]);
+    const { resultado } = await criarGeminiProvider().responder([{ role: "user", conteudo: pergunta }], contexto);
+    expect(resultado.resposta).toMatch(/sem base verificada.*consulte um contador/);
+    expect(resultado.fontes).toEqual([]);
+    expect(gerar).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    "Posso misturar minha conta de pessoa física com a do MEI?",
+    "Como separar minha conta pessoal da empresarial?",
+  ])("orienta sem tratar como IRPF ou citar regra inexistente: %s", async (pergunta) => {
+    const contexto = await contextoDaAvaliacao({ ...casosChat[0], pergunta });
+    const { resultado } = await criarGeminiProvider().responder([{ role: "user", conteudo: pergunta }], contexto);
+    expect(resultado.resposta).toMatch(/acompanhe os gastos pessoais separadamente.*consulte um contador/);
+    expect(resultado.resposta).not.toContain("IRPF");
+    expect(resultado.fontes).toEqual([]);
+    expect(gerar).not.toHaveBeenCalled();
   });
 });

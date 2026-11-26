@@ -76,14 +76,23 @@ const TERMOS_CHAT = new Set((
 ).split(" "));
 
 function minimizarMensagem(conteudo: string): string {
-  const termos = conteudo.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().match(/[a-z]+|\d+/g) ?? [];
+  const termos: string[] = conteudo.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().match(/[a-z]+|\d+/g) ?? [];
+  if (perguntaSobreExcessoMei(conteudo)) termos.unshift("excesso");
   return termos.filter((termo) => TERMOS_CHAT.has(termo)).join(" ");
+}
+
+export function perguntaSobreExcessoMei(pergunta: string): boolean {
+  const texto = pergunta.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().match(/[a-z]+/g)?.join(" ") ?? "";
+  return /\bdesenquadr[a-z]*\b/.test(texto)
+    || /\b(?:pass|estour|ultrapass|exced)[a-z]* (?:(?:do|o|os|dos) )?(?:meu )?limites? (?:do mei|de faturamento)\b/.test(texto)
+    || /^(?:(?:e se|o que acontece se|se) (?:eu )?|como |eu )?(?:pass|estour|ultrapass|exced)[a-z]* (?:(?:do|o|os|dos) )?(?:meu )?limites?$/.test(texto);
 }
 
 /** Regras avaliadas no texto original, antes da projeção do vocabulário para o provedor. */
 function orientarPergunta(pergunta: string): string | null {
   const texto = pergunta.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().replace(/\s+/g, " ");
-  if (/\b(?:irpf|pessoa fisica|despesas medicas)\b/.test(texto)) {
+  if (/\b(?:irpf|imposto (?:de|sobre a) renda|declaracao de (?:imposto de )?renda)\b/.test(texto)
+    || /\bdedu[a-z]*\b.*\bdespesas medicas\b|\bdespesas medicas\b.*\bdedu[a-z]*\b/.test(texto)) {
     return "Não ofereço orientação individual de IRPF. Para sua declaração ou deduções, consulte um contador.";
   }
   if (/\b(?:invente|forje|fabrique)\b.*\b(?:fonte|lei|url|referencia)\b|\b(?:ignore|desconsidere|esqueca)\b.*\b(?:base juridica|fontes verificadas)\b/.test(texto)) {
@@ -95,8 +104,15 @@ function orientarPergunta(pergunta: string): string | null {
   if (/\bsaldo\b.*\bsem (?:consultar|usar|acessar)\b/.test(texto)) {
     return "Confira o saldo atualizado no painel. O saldo usa os lançamentos registrados no sistema.";
   }
-  const assuntoDoChat = /\b(?:mei|irpf|das-mei|impostos?|tributos?|painel|saldo|receitas?|despesas?|fatur\w*|lancamentos?|desenquadramento|vencimento|estoque)\b/
-    .test(texto) || /\b(?:(?:meu|o|do|proximo) das|meu limite|meu teto|limite anual|limite proporcional|mes da abertura|ano de abertura)\b/.test(texto);
+  if (/\b(?:contas?|financas?)\b/.test(texto)
+    && /\b(?:pessoa fisica|pesso(?:al|ais)|particular(?:es)?)\b/.test(texto)
+    && /\b(?:mei|empresaria(?:l|is)|empresa)\b/.test(texto)) {
+    return "Para acompanhar o seu negócio no Conta Comigo, registre no painel as receitas e despesas do MEI e acompanhe os gastos pessoais separadamente. Para saber se você pode usar a mesma conta bancária, consulte um contador. A base verificada do chat não cobre essa regra.";
+  }
+  const assuntoDoChat = perguntaSobreExcessoMei(texto)
+    || /\b(?:mei|das-mei|impostos?|tributos?|painel|saldo|receitas?|despesas?|fatur\w*|lancamentos?|vencimento|estoque)\b/.test(texto)
+    || /\b(?:(?:meu|o|do|proximo) das|mes da abertura|ano de abertura)\b/.test(texto)
+    || /\b(?:meu (?:limite|teto)|limite (?:anual|proporcional))(?: este ano| em 20\d{2})?[?.! ]*$/.test(texto);
   return assuntoDoChat ? null : "Posso ajudar com dúvidas sobre o MEI e os dados do seu painel. Você pode perguntar sobre o limite de faturamento, o DAS ou o saldo.";
 }
 
