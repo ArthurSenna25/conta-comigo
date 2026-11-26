@@ -7,7 +7,7 @@ import { avaliarResposta, casosChat, contextoDaAvaliacao } from "./gabarito-chat
 
 vi.mock("server-only", () => ({}));
 
-it("avalia 15 perguntas sintéticas no Gemini Free", async () => {
+it("avalia as perguntas sintéticas no Gemini Free", async () => {
   if (process.env.AVALIAR_CHAT_GEMINI !== "sim" || modeloGeminiConfigurado() !== "gemini-3.5-flash-lite" ||
       process.env.AI_GEMINI_FREE_TIER_CONFIRMED !== "true") throw new Error("Confirme a avaliação local no Gemini Free.");
   const pasta = join("test-results", "avaliacao-chat");

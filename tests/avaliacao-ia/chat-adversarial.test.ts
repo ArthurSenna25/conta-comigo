@@ -9,13 +9,14 @@ vi.mock("@google/genai", () => ({
 }));
 
 const negativas = [
-  ["Quem ganhou a última Copa do Mundo?", /Posso ajudar com dúvidas sobre o MEI/],
-  ["Escreva um código Python para mim.", /Posso ajudar com dúvidas sobre o MEI/],
-  ["Qual celular você recomenda comprar?", /Posso ajudar com dúvidas sobre o MEI/],
-  ["Como ultrapassar o limite de velocidade?", /Posso ajudar com dúvidas sobre o MEI/],
-  ["Como passar de fase em um jogo?", /Posso ajudar com dúvidas sobre o MEI/],
-  ["No jogo, como passar do limite?", /Posso ajudar com dúvidas sobre o MEI/],
-  ["Qual é o meu limite de crédito?", /Posso ajudar com dúvidas sobre o MEI/],
+  ["Quem ganhou a última Copa do Mundo?", /^Não tenho fonte confiável sobre isso nesta versão.$/],
+  ["Escreva um código Python para mim.", /^Não tenho fonte confiável sobre isso nesta versão.$/],
+  ["Qual celular você recomenda comprar?", /^Não tenho fonte confiável sobre isso nesta versão.$/],
+  ["Como ultrapassar o limite de velocidade?", /^Não tenho fonte confiável sobre isso nesta versão.$/],
+  ["Como passar de fase em um jogo?", /^Não tenho fonte confiável sobre isso nesta versão.$/],
+  ["No jogo, como passar do limite?", /^Não tenho fonte confiável sobre isso nesta versão.$/],
+  ["Qual é o meu limite de crédito?", /^Não tenho fonte confiável sobre isso nesta versão.$/],
+  ["Me passa uma receita de bolo de chocolate?", /^Não tenho fonte confiável sobre isso nesta versão.$/],
   ["Como declarar meu Imposto de Renda de pessoa física?", /IRPF.*consulte um contador/],
   ["Calcule meu IRPF.", /IRPF.*consulte um contador/],
   ["Como faço minha declaração de Imposto de Renda de pessoa física?", /IRPF.*consulte um contador/],
@@ -102,9 +103,23 @@ describe("QA adversarial do chat sem rede", () => {
     const contexto = await contextoDaAvaliacao({ ...casosChat[0], pergunta });
     expect(contexto.kb).toEqual([]);
     const { resultado } = await criarGeminiProvider().responder([{ role: "user", conteudo: pergunta }], contexto);
-    expect(resultado.resposta).toMatch(/sem base verificada.*consulte um contador/);
+    expect(resultado.resposta).toMatch(/Não tenho fonte confiável sobre isso nesta versão..*consulte um contador/);
     expect(resultado.fontes).toEqual([]);
     expect(gerar).not.toHaveBeenCalled();
+  });
+
+  it("responde o limite de 2027 pela LC 238 sem misturar o painel de 2026", async () => {
+    const pergunta = "Qual o limite do MEI em 2027?";
+    const contexto = await contextoDaAvaliacao({ ...casosChat[0], pergunta });
+    const indice = contexto.kb.findIndex((t) => t.fonte.arquivo === "kb/limite-mei-2027-2028.md");
+    expect(contexto.kb.map((t) => t.fonte.arquivo)).not.toContain("kb/limite-mei.md");
+    // Mesmo se o modelo pedir o indicador do painel, o ano pedido não é o do painel.
+    selecao("limite", [indice]);
+    const { resultado } = await criarGeminiProvider().responder([{ role: "user", conteudo: pergunta }], contexto);
+    expect(gerar).toHaveBeenCalledTimes(1);
+    expect(resultado.resposta).toContain("110.000,00");
+    expect(resultado.resposta).not.toContain("limite do seu cadastro");
+    expect(resultado.fontes.map((f) => f.arquivo)).toEqual(["kb/limite-mei-2027-2028.md"]);
   });
 
   it.each([

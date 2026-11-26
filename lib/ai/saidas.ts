@@ -72,8 +72,13 @@ const TERMOS_CHAT = new Set((
   "mei comum caminhoneiro transportador excesso exceder excedi ultrapassar ultrapassei passei acima abaixo ate mais menos vinte cento " +
   "desenquadramento desenquadrar efeitos desenquadrado das guia valor valores custa pagar pago vencimento vence vencera prazo " +
   "feriado expediente bancario comercio industria servico servicos mista misto inss icms iss salario minimo arrecadacao " +
-  "calcule calcular simule simular hipotetico outro terceiro funcionario empregado contratar salario 2026"
+  "calcule calcular simule simular hipotetico outro terceiro funcionario empregado contratar salario 2026 " +
+  "2027 2028 funcionarios empregados contratacao perdao remissao divida dividas debito debitos lei nova muda mudou " +
+  "continua reforma tributaria ibs cbs"
 ).split(" "));
+
+/** Resposta honesta quando a pergunta está fora da base verificada do chat. */
+export const SEM_FONTE_CONFIAVEL = "Não tenho fonte confiável sobre isso nesta versão.";
 
 function minimizarMensagem(conteudo: string): string {
   const termos: string[] = conteudo.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().match(/[a-z]+|\d+/g) ?? [];
@@ -109,11 +114,14 @@ function orientarPergunta(pergunta: string): string | null {
     && /\b(?:mei|empresaria(?:l|is)|empresa)\b/.test(texto)) {
     return "Para acompanhar o seu negócio no Conta Comigo, registre no painel as receitas e despesas do MEI e acompanhe os gastos pessoais separadamente. Para saber se você pode usar a mesma conta bancária, consulte um contador. A base verificada do chat não cobre essa regra.";
   }
+  // ponytail: lista curta de culinária só para "receita" de cozinha não virar receita do MEI.
+  if (/\b(?:bolo|torta|pudim|culinaria|cozinhar|ingredientes?|forno)\b/.test(texto)) return SEM_FONTE_CONFIAVEL;
   const assuntoDoChat = perguntaSobreExcessoMei(texto)
     || /\b(?:mei|das-mei|impostos?|tributos?|painel|saldo|receitas?|despesas?|fatur\w*|lancamentos?|vencimento|estoque)\b/.test(texto)
+    || /\b(?:empregad[oa]s?|funcionari[oa]s?|reforma tributaria|ibs|cbs|perdao|remissao)\b/.test(texto)
     || /\b(?:(?:meu|o|do|proximo) das|mes da abertura|ano de abertura)\b/.test(texto)
     || /\b(?:meu (?:limite|teto)|limite (?:anual|proporcional))(?: este ano| em 20\d{2})?[?.! ]*$/.test(texto);
-  return assuntoDoChat ? null : "Posso ajudar com dúvidas sobre o MEI e os dados do seu painel. Você pode perguntar sobre o limite de faturamento, o DAS ou o saldo.";
+  return assuntoDoChat ? null : SEM_FONTE_CONFIAVEL;
 }
 
 export function prepararChat(mensagens: ChatRequest["mensagens"], contexto: ContextoChat) {
@@ -137,10 +145,12 @@ export function prepararChat(mensagens: ChatRequest["mensagens"], contexto: Cont
 const moeda = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 const reais = (centavos: number) => moeda.format(centavos / 100);
 
-export function lerChat(json: unknown, { dashboard, perfil, kb }: ContextoChat): ChatResponse {
+/** `outroAno`: a pergunta cita outro ano, então os indicadores do painel (ano atual) não se aplicam. */
+export function lerChat(json: unknown, { dashboard, perfil, kb }: ContextoChat, outroAno = false): ChatResponse {
   const saida = SelecaoChat.safeParse(json);
   if (!saida.success) throw new ErroIa("resposta");
-  const { referencias, indicador } = saida.data;
+  const referencias = saida.data.referencias;
+  const indicador = outroAno ? null : saida.data.indicador;
   let trechos = [...new Set(referencias)].map((indice) => {
     const trecho = kb[indice];
     if (!trecho) throw new ErroIa("resposta");
@@ -169,7 +179,7 @@ export function lerChat(json: unknown, { dashboard, perfil, kb }: ContextoChat):
     partes.unshift(`O próximo vencimento ordinário do DAS no seu painel é ${proximoDas.vencimento.split("-").reverse().join("/")}.`);
   }
   if (!trechos.length && indicador !== "resumo") {
-    partes.push("Para esclarecer dúvidas fiscais sem base verificada no assistente, consulte um contador.");
+    partes.push(`${SEM_FONTE_CONFIAVEL} Para o seu caso, consulte um contador.`);
   }
   const validada = ChatResponse.safeParse({ resposta: partes.join("\n\n"), fontes: trechos.map(({ fonte }) => fonte) });
   if (!validada.success) throw new ErroIa("resposta");
