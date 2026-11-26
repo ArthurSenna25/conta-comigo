@@ -7,7 +7,7 @@ const CARTOES = [
     ponta: 20,
   },
   {
-    titulo: "Nada é salvo sem você",
+    titulo: "Nenhum lançamento sem sua confirmação",
     texto: "Cada lançamento passa pelos seus olhos antes de entrar. O texto que você escreve vai à IA do Google (plano gratuito) para montar o rascunho; nenhum lançamento é salvo sem sua confirmação. Dá para descartar o rascunho antes de confirmar e conferir tudo em Lançamentos.",
     ponta: 40,
   },
