@@ -1,6 +1,6 @@
 # PROGRESS — Conta Comigo
 
-**Nível:** N2 (segurança e LGPD reforçadas) · **Fase atual:** telas, engine, IA e landing em paralelo (divisão de 24/11) · **Atualizado:** 25/11/2026
+**Nível:** N2 (segurança e LGPD reforçadas) · **Fase atual:** telas, engine, IA e landing em paralelo (divisão de 24/11) · **Atualizado:** 26/11/2026
 
 ## Feito
 - Gui: filtro do chat reconhece perguntas sobre exceder o limite do MEI, busca o trecho verificado de desenquadramento e distingue separação de contas de dúvidas sobre IRPF.
@@ -25,6 +25,7 @@
 - Frigeri (PR #43, revisão): `/adicionar` distingue 504/timeout ("A IA demorou…") de IA fora do ar; `/conferir` com trava de envio e sem retry automático em falha ambígua. Duplicata no servidor segue aberta: AMEACAS #24 (idempotência após o checkpoint).
 - Frigeri (PR #43, 2ª revisão): valor colado/digitado nunca é cortado (antes 9 dígitos mudava 10.000.000,00 para 1.000.000,00); acima do teto do contrato mantém o valor e bloqueia com erro; colar lê decimal/milhar. Falha ambígua: primário vira "Conferir em Lançamentos" e reenvio é secundário; descartar após ambiguidade não diz "Nada foi salvo".
 - Frigeri (PR #43, 3ª revisão): colar só aplica valor monetário claro (inteiro, milhar, decimal até 2 casas, com "R$"); negativo, 3+ casas, separadores inconsistentes e texto não mudam o campo e mostram erro. Digitar segue igual.
+- Arthur (26/11, `feat/landing-refino-responsivo`): landing refinada para 360–1024 px. Tokens só da landing (`.lp`: margem, seção, bloco, pilha, h2/h3/corpo com clamp), Siga o Fio em carrossel scroll-snap <900 px, CTA fixo no celular e na nav do tablet, vidro sem backdrop-filter <768. Altura em 360 px: 10.200 → 6.890 px. Copy veraz: só texto hoje, foto/áudio/print "em breve" (H1 virou "Anote a venda."). Âncoras e pin do Siga o Fio medidos pela base da nav (`--lp-nav-fim`, `safe center`). Demo: foco volta ao Escrever após Recomeçar. Não testado: iPhone/Safari real, leitor de tela.
 ## Próximo
 Divisão de 24/11 (ver `docs/handoff/`). Cada um segue o "Falta" do seu handoff, um PR por item; só o Arthur faz merge; plano B em 27/11 12h.
 - **Arthur:** tokens e componentes (primeiro), landing (estrutura › movimento › fio 3D), variáveis da Vercel, demo do júri, revisão de todos os PRs.
