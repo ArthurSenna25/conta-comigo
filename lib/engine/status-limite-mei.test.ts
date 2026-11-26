@@ -24,10 +24,13 @@ describe("statusLimiteMei", () => {
   it.each([
     [5_669_999, "ok"],
     [5_670_000, "70"],
+    [5_670_001, "70"],
     [7_289_999, "70"],
     [7_290_000, "90"],
+    [7_290_001, "90"],
     [8_099_999, "90"],
     [8_100_000, "100"],
+    [8_100_001, "100"],
   ])("classifica %i centavos na faixa %s sem arredondar o percentual", (receitasAnoCentavos, faixa) => {
     expect(statusLimiteMei({ ...entrada, receitasAnoCentavos }).faixa).toBe(faixa);
   });

@@ -4,7 +4,6 @@
  * Dono: Murilo. Cada função ganha seu arquivo + teste ao ser implementada.
  */
 import type {
-  Alerta,
   Lancamento,
   Perfil,
 } from "@/lib/contracts";
@@ -35,8 +34,4 @@ export type EstadoAlertas = {
   hoje: string;
 };
 
-/** DAS (7 e 2 dias antes), limite 70/90/100, despesa atípica, mistura PF/PJ, nota faltando. */
-export function gerarAlertas(estado: EstadoAlertas): Alerta[] {
-  void estado;
-  throw new Error("not implemented");
-}
+export { gerarAlertas } from "./gerar-alertas";
