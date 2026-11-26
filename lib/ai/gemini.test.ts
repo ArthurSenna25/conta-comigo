@@ -171,7 +171,7 @@ describe("Gemini", () => {
   });
 
   it("publica fontes do contexto, omitindo o nome e o identificador do perfil", async () => {
-    const fonte = { titulo: "Fonte", arquivo: "kb/fonte.md", url: null, verificadoEm: hoje };
+    const fonte = { titulo: "Fonte", arquivo: "kb/das-mei.md", url: "https://www.gov.br", verificadoEm: hoje };
     gerar.mockResolvedValue(resposta({ indicador: "das", referencias: [0] }));
     const { resultado } = await criarGeminiProvider().responder([{ role: "user", conteudo: "Qual a orientação?" }], {
       perfil: mockPerfil, dashboard: mockDashboard, kb: [{ texto: "Trecho de teste", fonte }],
