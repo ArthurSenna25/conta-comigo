@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { mockPerfil } from "@/lib/contracts/mocks";
 import type { PerfilInput } from "@/lib/contracts";
-import { salvarPerfil } from "./perfil";
+import { obterPerfil, salvarPerfil } from "./perfil";
 
 const { exigirAcesso, lerPerfil, criarPerfil, atualizarPerfil } = vi.hoisted(() => ({
   exigirAcesso: vi.fn(),
@@ -81,5 +81,47 @@ describe("salvarPerfil", () => {
     const r = await salvarPerfil(entrada);
     expect(r).toMatchObject({ ok: true, dados: { nomeNegocio: "Loja da Ana" } });
     expect(lerPerfil).not.toHaveBeenCalled();
+  });
+});
+
+describe("obterPerfil", () => {
+  it("devolve o perfil do usuário da sessão (portão só até o consentimento)", async () => {
+    lerPerfil.mockResolvedValue({ ...mockPerfil, userId: "u1" });
+    const r = await obterPerfil();
+    expect(r).toMatchObject({ ok: true, dados: { nomeNegocio: mockPerfil.nomeNegocio, userId: "u1" } });
+    expect(exigirAcesso).toHaveBeenCalledWith("consentimento");
+    expect(lerPerfil).toHaveBeenCalledWith(expect.anything(), "u1");
+  });
+
+  it("sem sessão: o portão redireciona e nada é lido", async () => {
+    exigirAcesso.mockRejectedValue(new Error("NEXT_REDIRECT"));
+    await expect(obterPerfil()).rejects.toThrow("NEXT_REDIRECT");
+    expect(lerPerfil).not.toHaveBeenCalled();
+  });
+
+  it("sem perfil ainda: erro claro, sem estourar", async () => {
+    lerPerfil.mockResolvedValue(null);
+    expect(await obterPerfil()).toMatchObject({ ok: false, erro: { codigo: "nao_encontrado" } });
+  });
+
+  it("conta de demonstração: leitura permitida", async () => {
+    exigirAcesso.mockResolvedValue({ userId: "demo", demo: true, consentimentoVigente: true });
+    lerPerfil.mockResolvedValue({ ...mockPerfil, userId: "demo" });
+    expect((await obterPerfil()).ok).toBe(true);
+  });
+
+  it("falha do banco: erro genérico, sem a mensagem interna", async () => {
+    lerPerfil.mockRejectedValue(new Error("falha ao ler perfil (XX000) segredo-interno"));
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const r = await obterPerfil();
+    expect(r).toMatchObject({ ok: false, erro: { codigo: "interno" } });
+    expect(JSON.stringify(r)).not.toContain("segredo-interno");
+  });
+
+  it("modo mock: devolve mockPerfil sem banco nem portão", async () => {
+    vi.stubEnv("NEXT_PUBLIC_USE_MOCKS", "true");
+    expect(await obterPerfil()).toEqual({ ok: true, dados: mockPerfil });
+    expect(lerPerfil).not.toHaveBeenCalled();
+    expect(exigirAcesso).not.toHaveBeenCalled();
   });
 });
