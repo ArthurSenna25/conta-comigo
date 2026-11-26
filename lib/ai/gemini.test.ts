@@ -75,7 +75,7 @@ describe("Gemini", () => {
 
   it.each([
     [new TypeError("texto privado"), "rede"],
-    [Object.assign(new Error("resposta privada"), { status: 429 }), "cota"],
+    [Object.assign(new Error("resposta privada"), { status: 429 }), "cota_provedor"],
     [Object.assign(new Error("resposta privada"), { status: 502 }), "indisponivel"],
     [Object.assign(new Error("API_KEY_INVALID"), { status: 400 }), "autenticacao"],
     [new DOMException("timeout", "TimeoutError"), "tempo"],

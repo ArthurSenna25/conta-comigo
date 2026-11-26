@@ -40,7 +40,7 @@ it("avalia 15 perguntas sintéticas no Gemini Free", async () => {
     } catch (erro) {
       const motivo = erro instanceof ErroIa ? erro.motivo : "inesperado";
       await appendFile(caminho, JSON.stringify({ id: caso.id, motivo, duracaoMs: Math.round(performance.now() - inicio), medicoes }) + "\n");
-      if (["cota", "autenticacao", "configuracao", "inesperado"].includes(motivo)) break;
+      if (["cota", "cota_provedor", "autenticacao", "configuracao", "inesperado"].includes(motivo)) break;
     }
   }
   expect(aprovados).toBe(casos.length);

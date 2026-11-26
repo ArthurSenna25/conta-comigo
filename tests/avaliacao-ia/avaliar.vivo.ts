@@ -69,7 +69,7 @@ it("avalia as extrações reais do Gemini com as fixtures sintéticas", async ()
     await appendFile(arquivo, JSON.stringify(linha) + "\n");
     console.info(caso.id, motivo, duracaoMs + " ms");
     executados++;
-    if (["cota", "configuracao", "autenticacao", "rede", "inesperado"].includes(motivo)) break;
+    if (["cota", "cota_provedor", "configuracao", "autenticacao", "rede", "inesperado"].includes(motivo)) break;
   }
   expect({ falhas, executados }).toEqual({ falhas: 0, executados: selecionados.length });
 });

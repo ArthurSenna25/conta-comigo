@@ -24,9 +24,9 @@ const MENSAGEM: Record<CodigoErro, string> = {
   interno: "Algo deu errado. Tente de novo em instantes.",
 };
 
-/** Resposta de erro de rota: JSON `ErroResposta`, status HTTP coerente, nunca redirect nem cache. */
-export function respostaErro(codigo: CodigoErro): Response {
-  const corpo: ErroResposta = { erro: { codigo, mensagem: MENSAGEM[codigo] } };
+/** Retorna uma mensagem pública fixa, com status HTTP coerente e sem cache. */
+export function respostaErro(codigo: CodigoErro, mensagemPublica = MENSAGEM[codigo]): Response {
+  const corpo: ErroResposta = { erro: { codigo, mensagem: mensagemPublica } };
   return Response.json(corpo, { status: STATUS[codigo], headers: { "cache-control": "no-store" } });
 }
 

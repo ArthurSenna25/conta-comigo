@@ -5,6 +5,7 @@ const FALHAS = {
   configuracao: ["ia_indisponivel", 503, "A IA ainda não está configurada. Você pode preencher manualmente."],
   autenticacao: ["ia_indisponivel", 503, "O provedor de IA está indisponível. Você pode preencher manualmente."],
   cota: ["limite_ia", 429, "O limite de uso da IA foi atingido. Você pode preencher manualmente."],
+  cota_provedor: ["limite_ia", 429, "O Gemini atingiu um limite de uso. Tente novamente mais tarde ou preencha manualmente."],
   tempo: ["ia_indisponivel", 504, "A IA demorou para responder. Você pode preencher manualmente."],
   rede: ["ia_indisponivel", 503, "Falha na conexão com a IA. Você pode preencher manualmente."],
   indisponivel: ["ia_indisponivel", 503, "A IA está temporariamente indisponível. Você pode preencher manualmente."],

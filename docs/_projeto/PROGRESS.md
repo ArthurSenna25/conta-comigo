@@ -3,6 +3,7 @@
 **Nível:** N2 (segurança e LGPD reforçadas) · **Fase atual:** telas, engine, IA e landing em paralelo (divisão de 24/11) · **Atualizado:** 25/11/2026
 
 ## Feito
+- Gui: chat distingue limite diário, 429 do Gemini, timeout e conexão. Flash-Lite em 25/11 à noite: 25/25 casos válidos e 178/182 campos corretos. [Relatório de estabilidade](../handoff/RELATORIO-25-11-ESTABILIDADE-IA.md).
 - Gui: `POST /api/chat` com portão e reserva compartilhados, contexto do engine e fontes oficiais em `kb/`. Chat real no Gemini Free restrito à conta demo, com corpus e avaliação em `tests/avaliacao-ia`.
 - Gui: provider Gemini multimodal e rota de rascunho com Zod, modo mock e portão de sessão, consentimento e origem. Suíte real executável em `tests/avaliacao-ia`.
 - Setup: scaffold Next 16 + Tailwind v4 + shadcn, husky/gitleaks, CI, `main` protegida, regras de camadas no ESLint.
