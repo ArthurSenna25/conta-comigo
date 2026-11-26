@@ -64,7 +64,7 @@ const PERGUNTAS = [
     "A IA calcula meu imposto?",
     "Não. A IA só lê o que você manda e monta um rascunho. Limite e DAS são calculados pelo código do app, com regras fixas.",
   ],
-  ["Algo é salvo sem eu ver?", "Nada. O texto que você escreve vai à IA do Google (plano gratuito) para montar o rascunho; nenhum lançamento é salvo sem sua confirmação. Antes disso você pode descartar o rascunho, e depois confere tudo em Lançamentos."],
+  ["Algo é salvo sem eu ver?", "Nenhum lançamento é salvo sem sua confirmação. Antes disso você pode descartar o rascunho, e depois confere tudo em Lançamentos. O texto que você escreve vai à IA do Google (plano gratuito) para montar o rascunho."],
   ["Posso apagar meus dados?", "O pedido de exclusão de dados é tratado conforme a LGPD. Ainda não há botão de exclusão no app."],
   [
     "Substitui meu contador?",
