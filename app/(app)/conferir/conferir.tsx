@@ -308,7 +308,9 @@ function Rotulado({ id, rotulo, erro, duvidoso = false, children }: { id: string
 }
 
 /** InputMoeda lg (03): "centavos entram primeiro", R$ fixo à esquerda. 0 aparece vazio. */
-function CampoValor({ centavos, duvidoso, erro, onChange }: { centavos: number; duvidoso: boolean; erro?: string; onChange: (c: number) => void }) {
+function CampoValor({ centavos, duvidoso, erro: erroForm, onChange }: { centavos: number; duvidoso: boolean; erro?: string; onChange: (c: number) => void }) {
+  const [erroColagem, setErroColagem] = useState<string | null>(null);
+  const erro = erroColagem ?? erroForm;
   return (
     <Rotulado id="valor" rotulo={duvidoso ? "Valor · confira" : "Valor"} erro={erro} duvidoso={duvidoso}>
       <div className={`flex h-16 items-center gap-2 rounded-2xl border px-4 ${estado(erro, duvidoso)}`}>
@@ -321,11 +323,16 @@ function CampoValor({ centavos, duvidoso, erro, onChange }: { centavos: number; 
           autoComplete="off"
           placeholder="0,00"
           value={centavos ? formatarSemSimbolo(centavos) : ""}
-          onChange={(e) => onChange(centavosDigitados(e.target.value))}
+          onChange={(e) => {
+            setErroColagem(null);
+            onChange(centavosDigitados(e.target.value));
+          }}
           onPaste={(e) => {
-            // colar lê vírgula/ponto como decimal ou milhar; sem isso "10.5" viraria R$ 1,05
+            // colar só vale para valor claro; o resto não muda o campo e avisa
             e.preventDefault();
-            onChange(centavosDoTextoColado(e.clipboardData.getData("text")));
+            const r = centavosDoTextoColado(e.clipboardData.getData("text"));
+            setErroColagem(r.ok ? null : r.erro);
+            if (r.ok) onChange(r.centavos);
           }}
           {...aria("valor", erro)}
           className="num w-full min-w-0 bg-transparent text-[28px] font-extrabold text-t1 tabular-nums placeholder:text-t3 focus:outline-none"

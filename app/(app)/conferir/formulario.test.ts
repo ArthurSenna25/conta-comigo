@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { LancamentoInput, VALOR_MAX_CENTAVOS, type Rascunho } from "@/lib/contracts";
-import { centavosDoTextoColado } from "@/components/moeda";
+import { centavosDoTextoColado, ERRO_COLAGEM, ERRO_COLAGEM_NEGATIVO } from "@/components/moeda";
 import { mockIngest } from "@/lib/contracts/mocks";
 import {
   centavosDigitados,
@@ -37,7 +37,7 @@ describe("centavosDigitados (centavos entram primeiro)", () => {
   });
 });
 
-describe("centavosDoTextoColado (nunca altera o valor em silêncio)", () => {
+describe("centavosDoTextoColado (só valor claro; resto não altera o campo)", () => {
   it.each([
     ["10.000.000,00", 1_000_000_000],
     ["10000000,00", 1_000_000_000],
@@ -48,13 +48,45 @@ describe("centavosDoTextoColado (nunca altera o valor em silêncio)", () => {
     ["1,234.56", 123_456],
     ["10,5", 1_050],
     ["10.5", 1_050],
+    ["10,50", 1_050],
     ["R$ 34.020,00", 3_402_000],
     ["1.000", 100_000],
+    ["1,000", 100_000],
     ["12", 1_200],
-    ["99999999,99", 9_999_999_999],
-    ["", 0],
-  ])("%s → %i centavos", (texto, esperado) => {
-    expect(centavosDoTextoColado(texto)).toBe(esperado);
+    [" 99999999,99 ", 9_999_999_999],
+  ])("aceita %s → %i centavos", (texto, esperado) => {
+    expect(centavosDoTextoColado(texto)).toEqual({ ok: true, centavos: esperado });
+  });
+
+  it.each(["1,2345", "1.2345", "1.2.3,4", "abc", "12abc", "", "   ", "R$", "10,", ",50", "1.000.50"])(
+    "recusa %j com a mensagem geral",
+    (texto) => {
+      expect(centavosDoTextoColado(texto)).toEqual({ ok: false, erro: ERRO_COLAGEM });
+    },
+  );
+
+  it.each(["-10,50", "-10.5", "R$ -10,50"])("recusa negativo %s", (texto) => {
+    expect(centavosDoTextoColado(texto)).toEqual({ ok: false, erro: ERRO_COLAGEM_NEGATIVO });
+  });
+
+  it("o teto passa e +1 centavo é decidido por erroDoValor, não pela colagem", () => {
+    const teto = centavosDoTextoColado("10.000.000,00");
+    expect(teto).toEqual({ ok: true, centavos: VALOR_MAX_CENTAVOS });
+    expect(centavosDoTextoColado("10.000.000,01")).toEqual({ ok: true, centavos: VALOR_MAX_CENTAVOS + 1 });
+  });
+
+  it("rejeição não altera o valor anterior (o chamador só aplica quando ok)", () => {
+    let valor = 12_345;
+    const colar = (t: string) => {
+      const r = centavosDoTextoColado(t);
+      if (r.ok) valor = r.centavos;
+    };
+    colar("-10,50");
+    colar("1,2345");
+    colar("abc");
+    expect(valor).toBe(12_345);
+    colar("10,5");
+    expect(valor).toBe(1_050);
   });
 });
 
