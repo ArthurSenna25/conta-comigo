@@ -45,6 +45,8 @@ export async function POST(req: Request): Promise<Response> {
   // O Free só pode receber dados sintéticos. A conta é identificada por claims verificadas.
   if (!acesso.mock && !acesso.demo) return respostaErro("proibido");
 
+  let etapa: "contexto" | "resposta" = "contexto";
+  const inicio = performance.now();
   try {
     const { mensagens } = entrada.data;
     if (acesso.mock) {
@@ -54,11 +56,15 @@ export async function POST(req: Request): Promise<Response> {
     const kb = await selecionarTrechos(mensagens.at(-1)?.conteudo ?? "");
     const contexto = await carregarContexto(acesso.userId, kb);
     if (!contexto) return respostaErro("nao_encontrado");
+    etapa = "resposta";
     const provider = criarGeminiProvider({ antesDaChamada: () => reservarTentativa(acesso) });
     const { resultado } = await provider.responder(mensagens, contexto);
     return Response.json(ChatResponse.parse(resultado), { headers: { "cache-control": "no-store" } });
   } catch (erro) {
-    if (!(erro instanceof ErroIa)) return respostaErro("ia_indisponivel");
+    if (!(erro instanceof ErroIa)) {
+      console.warn(JSON.stringify({ evento: "chat_falha", etapa, duracaoMs: Math.round(performance.now() - inicio) }));
+      return respostaErro("ia_indisponivel");
+    }
     switch (erro.motivo) {
       case "cota":
         return respostaErro("limite_ia", "O limite diário de uso da IA foi atingido. Tente novamente quando ele for renovado ou preencha manualmente.");

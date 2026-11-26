@@ -38,15 +38,12 @@ export type OpcoesGemini = {
 };
 
 export function modeloGeminiConfigurado(): string {
-  const modelo = process.env.AI_MODEL ?? MODELO_GEMINI;
+  const modelo = process.env.AI_MODEL?.trim() || process.env.GEMINI_MODEL?.trim() || MODELO_GEMINI;
   if (!MODELOS_FREE.has(modelo)) throw new ErroIa("configuracao");
   return modelo;
 }
 
-function criarCliente() {
-  const apiKey = process.env.AI_API_KEY?.trim();
-  if (!apiKey || process.env.AI_PROVIDER !== "gemini" ||
-      process.env.AI_GEMINI_FREE_TIER_CONFIRMED !== "true") throw new ErroIa("configuracao");
+function criarCliente(apiKey: string) {
   return new GoogleGenAI({
     apiKey,
     vertexai: false,
@@ -59,10 +56,27 @@ function criarCliente() {
 }
 
 function statusHttp(erro: unknown): number | null {
-  if (erro && typeof erro === "object" && "status" in erro && typeof erro.status === "number") {
+  if (erro && typeof erro === "object" && "status" in erro && typeof erro.status === "number" &&
+      Number.isInteger(erro.status) && erro.status >= 100 && erro.status <= 599) {
     return erro.status;
   }
   return null;
+}
+
+type Diagnostico = {
+  operacao: TentativaIa["operacao"];
+  modelo: string | null;
+  tentativa: number | null;
+  etapa: "configuracao" | "reserva" | "provedor" | "medicao";
+  motivo: MotivoIa | "modelo_invalido" | "modelo_indisponivel" |
+    "chave_ausente" | "provedor_nao_configurado" | "free_nao_confirmado";
+  statusHttp: number | null;
+  duracaoMs: number;
+};
+
+function registrarFalha(evento: Diagnostico) {
+  // Recebe apenas enums, números e identificador de modelo validado na allowlist.
+  console.warn(JSON.stringify({ evento: "gemini_falha", ...evento }));
 }
 
 function traduzirFalha(erro: unknown, sinal: AbortSignal): ErroIa {
@@ -112,15 +126,43 @@ type Pedido<T> = {
 };
 
 async function gerar<T>(pedido: Pedido<T>, opcoes: OpcoesGemini): Promise<ComCusto<T>> {
-  const modelo = modeloGeminiConfigurado();
-  const cliente = criarCliente();
+  const inicioConfig = performance.now();
+  let modelo: string | null = null;
+  function falhaConfig(motivo: Diagnostico["motivo"]): never {
+    registrarFalha({ operacao: pedido.operacao, modelo, tentativa: null, etapa: "configuracao",
+      motivo, statusHttp: null, duracaoMs: Math.round(performance.now() - inicioConfig) });
+    throw new ErroIa("configuracao");
+  }
+  try {
+    modelo = modeloGeminiConfigurado();
+  } catch {
+    return falhaConfig("modelo_invalido");
+  }
+  const apiKey = process.env.AI_API_KEY?.trim() || process.env.GEMINI_API_KEY?.trim();
+  if (!apiKey) return falhaConfig("chave_ausente");
+  if (process.env.AI_PROVIDER !== "gemini") return falhaConfig("provedor_nao_configurado");
+  if (process.env.AI_GEMINI_FREE_TIER_CONFIRMED !== "true") return falhaConfig("free_nao_confirmado");
+  let cliente: GoogleGenAI;
+  try {
+    cliente = criarCliente(apiKey);
+  } catch {
+    return falhaConfig("configuracao");
+  }
   const sinal = AbortSignal.timeout(TEMPO_TOTAL_MS);
   const limite = performance.now() + TEMPO_TOTAL_MS;
   let repararSaida = false;
   for (let tentativa = 1; tentativa <= 2; tentativa++) {
     const info = { modelo, operacao: pedido.operacao, tentativa };
-    if (sinal.aborted) throw new ErroIa("tempo");
-    await executarControle(opcoes.antesDaChamada, info);
+    const inicioReserva = performance.now();
+    try {
+      sinal.throwIfAborted();
+      await executarControle(opcoes.antesDaChamada, info);
+    } catch (erro) {
+      const falha = erro instanceof ErroIa ? erro : traduzirFalha(erro, sinal);
+      registrarFalha({ ...info, etapa: "reserva", motivo: falha.motivo, statusHttp: null,
+        duracaoMs: Math.round(performance.now() - inicioReserva) });
+      throw falha;
+    }
     const inicio = performance.now();
     let resposta: GenerateContentResponse | undefined;
     let resultado: T;
@@ -145,16 +187,26 @@ async function gerar<T>(pedido: Pedido<T>, opcoes: OpcoesGemini): Promise<ComCus
       falha = traduzirFalha(erro, sinal);
       status = statusHttp(erro);
     }
+    const duracaoMs = Math.round(performance.now() - inicio);
+    const codigo = status ?? (resposta ? 200 : null);
+    if (falha) registrarFalha({ ...info, etapa: "provedor",
+      motivo: status === 404 ? "modelo_indisponivel" : falha.motivo, statusHttp: codigo, duracaoMs });
     const uso = resposta?.usageMetadata;
-    await executarControle(opcoes.aoMedir, {
-      ...info, duracaoMs: Math.round(performance.now() - inicio),
-      tokensEntrada: uso?.promptTokenCount ?? null,
-      tokensSaida: uso?.candidatesTokenCount ?? null,
-      tokensPensamento: uso?.thoughtsTokenCount ?? null,
-      tokensTotais: uso?.totalTokenCount ?? null,
-      statusHttp: status ?? (resposta ? 200 : null),
-      custoCentavos: 0, motivo: falha?.motivo ?? "sucesso",
-    });
+    try {
+      await executarControle(opcoes.aoMedir, {
+        ...info, duracaoMs,
+        tokensEntrada: uso?.promptTokenCount ?? null,
+        tokensSaida: uso?.candidatesTokenCount ?? null,
+        tokensPensamento: uso?.thoughtsTokenCount ?? null,
+        tokensTotais: uso?.totalTokenCount ?? null,
+        statusHttp: codigo,
+        custoCentavos: 0, motivo: falha?.motivo ?? "sucesso",
+      });
+    } catch (erro) {
+      const falhaMedicao = traduzirFalha(erro, sinal);
+      registrarFalha({ ...info, etapa: "medicao", motivo: falhaMedicao.motivo, statusHttp: codigo, duracaoMs });
+      throw erro;
+    }
     if (!falha) return { resultado: resultado!, custoCentavos: 0 };
     // A avaliação encontrou 503 intermitentes. Só uma nova tentativa, com a
     // mesma chave e modelo e dentro do prazo total. A reserva se repete.
