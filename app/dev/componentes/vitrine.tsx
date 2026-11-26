@@ -111,6 +111,9 @@ export function Vitrine() {
           <Cartao legenda='tipo="429"'>
             <EstadoErro tipo="429" hrefManual="/conferir" />
           </Cartao>
+          <Cartao legenda='tipo="rede"'>
+            <EstadoErro tipo="rede" mensagem="Algo deu errado. Tente de novo em instantes." />
+          </Cartao>
         </div>
       </Secao>
 
