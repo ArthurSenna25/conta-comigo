@@ -21,8 +21,8 @@ const CARTOES = [
 export function Seguranca() {
   return (
     <section id="seguranca" aria-labelledby="titulo-seguranca" data-fio="0.3" className="lp-secao">
-      <div className="lp-contido flex flex-col gap-10">
-        <div className="flex max-w-[780px] flex-col gap-[18px]">
+      <div className="lp-contido flex flex-col gap-[var(--lp-bloco)]">
+        <div className="flex max-w-[780px] flex-col gap-[var(--lp-pilha)]">
           <p data-movimento="reveal" className="lp-kicker m-0">
             Segurança e privacidade
           </p>
@@ -30,16 +30,16 @@ export function Seguranca() {
             Seu dinheiro, suas regras.
           </h2>
         </div>
-        <ul className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,300px),1fr))] gap-4">
+        <ul className="grid gap-3 md:grid-cols-3 md:gap-4">
           {CARTOES.map((c) => (
             <li
               key={c.titulo}
               data-movimento="reveal tilt"
-              className="lp-vidro flex min-h-[240px] flex-col justify-between gap-7 rounded-3xl p-7"
+              className="lp-vidro flex flex-col justify-between gap-5 rounded-3xl p-5 md:min-h-[240px] md:gap-7 md:p-6 xl:p-7"
             >
               <FioCurto largura={64} ponta={c.ponta} />
               <div className="flex flex-col gap-2.5">
-                <h3 className="num m-0 text-2xl leading-[1.15] font-extrabold tracking-[-0.02em]">{c.titulo}</h3>
+                <h3 className="num m-0 text-xl leading-[1.15] font-extrabold tracking-[-0.02em] xl:text-2xl">{c.titulo}</h3>
                 <p className="lp-corpo text-base">{c.texto}</p>
               </div>
             </li>
@@ -76,14 +76,14 @@ const PERGUNTAS = [
 export function Perguntas() {
   return (
     <section id="perguntas" aria-labelledby="titulo-perguntas" data-fio="0.25" className="lp-secao">
-      <div className="mx-auto flex w-[min(900px,100%-40px)] flex-col gap-8">
+      <div className="mx-auto flex w-[min(900px,100%-2*var(--lp-margem))] flex-col gap-[var(--lp-bloco)]">
         <h2 id="titulo-perguntas" data-movimento="linhas skew" className="lp-h2">
           Perguntas frequentes
         </h2>
-        <div data-movimento="reveal" className="lp-vidro divide-y divide-line rounded-3xl px-6 py-1">
+        <div data-movimento="reveal" className="lp-vidro divide-y divide-line rounded-3xl px-5 py-1 md:px-6">
           {PERGUNTAS.map(([pergunta, resposta], i) => (
             <details key={pergunta} name="faq" open={i === 0} className="lp-faq">
-              <summary className="flex min-h-[72px] items-center justify-between gap-5 py-4 text-[clamp(17px,1.5vw,20px)] leading-[1.35] font-bold">
+              <summary className="flex min-h-[60px] items-center justify-between gap-4 py-3.5 text-[clamp(17px,1.5vw,20px)] md:min-h-[72px] md:gap-5 md:py-4 leading-[1.35] font-bold">
                 {pergunta}
                 <span
                   aria-hidden="true"
@@ -92,7 +92,7 @@ export function Perguntas() {
                   +
                 </span>
               </summary>
-              <p data-movimento="faq-resposta" className="lp-corpo pr-14 pb-[22px] text-[17px]">
+              <p data-movimento="faq-resposta" className="lp-corpo pb-5 text-base md:pr-14 md:pb-[22px] md:text-[17px]">
                 {resposta}
               </p>
             </details>

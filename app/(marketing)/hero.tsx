@@ -1,10 +1,15 @@
 import Link from "next/link";
+import { Check } from "lucide-react";
 import type { ReactNode } from "react";
 import { Celular } from "@/components/landing/celular";
 import { BotaoExperimente } from "@/components/landing/experimente/botao-experimente";
 import { FioCurto } from "@/components/landing/simbolos";
 
 const GARANTIAS = ["Nada é salvo sem você confirmar", "IA opcional", "Você apaga quando quiser"];
+
+/** CTAs: no celular, coluna de botões da mesma largura; a partir de 640px, linha centralizada. */
+export const GRUPO_CTA =
+  "flex w-full max-w-[400px] flex-col items-stretch gap-3 sm:w-auto sm:max-w-none sm:flex-row sm:flex-wrap sm:items-center sm:justify-center";
 
 export function Hero() {
   return (
@@ -13,10 +18,10 @@ export function Hero() {
       aria-labelledby="titulo-hero"
       data-fio="1"
       data-movimento="hero"
-      className="relative flex min-h-svh flex-col items-center overflow-x-clip pt-[clamp(124px,17vh,176px)]"
+      className="relative flex min-h-svh flex-col items-center overflow-x-clip pt-[calc(var(--lp-nav-fim)+28px)] md:pt-[clamp(124px,17vh,176px)]"
     >
       <Feixes />
-      <div className="relative z-[2] flex w-[min(1180px,100%-40px)] flex-col items-center gap-[26px] text-center">
+      <div className="relative z-[2] flex w-[min(1180px,100%-2*var(--lp-margem))] flex-col items-center gap-5 md:gap-[26px] text-center">
         <div
           aria-hidden="true"
           className="pointer-events-none absolute -inset-x-[4%] -inset-y-[16%] -z-10 [background:radial-gradient(closest-side,oklch(0.13_0.025_255/0.78),transparent)]"
@@ -31,17 +36,17 @@ export function Hero() {
         <h1
           id="titulo-hero"
           data-movimento="hero-linhas"
-          className="num m-0 max-w-[12ch] text-[clamp(52px,9.2vw,150px)] leading-[0.92] font-extrabold tracking-[-0.055em] text-balance"
+          className="num m-0 max-w-[12ch] text-[clamp(44px,6.5vw+22px,72px)] md:text-[clamp(52px,9.2vw,150px)] leading-[0.92] font-extrabold tracking-[-0.055em] text-balance"
         >
-          Anote a venda. A gente cuida do resto.
+          Anote a venda. A&nbsp;gente cuida do resto.
         </h1>
         <p data-movimento="hero-item" className="lp-corpo max-w-[560px] text-[clamp(17px,1.4vw,20px)]">
           Escreva do seu jeito e a IA monta o rascunho. Você confere, e o app calcula seu limite anual e o DAS.{" "}
           <span className="whitespace-nowrap text-t3">Foto, áudio e print: em breve.</span>
         </p>
-        <div data-movimento="hero-item" className="flex flex-wrap items-center justify-center gap-3">
-          <span className="lp-borda-conica" data-movimento="borda-conica">
-            <Link href="/cadastrar" className="lp-btn lp-btn-branco" data-movimento="ima">
+        <div data-movimento="hero-item hero-ctas" className={GRUPO_CTA}>
+          <span className="lp-borda-conica flex sm:inline-flex" data-movimento="borda-conica">
+            <Link href="/cadastrar" className="lp-btn lp-btn-branco flex-1" data-movimento="ima">
               Comece agora
             </Link>
           </span>
@@ -55,10 +60,13 @@ export function Hero() {
         </div>
         <ul
           data-movimento="hero-item"
-          className="flex flex-wrap justify-center gap-x-[22px] gap-y-2 text-[15px] text-t2"
+          className="flex flex-wrap justify-center gap-x-4 gap-y-1.5 text-sm text-t2 md:gap-x-[22px] md:text-[15px]"
         >
           {GARANTIAS.map((g) => (
-            <li key={g}>{g}</li>
+            <li key={g} className="inline-flex items-center gap-1.5">
+              <Check aria-hidden="true" size={15} strokeWidth={2.5} className="text-ok" />
+              {g}
+            </li>
           ))}
         </ul>
       </div>

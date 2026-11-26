@@ -10,6 +10,17 @@
        se medem por aqui, então nenhum título fica atrás da barra em qualquer largura. */
     --lp-nav-topo: max(14px, env(safe-area-inset-top));
     --lp-nav-fim: calc(var(--lp-nav-topo) + 64px);
+
+    /* Escala única da landing (só aqui: o app não usa). Espaço em passos de 4px nas pontas, fluido no meio.
+       360px → 1440px:  margem 20 → 48 · seção 52 → 104 · bloco 24 → 48 · pilha 16 → 24 */
+    --lp-margem: clamp(20px, 2.6vw + 11px, 48px);
+    --lp-secao: clamp(52px, 4.8vw + 35px, 104px);
+    --lp-bloco: clamp(24px, 2.2vw + 16px, 48px);
+    --lp-pilha: clamp(16px, 0.75vw + 13px, 24px);
+    /* Tipo: h2 32 → 68 · h3 26 → 52 · corpo 16 → 18 */
+    --lp-h2: clamp(32px, 3.35vw + 20px, 68px);
+    --lp-h3: clamp(26px, 2.4vw + 17px, 52px);
+    --lp-corpo: clamp(16px, 0.19vw + 15.3px, 18px);
   }
   .lp :where([id]) { scroll-margin-top: calc(var(--lp-nav-fim) + 16px); }
 
@@ -46,9 +57,9 @@
   .lp-grao { z-index: var(--z-grain); background-image: url("/landing/textura-grao.svg"); opacity: 0.875; }
 
   /* ---- layout ---- */
-  .lp-contido { width: min(1240px, 100% - 40px); margin-inline: auto; }
-  .lp-secao { position: relative; padding-block: clamp(64px, 8vw, 120px); }
-  .lp-2col { display: grid; gap: clamp(40px, 6vw, 88px); align-items: center; }
+  .lp-contido { width: min(1240px, 100% - 2 * var(--lp-margem)); margin-inline: auto; }
+  .lp-secao { position: relative; padding-block: var(--lp-secao); }
+  .lp-2col { display: grid; gap: clamp(32px, 5vw + 8px, 88px); align-items: center; }
   @media (min-width: 768px) {
     .lp-2col { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
   }
@@ -65,7 +76,7 @@
 
   /* ---- tipografia (02-TIPOGRAFIA.md, escala da landing) ---- */
   .lp-kicker {
-    font-size: 14px;
+    font-size: clamp(13px, 0.1vw + 12.6px, 14px);
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -75,12 +86,46 @@
     margin: 0;
     font-family: var(--font-manrope), system-ui, sans-serif;
     font-weight: 800;
-    font-size: clamp(36px, 4.8vw, 68px);
+    font-size: var(--lp-h2);
     line-height: 1.02;
     letter-spacing: -0.04em;
     text-wrap: balance;
   }
-  .lp-corpo { margin: 0; font-size: 18px; line-height: 1.55; color: var(--t2); text-wrap: pretty; }
+  .lp-corpo { margin: 0; font-size: var(--lp-corpo); line-height: 1.55; color: var(--t2); text-wrap: pretty; }
+
+  /* ---- Siga o Fio: empilhado (≥900, sem pin) ou carrossel com scroll-snap (<900) ---- */
+  .lp-siga-lista { display: flex; flex-direction: column; gap: clamp(56px, 9vw, 120px); margin: 0; padding: 0; list-style: none; }
+  @media (min-width: 900px) { .lp-siga-dica { display: none; } }
+  @media (max-width: 899px) {
+    .lp-siga-lista {
+      flex-direction: row;
+      gap: 12px;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scroll-snap-type: x mandatory;
+      scroll-padding-inline: var(--lp-margem);
+      scrollbar-width: none;
+      /* sangra até a borda da tela, mas o 1º cartão alinha com a margem das outras seções */
+      margin-inline: calc(-1 * var(--lp-margem));
+      padding: 4px var(--lp-margem) 8px;
+    }
+    .lp-siga-lista::-webkit-scrollbar { display: none; }
+    .lp-siga-lista > li {
+      flex: 0 0 min(86%, 620px);
+      scroll-snap-align: start;
+      gap: 20px;
+      padding: 20px 20px 24px;
+      border-radius: 24px;
+      border: 1px solid var(--glass-line);
+      /* sem backdrop-filter nem sombra externa: o scroller cortaria a sombra e o blur pesa no celular */
+      background: linear-gradient(180deg, oklch(0.23 0.034 255 / 0.9), oklch(0.17 0.028 255 / 0.9));
+      box-shadow: inset 0 1px 0 var(--glass-hi);
+      overflow: hidden;
+    }
+    .lp-siga-lista .lp-sombra-texto::before { content: none; }
+    .lp-siga-lista .celular { --s: 0.44; }
+  }
+  @media (min-width: 768px) and (max-width: 899px) { .lp-siga-lista .celular { --s: 0.5; } }
 
   /* ---- vidro (03 · cartões de vidro, variante landing) ---- */
   .lp-vidro {
@@ -91,6 +136,16 @@
     box-shadow: var(--shadow-glass);
     backdrop-filter: blur(18px) saturate(1.2);
     -webkit-backdrop-filter: blur(18px) saturate(1.2);
+  }
+  /* Celular: o blur de fundo em vários cartões custa GPU ao rolar. Troca por um vidro mais opaco (mesmo tom). */
+  @media (max-width: 767px) {
+    .lp-vidro {
+      background:
+        radial-gradient(360px circle at var(--x, 50%) var(--y, 0%), oklch(0.78 0.12 240 / 0.10), transparent 62%),
+        linear-gradient(180deg, oklch(0.23 0.034 255 / 0.92), oklch(0.17 0.028 255 / 0.92));
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
   }
 
   /* ---- botões grandes da landing (58px, pílula) ---- */
@@ -108,6 +163,10 @@
     transition: transform var(--dur-press) var(--ease-cc);
   }
   .lp-btn:hover { opacity: 1; }
+  /* No celular os CTAs da landing empilham na mesma largura: 52px de alto já passa dos 44px de toque. */
+  @media (max-width: 639px) {
+    .lp .lp-btn { min-height: 52px; padding-inline: 24px; font-size: 17px; }
+  }
   .lp-btn:active { transform: scale(0.97); }
   .lp-btn-branco {
     background: var(--cta-bg);
@@ -333,3 +392,17 @@ html.mv-abrindo [data-movimento~="abertura-celular"] { transition: transform 800
 
 /* Lenis (só ≥1280 com mouse) */
 html.lenis, html.lenis body { height: auto; }
+
+/* CTA fixo do celular: discreto, respeita a área segura e não captura toque enquanto escondido. */
+.lp-cta-fixo {
+  position: fixed;
+  inset: auto 0 0;
+  z-index: var(--z-menu);
+  padding: 20px max(16px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  background: linear-gradient(180deg, transparent, oklch(0.13 0.022 255 / 0.92) 45%);
+  transform: translateY(110%);
+  visibility: hidden;
+  transition: transform 300ms var(--ease-cc), visibility 0s linear 300ms;
+}
+.lp-cta-fixo[data-visivel] { transform: none; visibility: visible; transition: transform 300ms var(--ease-cc); }
+.lp-cta-fixo .lp-btn { min-height: 48px; }
