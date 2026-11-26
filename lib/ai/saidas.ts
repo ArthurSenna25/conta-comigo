@@ -66,7 +66,7 @@ const Contexto = z.object({
 const TERMOS_CHAT = new Set((
   "qual quais quanto quantos como quando porque o a os as de do da das dos em no na para por se um uma e ou " +
   "meu minha meus minhas seu eu voce minha loja negocio painel cadastro limite teto anual proporcional receita receitas bruta " +
-  "faturamento faturar faturei registrei registrado despesas gastei gastos saldo mes mensal ano anos atual este " +
+  "faturamento faturar faturei registrei registrado despesas gastei gastos saldo mes mensal ano anos atual este ainda posso " +
   "abri abriu abertura inicio atividade atividades comeco primeiro ultimo dia janeiro fevereiro marco abril maio junho julho " +
   "agosto setembro outubro novembro dezembro integral incompleto conta inteiro seguinte retroage retroativo " +
   "mei comum caminhoneiro transportador excesso exceder excedi ultrapassar ultrapassei passei acima abaixo ate mais menos vinte cento " +
@@ -105,21 +105,31 @@ export function lerChat(json: unknown, { dashboard, perfil, kb }: ContextoChat):
   const saida = SelecaoChat.safeParse(json);
   if (!saida.success) throw new ErroIa("resposta");
   const { referencias, indicador } = saida.data;
-  const trechos = [...new Set(referencias)].map((indice) => {
+  let trechos = [...new Set(referencias)].map((indice) => {
     const trecho = kb[indice];
     if (!trecho) throw new ErroIa("resposta");
     return trecho;
   });
   const { resumoMes, limiteMei, proximoDas } = dashboard;
+  const ano = resumoMes.mes.slice(0, 4);
+  const arquivoLimite = perfil.dataAbertura.startsWith(ano) ? "kb/limite-proporcional.md" : "kb/limite-mei.md";
+  const arquivosFiscais = { limite: arquivoLimite, das: "kb/das-mei.md", vencimento: "kb/vencimento-das.md", resumo: null };
+  const arquivoFiscal = perfil.ehMei && indicador ? arquivosFiscais[indicador] : null;
+  const fonteIndicador = kb.find(({ fonte }) => fonte.url && fonte.arquivo === arquivoFiscal);
+  if (fonteIndicador && indicador === "limite") {
+    const outraRegra = arquivoLimite === "kb/limite-mei.md" ? "kb/limite-proporcional.md" : "kb/limite-mei.md";
+    trechos = trechos.filter(({ fonte }) => fonte.arquivo !== outraRegra);
+  }
+  if (fonteIndicador && !trechos.includes(fonteIndicador)) trechos.unshift(fonteIndicador);
   const partes = trechos.map(({ texto }) => texto);
   if (indicador === "resumo") {
     partes.unshift(`No mês ${resumoMes.mes}, suas receitas somam ${reais(resumoMes.receitaCentavos)}, as despesas somam ${reais(resumoMes.despesaCentavos)} e o saldo é de ${reais(resumoMes.saldoCentavos)}.`);
   }
-  if (perfil.ehMei && indicador === "limite") {
+  if (fonteIndicador && indicador === "limite") {
     partes.unshift(`No ano, você registrou ${reais(limiteMei.usadoCentavos)} em receitas. O limite do seu cadastro é ${reais(limiteMei.limiteCentavos)}.`);
   }
-  if (perfil.ehMei && indicador === "das") partes.unshift(`O valor ordinário do próximo DAS no seu painel é ${reais(proximoDas.valorCentavos)}.`);
-  if (perfil.ehMei && indicador === "vencimento") {
+  if (fonteIndicador && indicador === "das") partes.unshift(`O valor ordinário do próximo DAS no seu painel é ${reais(proximoDas.valorCentavos)}.`);
+  if (fonteIndicador && indicador === "vencimento") {
     partes.unshift(`O próximo vencimento ordinário do DAS no seu painel é ${proximoDas.vencimento.split("-").reverse().join("/")}.`);
   }
   if (!trechos.length) {
