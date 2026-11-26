@@ -244,6 +244,7 @@ export function criarGeminiProvider(opcoes: OpcoesGemini = {}): AiProvider {
     },
     async responder(mensagens, contexto) {
       const preparado = prepararChat(mensagens, contexto);
+      if (preparado.orientacao) return { resultado: { resposta: preparado.orientacao, fontes: [] }, custoCentavos: 0 };
       if (preparado.periodoDiferente) {
         const resultado = lerChat({ indicador: null, referencias: [] }, preparado.contexto);
         return { resultado, custoCentavos: 0 };
