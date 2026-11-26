@@ -7,7 +7,8 @@ export function FaixaDemo({ demo }: { demo: boolean }) {
   return (
     <div
       role="note"
-      className="sticky top-0 z-50 border-b border-amber-700 bg-amber-100 px-4 py-2 text-center text-sm font-medium text-amber-950"
+      // Uma linha a partir de 360px: 12px (13px a partir de 390) com tracking levemente fechado; abaixo disso quebra em vez de cortar.
+      className="sticky top-0 z-50 border-b border-amber-700 bg-amber-100 px-3 py-1.5 text-center text-xs leading-5 font-medium tracking-[-0.015em] text-amber-950 xs:text-[13px]"
     >
       Conta de demonstração: dados fictícios, não envie dados reais.
     </div>
