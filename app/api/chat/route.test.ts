@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "@/app/api/chat/route";
 import { ErroIa } from "@/lib/ai/erro";
 import { mockChat, mockPerfil, mockDashboard } from "@/lib/contracts/mocks";
-import { respostaErro } from "@/lib/security/portao-api";
+import { MENSAGEM_IA_SOMENTE_DEMO, respostaErro } from "@/lib/security/portao-api";
 
 const d = vi.hoisted(() => ({ acesso: vi.fn(), contexto: vi.fn(), kb: vi.fn(), reservar: vi.fn(), responder: vi.fn() }));
 vi.mock("@/actions/portao-api", () => ({ exigirAcessoApi: d.acesso }));
@@ -69,8 +69,12 @@ describe("POST /api/chat", () => {
 
   it("protege perfis reais na operação gratuita", async () => {
     d.acesso.mockResolvedValue({ ...acesso, demo: false });
-    expect((await POST(req())).status).toBe(403);
+    const res = await POST(req());
+    expect(res.status).toBe(403);
+    expect(await res.json()).toEqual({ erro: { codigo: "proibido", mensagem: MENSAGEM_IA_SOMENTE_DEMO } });
     expect(d.contexto).not.toHaveBeenCalled();
+    expect(d.responder).not.toHaveBeenCalled();
+    expect(d.reservar).not.toHaveBeenCalled();
   });
 
   it.each([

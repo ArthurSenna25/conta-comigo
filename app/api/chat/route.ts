@@ -5,7 +5,7 @@ import { reservarTentativa } from "@/app/api/ingest/reserva";
 import { criarGeminiProvider, ErroIa } from "@/lib/ai/gemini";
 import { ChatRequest, ChatResponse } from "@/lib/contracts";
 import { mockAiProvider, mockDashboard, mockPerfil } from "@/lib/contracts/mocks";
-import { respostaErro } from "@/lib/security/portao-api";
+import { MENSAGEM_IA_SOMENTE_DEMO, respostaErro } from "@/lib/security/portao-api";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -40,10 +40,10 @@ async function lerPedido(req: Request): Promise<unknown> {
 export async function POST(req: Request): Promise<Response> {
   const acesso = await exigirAcessoApi(req, { ia: true });
   if (acesso instanceof Response) return acesso;
+  // O Free só pode receber dados sintéticos. A conta é identificada por claims verificadas.
+  if (!acesso.mock && !acesso.demo) return respostaErro("proibido", MENSAGEM_IA_SOMENTE_DEMO);
   const entrada = ChatRequest.safeParse(await lerPedido(req));
   if (!entrada.success) return respostaErro("invalido");
-  // O Free só pode receber dados sintéticos. A conta é identificada por claims verificadas.
-  if (!acesso.mock && !acesso.demo) return respostaErro("proibido");
 
   let etapa: "contexto" | "resposta" = "contexto";
   const inicio = performance.now();
