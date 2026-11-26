@@ -4,6 +4,12 @@
 
 ## Configuração e validação
 
+### Diagnóstico na Vercel
+
+Em **Production**, confira a presença de `AI_API_KEY` (ou `GEMINI_API_KEY`), `AI_PROVIDER=gemini`, `AI_GEMINI_FREE_TIER_CONFIRMED=true` e, para fixar o modelo oficial, `AI_MODEL=gemini-3.5-flash-lite` (ou `GEMINI_MODEL`). As variáveis `AI_*` preenchidas têm precedência sobre os aliases. Use apenas uma chave de servidor vinculada ao projeto Free confirmado no AI Studio. A Vercel aplica alterações de variáveis ao próximo deploy. [Variáveis na Vercel](https://vercel.com/docs/environment-variables/managing-environment-variables)
+
+Nos Runtime Logs, filtre o POST de `/api/chat` e procure `gemini_falha`. O evento contém operação, etapa, modelo aprovado, tentativa, status HTTP, motivo e duração. `chave_ausente`, `provedor_nao_configurado`, `free_nao_confirmado` e `modelo_invalido` falham antes do SDK. `modelo_indisponivel` identifica HTTP 404 do SDK. Em `etapa=reserva`, confira `SUPABASE_SECRET_KEY`, a função `reservar_uso_ia` e os limites `AI_DAILY_CALLS_GLOBAL`, `AI_DAILY_CALLS_USER`, `DEMO_AI_DAILY_CALLS` e `AI_DAILY_BUDGET_CENTS`. Se houver `chat_falha` em `etapa=contexto`, investigue a leitura do banco ou da base jurídica. Valide pelo menos uma pergunta sintética da demo após o deploy autorizado.
+
 - Use Node 24 e pnpm 12.23.0. Rode `pnpm install --frozen-lockfile`, `pnpm check` e `pnpm dev`. Para build com a flag local de mock, rode `$env:NEXT_PUBLIC_USE_MOCKS='false'; pnpm build` em uma sessão PowerShell separada.
 - Para o modo mock local, use `NEXT_PUBLIC_USE_MOCKS=true`. O resultado é o fixture compartilhado. Em produção a porta de mock bloqueia essa configuração.
 - Para o Gemini, configure no servidor `AI_PROVIDER=gemini`, `AI_API_KEY` e `AI_GEMINI_FREE_TIER_CONFIRMED=true` depois de verificar o plano **Free** do projeto no AI Studio. `AI_MODEL` é opcional e aceita `gemini-3.5-flash-lite` ou `gemini-3.6-flash`. A escolha é explícita e cada processo usa um modelo, sem fallback. A declaração de plano é operacional. O catálogo confirma acesso ao modelo e o painel confirma faturamento e cotas por projeto. [Faturamento](https://aistudio.google.com/docs/billing) · [Cotas](https://aistudio.google.com/rate-limit) · [Preços do 3.6 Flash](https://aistudio.google.com/docs/pricing#gemini-3.6-flash)

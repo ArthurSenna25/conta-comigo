@@ -1,11 +1,12 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { criarGeminiProvider } from "@/lib/ai/gemini";
 import { mockDashboard, mockPerfil } from "@/lib/contracts/mocks";
 
-const { gerar } = vi.hoisted(() => ({ gerar: vi.fn() }));
+const { gerar, inicializar } = vi.hoisted(() => ({ gerar: vi.fn(), inicializar: vi.fn() }));
 vi.mock("server-only", () => ({}));
 vi.mock("@google/genai", () => ({
   GoogleGenAI: class {
+    constructor(opcoes: unknown) { inicializar(opcoes); }
     models = { generateContent: gerar };
   },
 }));
@@ -28,11 +29,66 @@ beforeEach(() => {
   vi.stubEnv("AI_PROVIDER", "gemini");
   vi.stubEnv("AI_API_KEY", "chave-de-teste");
   vi.stubEnv("AI_MODEL", "gemini-3.5-flash-lite");
+  vi.stubEnv("GEMINI_API_KEY", "");
+  vi.stubEnv("GEMINI_MODEL", "");
   vi.stubEnv("AI_GEMINI_FREE_TIER_CONFIRMED", "true");
   gerar.mockReset().mockResolvedValue(resposta(resultado));
 });
 
+afterEach(() => {
+  vi.restoreAllMocks();
+  vi.unstubAllEnvs();
+});
+
 describe("Gemini", () => {
+  it("aceita aliases da Vercel sem relaxar a confirmação Free", async () => {
+    vi.stubEnv("AI_API_KEY", "");
+    vi.stubEnv("AI_MODEL", "");
+    vi.stubEnv("GEMINI_API_KEY", "chave-alias-de-teste");
+    vi.stubEnv("GEMINI_MODEL", "gemini-3.5-flash-lite");
+    await expect(criarGeminiProvider().extrair(entrada, hoje)).resolves.toMatchObject({ resultado });
+    expect(inicializar).toHaveBeenCalledWith(expect.objectContaining({ apiKey: "chave-alias-de-teste" }));
+    vi.stubEnv("AI_GEMINI_FREE_TIER_CONFIRMED", "");
+    await expect(criarGeminiProvider().extrair(entrada, hoje)).rejects.toMatchObject({ motivo: "configuracao" });
+    expect(gerar).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    ["AI_API_KEY", "", "chave_ausente"],
+    ["AI_PROVIDER", "", "provedor_nao_configurado"],
+    ["AI_GEMINI_FREE_TIER_CONFIRMED", "", "free_nao_confirmado"],
+    ["AI_MODEL", "texto-inseguro-no-modelo", "modelo_invalido"],
+  ])("diagnostica configuração %s sem expor valores ou chamar o SDK", async (nome, valor, motivo) => {
+    vi.stubEnv(nome, valor);
+    const log = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const reservar = vi.fn();
+    await expect(criarGeminiProvider({ antesDaChamada: reservar }).extrair(entrada, hoje)).rejects.toMatchObject({ status: 503 });
+    expect(gerar).not.toHaveBeenCalled();
+    expect(reservar).not.toHaveBeenCalled();
+    expect(JSON.parse(log.mock.calls[0][0])).toMatchObject({ evento: "gemini_falha", etapa: "configuracao",
+      motivo, operacao: "extracao", tentativa: null, statusHttp: null, duracaoMs: expect.any(Number) });
+    expect(log.mock.calls.flat().join()).not.toMatch(/chave-de-teste|texto-inseguro-no-modelo|1200/);
+  });
+
+  it.each([
+    [404, "modelo_indisponivel"], [401, "autenticacao"], [429, "cota_provedor"], [503, "indisponivel"],
+    [504, "tempo"],
+  ])("diagnostica HTTP %i de modo sanitizado", async (status, motivo) => {
+    const log = vi.spyOn(console, "warn").mockImplementation(() => {});
+    gerar.mockRejectedValue(Object.assign(new Error("SEGREDO-EM-EXCECAO"), { status }));
+    await expect(criarGeminiProvider().extrair(entrada, hoje)).rejects.toBeDefined();
+    expect(JSON.parse(log.mock.calls[0][0])).toMatchObject({ etapa: "provedor", motivo, statusHttp: status, tentativa: 1 });
+    expect(log.mock.calls.flat().join()).not.toContain("SEGREDO-EM-EXCECAO");
+  });
+
+  it("distingue uma falha de reserva antes da chamada externa", async () => {
+    const log = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const antesDaChamada = vi.fn().mockRejectedValue(new Error("DADO-DO-BANCO"));
+    await expect(criarGeminiProvider({ antesDaChamada }).extrair(entrada, hoje)).rejects.toMatchObject({ motivo: "controle" });
+    expect(JSON.parse(log.mock.calls[0][0])).toMatchObject({ etapa: "reserva", motivo: "controle", statusHttp: null });
+    expect(gerar).not.toHaveBeenCalled();
+    expect(log.mock.calls.flat().join()).not.toContain("DADO-DO-BANCO");
+  });
   it("transporta dado e instrução em campos separados, solicita JSON, valida a saída e informa uso", async () => {
     const aoMedir = vi.fn();
     const antesDaChamada = vi.fn();
