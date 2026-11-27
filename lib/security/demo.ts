@@ -90,3 +90,18 @@ export function decidirSeed(existente: unknown): "criar" | "recriar" | "abortar"
   if (existente === undefined) return "criar";
   return ehContaDemo(existente) ? "recriar" : "abortar";
 }
+
+/**
+ * Teto de caracteres do texto enviado à IA pela demo (AMEACAS #22). O contrato aceita 2.000 no ingest e
+ * 1.000 por pergunta no chat; na demo pública, que vai ao Gemini Free, 280 bastam para um lançamento
+ * ("recebi 120 do corte da Maria hoje") ou uma dúvida, e encurtam o que um visitante consegue colar ali.
+ */
+export const TEXTO_IA_DEMO_MAX = 280;
+export const MENSAGEM_IA_DEMO_SO_TEXTO = "Na demonstração, a IA aceita apenas texto.";
+export const MENSAGEM_IA_DEMO_TEXTO_LONGO = `Na demonstração, escreva até ${TEXTO_IA_DEMO_MAX} caracteres.`;
+
+/** Recusa da entrada de IA da demo: só texto e até TEXTO_IA_DEMO_MAX. `null` = pode seguir. */
+export function recusaEntradaIaDemo(entrada: { kind: string; texto?: string }): string | null {
+  if (entrada.kind !== "texto") return MENSAGEM_IA_DEMO_SO_TEXTO;
+  return (entrada.texto ?? "").length > TEXTO_IA_DEMO_MAX ? MENSAGEM_IA_DEMO_TEXTO_LONGO : null;
+}

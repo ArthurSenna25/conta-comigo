@@ -5,6 +5,7 @@ import { reservarTentativa } from "@/app/api/ingest/reserva";
 import { criarGeminiProvider, ErroIa } from "@/lib/ai/gemini";
 import { ChatRequest, ChatResponse } from "@/lib/contracts";
 import { mockAiProvider, mockDashboard, mockPerfil } from "@/lib/contracts/mocks";
+import { MENSAGEM_IA_DEMO_TEXTO_LONGO, TEXTO_IA_DEMO_MAX } from "@/lib/security/demo";
 import { MENSAGEM_IA_SOMENTE_DEMO, respostaErro } from "@/lib/security/portao-api";
 
 export const runtime = "nodejs";
@@ -44,6 +45,10 @@ export async function POST(req: Request): Promise<Response> {
   if (!acesso.mock && !acesso.demo) return respostaErro("proibido", MENSAGEM_IA_SOMENTE_DEMO);
   const entrada = ChatRequest.safeParse(await lerPedido(req));
   if (!entrada.success) return respostaErro("invalido");
+  // Demo pública no Free (AMEACAS #22): cada pergunta com o mesmo teto de texto do /api/ingest.
+  if (acesso.demo && !acesso.mock && entrada.data.mensagens.some((m) => m.conteudo.length > TEXTO_IA_DEMO_MAX)) {
+    return respostaErro("invalido", MENSAGEM_IA_DEMO_TEXTO_LONGO);
+  }
 
   let etapa: "contexto" | "resposta" = "contexto";
   const inicio = performance.now();

@@ -13,6 +13,10 @@ export default async function PaginaEntrar({ searchParams }: PageProps<"/entrar"
         <h1 className="text-2xl font-semibold">Entrar</h1>
         <p className="text-sm text-muted-foreground">Bem-vindo de volta ao Conta Comigo.</p>
       </header>
+      <section aria-label="Demonstração" className="flex flex-col gap-2 rounded-xl border border-line-strong bg-s2 p-4">
+        <p className="text-sm text-t2">Durante a avaliação, a IA só funciona na conta demo.</p>
+        <BotaoDemo />
+      </section>
       {/* A action valida o destino (destinoSeguro): aqui ele só viaja no formulário. */}
       <FormEntrar next={typeof next === "string" ? next : ""} />
       <p className="text-sm">
@@ -21,7 +25,6 @@ export default async function PaginaEntrar({ searchParams }: PageProps<"/entrar"
           Criar conta
         </Link>
       </p>
-      <BotaoDemo />
     </>
   );
 }

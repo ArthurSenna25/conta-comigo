@@ -5,7 +5,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { BOTAO } from "@/components/botao";
+import { AvisoIaDemo, ehRecusaSomenteDemo, SaidasIaSomenteDemo } from "@/components/demo/ia-demo";
 import { EstadoErro } from "@/components/estado-erro";
+import { TEXTO_IA_DEMO_MAX } from "@/lib/security/demo";
 import { RODAPE_FLUXO, useFluxo } from "@/app/(app)/fluxo-lancamento";
 import { mensagemSemResposta, podeEnviarTexto, resultadoDaLeitura, TEMPO_MAX_LEITURA_MS } from "./leitura";
 
@@ -16,7 +18,7 @@ type Falha = { status?: number; mensagem: string };
 type Etapa = { tipo: "escrever"; falha?: Falha } | { tipo: "lendo" } | { tipo: "erro"; codigo: "503" | "429" };
 
 /** /adicionar só com texto (04 § /adicionar e § Estado Lendo). Foto, áudio e print entram em outra etapa. */
-export function Adicionar() {
+export function Adicionar({ demo }: { demo: boolean }) {
   const router = useRouter();
   const [, despachar] = useFluxo();
   const [texto, setTexto] = useState("");
@@ -110,13 +112,14 @@ export function Adicionar() {
             ref={campo}
             id="texto-adicionar"
             rows={3}
-            maxLength={TEXTO_MAX}
+            maxLength={demo ? TEXTO_IA_DEMO_MAX : TEXTO_MAX}
             value={texto}
             onChange={(e) => setTexto(e.target.value)}
             placeholder="recebi 120 do corte da Maria hoje"
-            aria-describedby={etapa.falha ? "falha-adicionar" : undefined}
+            aria-describedby={[demo && "aviso-ia-demo", etapa.falha && "falha-adicionar"].filter(Boolean).join(" ") || undefined}
             className="resize-none rounded-2xl border border-line-strong bg-s2 px-4 py-3 text-[17px] leading-[1.45] text-t1 placeholder:text-t3 focus:border-ring focus:shadow-[0_0_0_4px_var(--ring-halo)] focus:outline-none"
           />
+          <AvisoIaDemo demo={demo} id="aviso-ia-demo" />
         </div>
 
         {etapa.falha && <AvisoFalha falha={etapa.falha} onTentar={() => void enviar()} podeTentar={liberado} />}
@@ -167,7 +170,7 @@ function OpcaoEmBreve({ rotulo, Icone }: { rotulo: string; Icone: LucideIcon }) 
 }
 
 /** Falha que não é 429/503: mensagem da rota e o caminho que resolve. "Preencher na mão" fica no rodapé. */
-function AvisoFalha({ falha, onTentar, podeTentar }: { falha: Falha; onTentar: () => void; podeTentar: boolean }) {
+export function AvisoFalha({ falha, onTentar, podeTentar }: { falha: Falha; onTentar: () => void; podeTentar: boolean }) {
   return (
     <div
       id="falha-adicionar"
@@ -176,7 +179,9 @@ function AvisoFalha({ falha, onTentar, podeTentar }: { falha: Falha; onTentar: (
       style={{ background: "color-mix(in oklch, var(--err) 10%, var(--s1))", borderColor: "color-mix(in oklch, var(--err) 50%, transparent)" }}
     >
       <p className="text-[15px] font-semibold text-t1 text-pretty">{falha.mensagem}</p>
-      {falha.status === 401 ? (
+      {ehRecusaSomenteDemo(falha) ? (
+        <SaidasIaSomenteDemo hrefManual={MANUAL} />
+      ) : falha.status === 401 ? (
         <Link href="/entrar?next=%2Fadicionar" className={`${BOTAO.fantasma} self-start`}>
           Entrar novamente
         </Link>

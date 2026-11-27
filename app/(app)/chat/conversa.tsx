@@ -5,7 +5,9 @@ import { ArrowUp, Sparkles } from "lucide-react";
 import { useEffect, useLayoutEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { BOTAO } from "@/components/botao";
 import { ChipFonte, fonteValida } from "@/components/chip-fonte";
+import { AvisoIaDemo, ehRecusaSomenteDemo, SaidasIaSomenteDemo } from "@/components/demo/ia-demo";
 import type { ChatResponse } from "@/lib/contracts";
+import { TEXTO_IA_DEMO_MAX } from "@/lib/security/demo";
 import { enviarPergunta } from "./requisicao";
 
 const SUGESTOES = ["Qual é o meu limite?", "Quando vence o DAS?", "E se eu passar do limite?"];
@@ -60,7 +62,7 @@ function Fontes({ fontes }: { fontes: ChatResponse["fontes"] }) {
   );
 }
 
-export function Conversa() {
+export function Conversa({ demo }: { demo: boolean }) {
   const [historico, setHistorico] = useState<Troca[]>([]);
   const [rascunho, setRascunho] = useState("");
   const [pendente, setPendente] = useState<string | null>(null);
@@ -151,29 +153,17 @@ export function Conversa() {
           ))}
           {pendente && <Pergunta texto={pendente} />}
         </div>
-        {falha && (
-          <div className="rounded-xl border border-line-strong bg-s2 p-4">
-            <p role="alert" className="text-sm font-medium text-t1">{falha.mensagem}</p>
-            {falha.status === 403 && <p className="mt-1 text-sm text-t2">Confira seu acesso à demo e o consentimento para uso da IA.</p>}
-            {falha.status !== 401 && falha.status !== 403 && (
-              <p className="mt-1 text-sm text-t2">Se precisar registrar uma receita ou despesa, volte ao painel para continuar pelo fluxo de lançamentos.</p>
-            )}
-            <div className="mt-2 flex flex-wrap items-center gap-2">
-              {falha.status === 401 ? <Link href="/entrar?next=%2Fchat" className={BOTAO.fantasma}>Entrar novamente</Link> :
-                falha.status === 403 ? <Link href="/consentimento" className={BOTAO.fantasma}>Conferir consentimento</Link> :
-                  <button type="button" onClick={() => void enviar(rascunho)} disabled={!rascunho.trim()} className={BOTAO.fantasma}>Tentar novamente</button>}
-              <Link href="/painel" className={BOTAO.fantasma}>Continuar no painel</Link>
-            </div>
-          </div>
-        )}
+        {falha && <FalhaChat falha={falha} podeTentar={!!rascunho.trim()} onTentar={() => void enviar(rascunho)} />}
       </section>
       <form ref={form} onSubmit={aoEnviar} className="shrink-0 border-t border-line bg-bg pt-2">
         <p role="status" className={pendente ? "mb-2 text-sm font-medium text-acc-ink" : "sr-only"}>
           {pendente ? "Preparando a resposta…" : ""}
         </p>
         <label htmlFor="pergunta-chat" className="mb-2 block text-sm font-semibold">Sua pergunta</label>
+        {demo && <div className="mb-2"><AvisoIaDemo demo id="aviso-ia-demo" /></div>}
         <div className="flex items-end gap-2">
-          <textarea id="pergunta-chat" value={rascunho} maxLength={LIMITE_PERGUNTA} rows={2}
+          <textarea id="pergunta-chat" value={rascunho} maxLength={demo ? TEXTO_IA_DEMO_MAX : LIMITE_PERGUNTA} rows={2}
+            aria-describedby={demo ? "aviso-ia-demo" : undefined}
             placeholder="Escreva sua dúvida" readOnly={pendente !== null}
             onChange={(evento) => setRascunho(evento.target.value)}
             onKeyDown={(evento) => {
@@ -190,6 +180,27 @@ export function Conversa() {
         </div>
       </form>
     </>
+  );
+}
+
+/** Falha do chat. A recusa "IA só na demo" mostra a mensagem do servidor e o caminho para a demo. */
+export function FalhaChat({ falha, podeTentar, onTentar }: { falha: Falha; podeTentar: boolean; onTentar: () => void }) {
+  const somenteDemo = ehRecusaSomenteDemo(falha);
+  return (
+    <div className="rounded-xl border border-line-strong bg-s2 p-4">
+      <p role="alert" className="text-sm font-medium text-t1">{falha.mensagem}</p>
+      {falha.status === 403 && !somenteDemo && <p className="mt-1 text-sm text-t2">Confira seu acesso à demo e o consentimento para uso da IA.</p>}
+      {falha.status !== 401 && falha.status !== 403 && (
+        <p className="mt-1 text-sm text-t2">Se precisar registrar uma receita ou despesa, volte ao painel para continuar pelo fluxo de lançamentos.</p>
+      )}
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        {somenteDemo ? <SaidasIaSomenteDemo /> :
+          falha.status === 401 ? <Link href="/entrar?next=%2Fchat" className={BOTAO.fantasma}>Entrar novamente</Link> :
+            falha.status === 403 ? <Link href="/consentimento" className={BOTAO.fantasma}>Conferir consentimento</Link> :
+              <button type="button" onClick={onTentar} disabled={!podeTentar} className={BOTAO.fantasma}>Tentar novamente</button>}
+        <Link href="/painel" className={BOTAO.fantasma}>Continuar no painel</Link>
+      </div>
+    </div>
   );
 }
 

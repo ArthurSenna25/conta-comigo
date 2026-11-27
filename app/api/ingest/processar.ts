@@ -3,6 +3,7 @@ import { mockAiProvider } from "@/lib/contracts/mocks";
 import { criarGeminiProvider, ErroIa, type TentativaIa } from "@/lib/ai/gemini";
 import { validarMidia } from "@/lib/ai/midia";
 import type { AcessoApi } from "@/actions/portao-api";
+import { recusaEntradaIaDemo } from "@/lib/security/demo";
 import { ErroIngestao, lerEntrada } from "./entrada";
 
 /** Reserva UMA chamada por tentativa (ver `reserva.ts`), inclusive em concorrência e com custo zero. */
@@ -20,12 +21,14 @@ const calendario = new Intl.DateTimeFormat("en-CA", {
 export function criarProcessarIngestao(reservar?: ReservarTentativa) {
   return async function processar(request: Request, acesso: AcessoApi): Promise<Response> {
     try {
-      let provider = mockAiProvider;
-      if (!acesso.mock) {
-        if (!reservar) throw new ErroIa("controle");
-        provider = criarGeminiProvider({ antesDaChamada: (t) => reservar(acesso, t) });
-      }
+      if (!acesso.mock && !reservar) throw new ErroIa("controle");
       const entrada = await lerEntrada(request);
+      // Demo pública no Free (AMEACAS #22): só texto curto. Recusa antes do provedor e da reserva.
+      const recusa = acesso.demo && !acesso.mock ? recusaEntradaIaDemo(entrada) : null;
+      if (recusa) throw new ErroIngestao(400, "invalido", recusa);
+      const provider = acesso.mock || !reservar
+        ? mockAiProvider
+        : criarGeminiProvider({ antesDaChamada: (t) => reservar(acesso, t) });
       if (acesso.mock) await validarMidia(entrada);
       const { resultado } = await provider.extrair(entrada, calendario.format(new Date()));
       const saida = IngestResponse.safeParse(resultado);

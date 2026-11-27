@@ -26,7 +26,7 @@ export default async function PaginaChat() {
           </div>
           <p className="text-sm text-t2 group-data-[compacto=true]/chat:hidden">Orientação sobre seu MEI e seu painel. Para decisões fiscais, consulte um contador.</p>
         </header>
-        <Conversa />
+        <Conversa demo={demo} />
       </main>
     </JanelaChat>
   );
