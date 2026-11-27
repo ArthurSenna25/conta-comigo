@@ -16,7 +16,7 @@ export type AcaoFluxo =
 
 /** Rodapé de ação fixo das telas de fluxo (04 § Estrutura comum: padding 12 20 34), acima do indicador home. */
 export const RODAPE_FLUXO =
-  "sticky bottom-0 z-[var(--z-content)] flex flex-col gap-3 border-t border-line bg-[oklch(0.16_0.025_255/0.85)] px-5 pt-3 " +
+  "sticky bottom-0 z-[var(--z-content)] flex flex-col gap-3 border-t border-line bg-[oklch(0.16_0.025_255/0.96)] px-5 pt-3 " +
   "pb-[max(34px,calc(14px+env(safe-area-inset-bottom)))] backdrop-blur-[12px]";
 
 export const FLUXO_INICIAL: EstadoFluxo = { rascunhos: null, aviso: null };

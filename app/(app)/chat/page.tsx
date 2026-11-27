@@ -18,7 +18,8 @@ export default async function PaginaChat() {
           <Link href="/painel" className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-acc-ink no-underline">
             <ArrowLeft size={16} aria-hidden="true" /> Voltar ao painel
           </Link>
-          <div className="flex items-center gap-3">
+          {/* Teclado aberto (compacto): o título sai da vista e fica só para leitor de tela; a conversa ganha a altura. */}
+          <div className="flex items-center gap-3 group-data-[compacto=true]/chat:sr-only">
             <span className="grid size-11 shrink-0 place-items-center rounded-xl border border-line bg-s2 text-acc-ink">
               <MessageCircle size={22} aria-hidden="true" />
             </span>

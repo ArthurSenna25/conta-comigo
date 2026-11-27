@@ -60,12 +60,17 @@ function Conteudo({ dados, hoje, demo }: { dados: DashboardResponse; hoje: strin
     adicionarAtivo: ADICIONAR.ativo,
   });
 
+  // Atenção e crítico ficam logo abaixo do limite; os informativos descem para depois do DAS e não competem com ele.
+  const urgentes = alertas.filter((a) => a.severidade !== "info");
+  const informativos = alertas.filter((a) => a.severidade === "info");
+
   return (
     <>
       <Heroi limite={limiteMei} ano={hoje.slice(0, 4)} vazio={vazio} demo={demo} />
-      {alertas.length > 0 && <Alertas alertas={alertas} />}
+      {urgentes.length > 0 && <Alertas alertas={urgentes} />}
       <ProximoPasso {...passo} />
       {!vazio && <CartaoDas vencimento={proximoDas.vencimento} valorCentavos={proximoDas.valorCentavos} hoje={hoje} />}
+      {informativos.length > 0 && <Alertas alertas={informativos} />}
       <Resumo resumo={resumoMes} />
     </>
   );
@@ -104,21 +109,31 @@ function Heroi({ limite, ano, vazio, demo }: { limite: DashboardResponse["limite
   );
 }
 
-/** Cor por severidade: atenção e crítico seguem os cartões de alerta do handoff (itens 4 e 5); info usa o acento. */
-const COR_SEVERIDADE: Record<Severidade, CSSProperties> = {
-  info: { background: "var(--acc-a10)", borderColor: "var(--acc-a40)" },
-  atencao: { background: "color-mix(in oklch, var(--warn) 11%, var(--s1))", borderColor: "color-mix(in oklch, var(--warn) 50%, transparent)" },
-  critico: { background: "color-mix(in oklch, var(--err) 12%, var(--s1))", borderColor: "color-mix(in oklch, var(--err) 55%, transparent)" },
+/** Cor por severidade: atenção e crítico seguem os cartões de alerta do handoff (itens 4 e 5); info fica neutro, só com o ponto no acento. */
+const COR_SEVERIDADE: Record<Severidade, { cartao: CSSProperties; ponto: string }> = {
+  info: { cartao: { background: "var(--card-solid)", borderColor: "var(--line)" }, ponto: "var(--acc)" },
+  atencao: {
+    cartao: { background: "color-mix(in oklch, var(--warn) 11%, var(--s1))", borderColor: "color-mix(in oklch, var(--warn) 50%, transparent)" },
+    ponto: "var(--warn)",
+  },
+  critico: {
+    cartao: { background: "color-mix(in oklch, var(--err) 12%, var(--s1))", borderColor: "color-mix(in oklch, var(--err) 55%, transparent)" },
+    ponto: "var(--err)",
+  },
 };
 
+/** Cartões compactos: título e mensagem em corpo menor que o limite e o DAS, para não disputar a hierarquia. */
 function Alertas({ alertas }: { alertas: DashboardResponse["alertas"] }) {
   return (
     <section aria-label="Alertas">
-      <ul className="flex flex-col gap-3">
+      <ul className="flex flex-col gap-2">
         {alertas.map((a) => (
-          <li key={a.chave} className="flex flex-col gap-1 rounded-[18px] border px-4 py-3.5" style={COR_SEVERIDADE[a.severidade]}>
-            <p className="text-base font-bold text-pretty">{a.titulo}</p>
-            <p className="text-[15px] text-t2 text-pretty">{a.mensagem}</p>
+          <li key={a.chave} className="flex gap-3 rounded-2xl border px-4 py-3" style={COR_SEVERIDADE[a.severidade].cartao}>
+            <span aria-hidden="true" className="mt-[7px] size-2 shrink-0 rounded-full" style={{ background: COR_SEVERIDADE[a.severidade].ponto }} />
+            <div className="flex min-w-0 flex-col gap-0.5">
+              <p className="text-[15px] leading-snug font-bold text-pretty">{a.titulo}</p>
+              <p className="text-sm leading-snug text-t2 text-pretty">{a.mensagem}</p>
+            </div>
           </li>
         ))}
       </ul>

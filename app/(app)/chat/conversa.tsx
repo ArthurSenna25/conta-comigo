@@ -162,8 +162,8 @@ export function Conversa({ demo }: { demo: boolean }) {
         <p role="status" className={pendente ? "mb-2 text-sm font-medium text-acc-ink" : "sr-only"}>
           {pendente ? "Preparando a resposta…" : ""}
         </p>
-        <label htmlFor="pergunta-chat" className="mb-2 block text-sm font-semibold">Sua pergunta</label>
-        {demo && <div className="mb-2"><AvisoIaDemo demo id="aviso-ia-demo" /></div>}
+        <label htmlFor="pergunta-chat" className="mb-2 block text-sm font-semibold group-data-[compacto=true]/chat:sr-only">Sua pergunta</label>
+        {demo && <div className="mb-2 group-data-[compacto=true]/chat:mb-1.5 group-data-[compacto=true]/chat:[&>p]:py-1.5 group-data-[compacto=true]/chat:[&>p]:text-xs"><AvisoIaDemo demo id="aviso-ia-demo" /></div>}
         <div className="flex items-end gap-2">
           <textarea id="pergunta-chat" value={rascunho} maxLength={demo ? TEXTO_IA_DEMO_MAX : LIMITE_PERGUNTA} rows={2}
             aria-describedby={demo ? "aviso-ia-demo" : undefined}
@@ -181,7 +181,7 @@ export function Conversa({ demo }: { demo: boolean }) {
             <ArrowUp size={24} aria-hidden="true" />
           </button>
         </div>
-        <p className="mt-2 text-xs text-t3">A IA pode cometer erros. Confira informações importantes na fonte ou com um contador.</p>
+        <p className="mt-2 text-xs text-t3 group-data-[compacto=true]/chat:mt-1 group-data-[compacto=true]/chat:leading-4">A IA pode cometer erros. Confira informações importantes na fonte ou com um contador.</p>
       </form>
     </>
   );
