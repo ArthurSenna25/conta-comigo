@@ -25,6 +25,12 @@ describe("Simulacao", () => {
     expect(html).toContain(ROTULO_SIMULACAO);
   });
 
+  it("depois de Recomeçar o foco vai para o Escrever", () => {
+    const recomecado = rodar("escrever", "enviar", "rascunhoPronto", "confirmar", "recomecar");
+    const html = renderToStaticMarkup(<Simulacao aoFechar={nada} inicial={recomecado} />);
+    expect(html).toMatch(/<button[^>]*autofocus=""[^>]*>Escrever</);
+  });
+
   it("nenhuma etapa chama a rede", () => {
     const fetch = vi.fn();
     vi.stubGlobal("fetch", fetch);

@@ -115,19 +115,27 @@ function Adicionar() {
       <span className="num text-[30px] leading-[1.1] font-extrabold tracking-[-0.02em]">O que entrou ou saiu?</span>
       <span className="text-base text-t2">Mande do jeito mais fácil. A IA monta um rascunho e você confere.</span>
       <div className="grid grid-cols-2 gap-3">
-        {OPCOES.map(({ nome, icone }, i) => (
-          <span
-            key={nome}
-            className={`flex h-[104px] flex-col items-center justify-center gap-2 rounded-2xl border text-base font-bold ${i === 0 ? "border-acc bg-[var(--acc-a10)]" : "border-line-strong bg-s1"}`}
-          >
-            <Image src={`/landing/icone-${icone}.svg`} alt="" width={30} height={30} />
-            {nome}
-          </span>
-        ))}
+        {OPCOES.map(({ nome, icone }) => {
+          const ativo = icone === "escrever"; // como no app: só texto hoje; foto, áudio e print "em breve"
+          return (
+            <span
+              key={nome}
+              className={`relative flex h-[104px] flex-col items-center justify-center gap-2 rounded-2xl border text-base font-bold ${ativo ? "border-acc bg-[var(--acc-a10)]" : "border-line-strong bg-s1 text-t3"}`}
+            >
+              <Image src={`/landing/icone-${icone}.svg`} alt="" width={30} height={30} className={ativo ? "" : "opacity-50"} />
+              <span className={ativo ? "" : "opacity-60"}>{nome}</span>
+              {!ativo && (
+                <span className="absolute -top-2.5 rounded-full border border-line-strong bg-s3 px-2 text-[13px] leading-5 font-bold text-t2">
+                  em breve
+                </span>
+              )}
+            </span>
+          );
+        })}
       </div>
       <span className="text-sm font-semibold text-t2">Ou escreva do seu jeito</span>
-      <span className="h-[96px] rounded-xl border border-line-strong bg-s2 p-4 text-[17px] text-t3">
-        recebi 120 do corte da Maria hoje
+      <span className="h-[96px] rounded-xl border border-acc bg-s2 p-4 text-[17px] text-t1">
+        recebi 350 da escova da Maria, dia 2 ou 3
       </span>
       <span className="rounded-xl bg-s2 p-3.5 text-sm leading-snug text-t2">
         A IA só rascunha. Quem calcula limite e DAS é o app, e nada entra sem você confirmar.
@@ -139,9 +147,10 @@ function Adicionar() {
 function Lendo() {
   return (
     <div className="flex h-full flex-col gap-5 px-5 pt-8">
-      <span className="num text-[30px] leading-[1.1] font-extrabold tracking-[-0.02em]">Lendo sua foto…</span>
+      <span className="num text-[30px] leading-[1.1] font-extrabold tracking-[-0.02em]">Lendo seu texto…</span>
       <span className="text-base text-t2">Isso leva poucos segundos. Nada foi salvo ainda.</span>
-      <div className="relative h-[300px] overflow-hidden rounded-3xl border border-line-strong [background:repeating-linear-gradient(135deg,var(--s2)_0_8px,var(--s3)_8px_16px)]">
+      <div className="relative grid h-[300px] place-items-center overflow-hidden rounded-3xl border border-line-strong px-8 text-center text-[22px] leading-snug text-t2 [background:repeating-linear-gradient(135deg,var(--s2)_0_8px,var(--s3)_8px_16px)]">
+        “recebi 350 da escova da Maria, dia 2 ou 3”
         <span className="absolute inset-x-0 top-[38%] h-[30%] [background:linear-gradient(180deg,transparent,oklch(0.78_0.12_240/0.45),transparent)]" />
       </div>
       <span className="flex items-center gap-3 text-base">
@@ -182,10 +191,10 @@ function Conferir() {
         <span className="rounded-xs border border-dashed border-line-strong px-2 py-0.5 text-sm font-semibold text-t3">exemplo</span>
       </div>
       <div className="flex items-center gap-3 rounded-2xl border border-line bg-s1 p-3">
-        <span className="grid size-14 place-items-center rounded-md text-sm text-t2 [background:repeating-linear-gradient(135deg,var(--s2)_0_8px,var(--s3)_8px_16px)]">foto</span>
+        <span className="grid size-14 place-items-center rounded-md text-lg font-bold text-t2 [background:repeating-linear-gradient(135deg,var(--s2)_0_8px,var(--s3)_8px_16px)]">Aa</span>
         <span className="flex flex-col">
-          <span className="text-[15px] font-semibold">Lido de uma foto</span>
-          <span className="text-sm text-t3">Hoje, 14:32 · toque para ver o original</span>
+          <span className="text-[15px] font-semibold">Lido do seu texto</span>
+          <span className="text-sm text-t3">Hoje, 14:32 · toque para ver o que você escreveu</span>
         </span>
       </div>
       <Campo rotulo="Valor" valor="R$ 350,00" grande />
@@ -195,7 +204,7 @@ function Conferir() {
         <Campo rotulo="Tipo" valor="Entrada" />
       </div>
       <span className="rounded-xl border border-warn p-3 text-sm text-t1 [background:color-mix(in_oklch,var(--warn)_10%,var(--s1))]">
-        A data estava cortada na foto. Confira.
+        Você escreveu “dia 2 ou 3”. Confira a data.
       </span>
       <div className="absolute inset-x-0 bottom-0 flex flex-col gap-3 border-t border-line px-5 pt-3 pb-[34px] [background:oklch(0.16_0.025_255/0.85)]">
         <span className="text-center text-sm text-t2">Nada foi salvo ainda. Só entra no fio quando você confirmar.</span>

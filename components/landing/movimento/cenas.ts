@@ -167,3 +167,16 @@ export function flutuar(gsap: Gsap): () => void {
     gsap.set(alvos, { clearProps: "transform" });
   };
 }
+
+export interface PosicaoCtas {
+  /** bottom (getBoundingClientRect) do grupo de CTAs do herói */
+  fimCtasHeroi: number;
+  /** top (getBoundingClientRect) da seção do CTA final */
+  topoCtaFinal: number;
+  alturaTela: number;
+}
+
+/** CTA fixo do celular: só entre a saída dos CTAs do herói e a chegada do CTA final (depois dele, nunca). */
+export function mostrarCtaFixo({ fimCtasHeroi, topoCtaFinal, alturaTela }: PosicaoCtas): boolean {
+  return fimCtasHeroi < 0 && topoCtaFinal >= alturaTela;
+}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { flutuar, linhaDoCta, parallax, prenderSigaOFio, revelar, sairDoPalco } from "./cenas";
+import { flutuar, linhaDoCta, mostrarCtaFixo, parallax, prenderSigaOFio, revelar, sairDoPalco } from "./cenas";
 import { ligarFioEstatico, ligarFioScrub } from "./fio-fundo";
 import { ligarFio3d } from "./fio3d-ligar";
 import { CONSULTA_FIO3D, podeMontarFio3d } from "./fio3d-limites";
@@ -13,6 +13,7 @@ import { CONSULTA_REDUZIDO } from "./script-inicial";
 const CLASSES_HTML = ["mv", "mv-pronto", "mv-abertura", "mv-abrindo", "mv-estatico"];
 const ABERTURA_MS = 1400;
 const NAV_VIDRO_Y = 40;
+const CONSULTA_CELULAR = "(max-width: 767px)"; // mesmo corte do md:hidden do CTA fixo
 
 const CONDICOES = {
   reduzido: CONSULTA_REDUZIDO,
@@ -72,10 +73,14 @@ function abrir(html: HTMLElement): () => void {
   };
 }
 
-/** Nav transparente no topo que vira vidro ao rolar + barra de progresso de leitura. */
+/** Nav transparente no topo que vira vidro ao rolar + barra de progresso de leitura + CTA fixo do celular. */
 function acompanharRolagem(): () => void {
   const nav = document.querySelector<HTMLElement>('[data-movimento="nav"]');
   const barra = document.querySelector<HTMLElement>('[data-movimento="progresso"]');
+  const ctaFixo = document.querySelector<HTMLElement>('[data-movimento="cta-fixo"]');
+  const ctasHeroi = document.querySelector<HTMLElement>('[data-movimento~="hero-ctas"]');
+  const ctaFinal = document.querySelector<HTMLElement>('[data-movimento="cta-final"]');
+  const celular = window.matchMedia(CONSULTA_CELULAR);
   let quadro = 0;
   const atualizar = () => {
     quadro = 0;
@@ -83,6 +88,15 @@ function acompanharRolagem(): () => void {
     const max = document.documentElement.scrollHeight - window.innerHeight;
     nav?.toggleAttribute("data-rolada", y > NAV_VIDRO_Y);
     barra?.style.setProperty("transform", `scaleX(${max > 0 ? Math.min(1, y / max) : 0})`);
+    // a partir de 768px o CTA fixo nem aparece (md:hidden): lá o "Comece agora" fica na nav
+    if (ctaFixo && ctasHeroi && ctaFinal && celular.matches) {
+      const visivel = mostrarCtaFixo({
+        fimCtasHeroi: ctasHeroi.getBoundingClientRect().bottom,
+        topoCtaFinal: ctaFinal.getBoundingClientRect().top,
+        alturaTela: window.innerHeight,
+      });
+      ctaFixo.toggleAttribute("data-visivel", visivel);
+    }
   };
   const agendar = () => {
     if (!quadro) quadro = requestAnimationFrame(atualizar);
@@ -95,6 +109,7 @@ function acompanharRolagem(): () => void {
     window.removeEventListener("scroll", agendar);
     window.removeEventListener("resize", agendar);
     nav?.removeAttribute("data-rolada");
+    ctaFixo?.removeAttribute("data-visivel");
     barra?.style.removeProperty("transform");
   };
 }

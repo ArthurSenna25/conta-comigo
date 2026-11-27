@@ -5,7 +5,7 @@ const PAPEIS = [
   {
     quem: "A IA",
     cor: "var(--acc-ink)",
-    oQue: "Lê a foto, o áudio ou o print e sugere valor, data, tipo e categoria. Se ficar em dúvida, avisa.",
+    oQue: "Lê o que você escreve e sugere valor, data, tipo e categoria. Se ficar em dúvida, avisa. Foto, áudio e print: em breve.",
   },
   {
     quem: "O código",
@@ -24,9 +24,9 @@ const CAMPOS = [
 
 export function IaSoRascunha() {
   return (
-    <section id="ia" aria-labelledby="titulo-ia" data-fio="0.3" className="lp-secao pt-[clamp(96px,12vw,160px)]">
+    <section id="ia" aria-labelledby="titulo-ia" data-fio="0.3" className="lp-secao">
       <div className="lp-contido lp-2col">
-        <div className="flex flex-col gap-[22px]">
+        <div className="flex flex-col gap-[var(--lp-pilha)]">
           <p data-movimento="reveal" className="lp-kicker m-0">
             A IA só rascunha
           </p>
@@ -38,12 +38,12 @@ export function IaSoRascunha() {
               <div
                 key={p.quem}
                 data-movimento="reveal"
-                className="grid grid-cols-[110px_1fr] gap-[18px] border-t border-line py-[18px]"
+                className="grid grid-cols-[84px_1fr] gap-4 border-t border-line py-4 md:grid-cols-[110px_1fr] md:gap-[18px] md:py-[18px]"
               >
                 <dt className="num text-lg font-extrabold" style={{ color: p.cor }}>
                   {p.quem}
                 </dt>
-                <dd className="lp-corpo m-0 text-[17px]">{p.oQue}</dd>
+                <dd className="lp-corpo m-0 text-base md:text-[17px]">{p.oQue}</dd>
               </div>
             ))}
           </dl>
@@ -59,7 +59,7 @@ export function IaSoRascunha() {
 /** Ilustração (campos já preenchidos no HTML). A ilha LerDeNovo faz a varredura e o preenchimento a cada 560ms. */
 function CartaoRascunho() {
   return (
-    <figure data-movimento="tilt" className="lp-vidro m-0 flex w-[min(440px,100%)] flex-col gap-3.5 rounded-4xl p-[22px]">
+    <figure data-movimento="tilt" className="lp-vidro m-0 flex w-[min(440px,100%)] flex-col gap-3.5 rounded-4xl p-[18px] md:p-[22px]">
       <div className="flex items-center justify-between gap-2.5">
         <div className="flex flex-col gap-[3px]">
           <span className="num text-xl font-extrabold">Rascunho</span>
@@ -69,7 +69,7 @@ function CartaoRascunho() {
               Pronto para você conferir
             </span>
             <span aria-hidden="true" data-movimento="ia-status-lendo" className="invisible [grid-area:1/1]">
-              Lendo a foto… procurando valor, data e tipo
+              Lendo o texto… procurando valor, data e tipo
             </span>
           </span>
         </div>
@@ -80,9 +80,9 @@ function CartaoRascunho() {
       <div
         aria-hidden="true"
         data-movimento="ia-varredura"
-        className="flex h-[76px] items-center justify-center rounded-lg font-mono text-sm text-t2 [background:repeating-linear-gradient(135deg,var(--s2)_0_8px,var(--s3)_8px_16px)]"
+        className="flex h-[76px] items-center justify-center rounded-lg px-4 text-center text-[15px] leading-snug text-balance text-t2 [background:repeating-linear-gradient(135deg,var(--s2)_0_8px,var(--s3)_8px_16px)]"
       >
-        recibo.jpg
+        “recebi 350 da escova da Maria, dia 2 ou 3”
       </div>
       <dl className="m-0 grid grid-cols-2 gap-3">
         {CAMPOS.map((c) => (
@@ -122,7 +122,7 @@ export function ChatComFonte() {
   return (
     <section aria-labelledby="titulo-chat" data-fio="0.3" className="lp-secao">
       <div className="lp-contido lp-2col">
-        <div className="flex flex-col gap-[22px] md:order-2">
+        <div className="flex flex-col gap-[var(--lp-pilha)] md:order-2">
           <p data-movimento="reveal" className="lp-kicker m-0">
             Chat com fonte
           </p>

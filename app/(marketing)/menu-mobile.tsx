@@ -27,7 +27,7 @@ export function MenuMobile({ links }: MenuMobileProps) {
         <span className="lp-menu-abrir">Menu</span>
         <span className="lp-menu-fechar">Fechar</span>
       </summary>
-      <div className="fixed top-[82px] right-3 left-3 z-[var(--z-menu)] flex flex-col gap-1 rounded-2xl border border-line-strong bg-[oklch(0.20_0.03_255/0.94)] p-2.5 backdrop-blur-[20px]">
+      <div className="fixed top-[calc(var(--lp-nav-fim)+4px)] right-3 left-3 z-[var(--z-menu)] md:left-auto md:w-[380px] flex flex-col gap-1 rounded-2xl border border-line-strong bg-[oklch(0.20_0.03_255/0.94)] p-2.5 backdrop-blur-[20px]">
         <ul className="flex flex-col gap-1">
           {links.map((l) => (
             <li key={l.href}>

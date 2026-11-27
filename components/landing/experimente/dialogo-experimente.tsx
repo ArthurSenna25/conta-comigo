@@ -179,7 +179,9 @@ function Etapas({ estado, despachar }: { estado: EstadoSimulacao; despachar: (a:
   if (etapa === "painel") {
     return (
       <div className="flex flex-col gap-2">
-        <button type="button" onClick={() => despachar("escrever")} className={`${BTN} lp-btn-branco`}>
+        {/* autoFocus só tem efeito ao voltar do "Recomeçar": na abertura o <dialog> ainda está fechado quando
+            o React foca, e o showModal() segue focando o primeiro controle (o Fechar). */}
+        <button type="button" autoFocus onClick={() => despachar("escrever")} className={`${BTN} lp-btn-branco`}>
           Escrever
         </button>
         <p className="text-center text-sm text-t3">Anote uma venda por texto, como no app.</p>
