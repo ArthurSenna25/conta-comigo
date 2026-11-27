@@ -14,6 +14,7 @@ import { nivelDoFio } from "@/components/nivel-do-fio";
 import { ProximoPasso } from "@/components/proximo-passo";
 import { ValorMoeda } from "@/components/valor-moeda";
 import { type DashboardResponse, hojeBrasil, type Severidade } from "@/lib/contracts";
+import { AvisoFluxo } from "./aviso-fluxo";
 import { diasAte, escolherProximoPasso, painelSemTabelaDoDas } from "./painel";
 
 export const metadata: Metadata = { title: "Painel · Conta Comigo" };
@@ -43,6 +44,7 @@ export default async function PaginaPainel() {
         </div>
       </main>
       <FabAdicionar />
+      <AvisoFluxo />
     </div>
   );
 }
