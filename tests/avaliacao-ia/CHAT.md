@@ -1,6 +1,6 @@
 # Avaliação jurídica do chat (AMEACAS #13)
 
-O [gabarito das 15 perguntas](casos-chat.json) registra pergunta, atividade, abertura, data de referência, resposta esperada por critérios textuais, fundamento, fontes e indicador. Todos os casos usam dados fictícios com receita inicial de R$ 1.000,00, receita de R$ 1.250,00 e despesa de R$ 350,00 em novembro de 2026. O mesmo engine da API calcula valores e vencimentos. O teste determinístico fornece a seleção esperada, confere fontes e trechos, valida a resposta e verifica que alertas indisponíveis ficam vazios.
+O [gabarito das perguntas](casos-chat.json) registra pergunta, atividade, abertura, data de referência, resposta esperada por critérios textuais, fundamento, fontes e indicador. Todos os casos usam dados fictícios com receita inicial de R$ 1.000,00, receita de R$ 1.250,00 e despesa de R$ 350,00 em novembro de 2026. O mesmo engine da API calcula valores e vencimentos. O teste determinístico fornece a seleção esperada, confere fontes e trechos, valida a resposta e verifica que alertas indisponíveis ficam vazios.
 
 Para rodar o teste externo localmente, confirme que o projeto continua Free e tem cota. A chave deve estar no ambiente local e `AI_PROVIDER` deve ser `gemini`.
 
@@ -22,3 +22,7 @@ No primeiro lote, o Gemini respondeu 15 perguntas e aprovou 11. Ocorreu um HTTP 
 O lote completo com o prompt final aprovou **13 de 15**. Passaram limite anual, limite proporcional, mês de abertura, retroatividade fora do ano de abertura, DAS de comércio, serviços e atividade mista, regra de vencimento, próximo vencimento, saldo, limite do perfil, pergunta sem cobertura e recusa de simulação. No caso de excesso de até 20% no ano completo, um HTTP 503 foi seguido por timeout. No caso de excesso no primeiro ano, a explicação foi correta e citou um trecho proporcional adicional, que reprovou pela lista exata de fontes. Um segundo HTTP 503, na pergunta sobre DAS de serviços, foi recuperado no retry.
 
 O lote final fez 17 tentativas e recebeu 14 respostas HTTP 200. O Gemini informou 7.460 tokens. A mediana das tentativas HTTP 200 foi 1,08 s e o p95, 5,13 s. As três rodadas somaram 37 tentativas e 16.705 tokens informados, sem HTTP 429. Custo registrado no Free de R$ 0. Nenhuma das respostas renderizadas apresentou afirmação legal sem fonte. O timeout conta como falha de disponibilidade e a seleção intermitente de fonte adicional conta como falha de adequação.
+
+## Observado em 26/11/2026 (perguntas de ouro)
+
+Com a kb da LC nº 238/2026 e da reforma tributária, as 6 perguntas de ouro (`ouro-*`) aprovaram **6 de 6** no Gemini Free: 5 chamadas HTTP 200, sem retry, e a pergunta fora do escopo respondida no servidor sem chamar o provedor ("Não tenho fonte confiável sobre isso nesta versão."). O caso `sem-base` passou a ser nota fiscal em 2027, que segue sem fonte oficial confirmada.

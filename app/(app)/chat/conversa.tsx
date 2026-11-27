@@ -10,7 +10,7 @@ import type { ChatResponse } from "@/lib/contracts";
 import { TEXTO_IA_DEMO_MAX } from "@/lib/security/demo";
 import { enviarPergunta } from "./requisicao";
 
-const SUGESTOES = ["Qual é o meu limite?", "Quando vence o DAS?", "E se eu passar do limite?"];
+const SUGESTOES = ["Quando vence o DAS?", "Qual o limite do MEI em 2027?", "Posso contratar empregado?"];
 const LIMITE_PERGUNTA = 1000;
 type Troca = { pergunta: string; retorno: ChatResponse };
 type Falha = { mensagem: string; status?: number };
@@ -124,10 +124,13 @@ export function Conversa({ demo }: { demo: boolean }) {
           seguirFim.current = scrollHeight - clientHeight - scrollTop <= 48;
         }}
         className="min-h-0 min-w-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-1 pb-2">
-        {historico.length === 0 && !pendente && !falha && (
-          <div className="rounded-2xl border border-line bg-s1 p-4 sm:p-5">
-            <p className="font-semibold text-t1">Pergunte do seu jeito</p>
-            <p className="mt-1 text-sm text-t2">Posso ajudar com o DAS, o limite do MEI ou os números do seu painel.</p>
+        {/* Saudação fixa, sem chamar a IA. */}
+        <article className="rounded-2xl border border-line bg-s1 p-4 sm:p-5">
+          <h2 className="mb-2 flex items-center gap-2 text-sm font-semibold text-acc-ink">
+            <Sparkles size={15} aria-hidden="true" /> Assistente
+          </h2>
+          <p className="leading-relaxed">Olá! Tiro dúvidas sobre o MEI com base em fontes oficiais e nos números do seu painel. Experimente uma destas perguntas:</p>
+          {historico.length === 0 && !pendente && (
             <div className="mt-4 flex flex-wrap gap-2">
               {SUGESTOES.map((sugestao) => (
                 <button key={sugestao} type="button" onClick={() => void enviar(sugestao)}
@@ -136,8 +139,8 @@ export function Conversa({ demo }: { demo: boolean }) {
                 </button>
               ))}
             </div>
-          </div>
-        )}
+          )}
+        </article>
         <div role="log" aria-label="Mensagens" aria-relevant="additions" className="space-y-5">
           {historico.map(({ pergunta, retorno }, i) => (
             <div key={i} className="space-y-3">
@@ -178,6 +181,7 @@ export function Conversa({ demo }: { demo: boolean }) {
             <ArrowUp size={24} aria-hidden="true" />
           </button>
         </div>
+        <p className="mt-2 text-xs text-t3">A IA pode cometer erros. Confira informações importantes na fonte ou com um contador.</p>
       </form>
     </>
   );

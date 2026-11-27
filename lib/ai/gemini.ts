@@ -245,13 +245,14 @@ export function criarGeminiProvider(opcoes: OpcoesGemini = {}): AiProvider {
     async responder(mensagens, contexto) {
       const preparado = prepararChat(mensagens, contexto);
       if (preparado.orientacao) return { resultado: { resposta: preparado.orientacao, fontes: [] }, custoCentavos: 0 };
-      if (preparado.periodoDiferente) {
+      // Outro ano sem trecho verificado para ele: responde sem chamar o provedor.
+      if (preparado.periodoDiferente && !preparado.contexto.kb.length) {
         const resultado = lerChat({ indicador: null, referencias: [] }, preparado.contexto);
         return { resultado, custoCentavos: 0 };
       }
       return gerar({
         operacao: "chat", partes: [{ text: preparado.texto }], esquema: ESQUEMA_CHAT,
-        instrucao: INSTRUCAO_CHAT, validar: (json) => lerChat(json, preparado.contexto),
+        instrucao: INSTRUCAO_CHAT, validar: (json) => lerChat(json, preparado.contexto, preparado.periodoDiferente),
       }, opcoes);
     },
   };
