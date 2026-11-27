@@ -92,7 +92,7 @@ describe("obterDashboard com engine real", () => {
     });
   });
 
-  it("apura lembretes do mês atual e dos dois anteriores até hoje inclusive", async () => {
+  it("agrega lembretes do mês atual e dos dois anteriores até hoje inclusive", async () => {
     // Em 05/01 a janela começa em 01/11, mesmo quando o painel exibe outro mês.
     m.hoje.mockReturnValue("2027-01-05");
     const despesa = (numero: number, data: string): Lancamento => ({
@@ -101,18 +101,27 @@ describe("obterDashboard com engine real", () => {
     });
     const inicio = despesa(2, "2026-11-01");
     const hoje = despesa(3, "2027-01-05");
+    const outras = Array.from({ length: 10 }, (_, i) => despesa(10 + i, "2026-12-01"));
     m.listarLancamentos.mockResolvedValue([
       despesa(1, "2026-10-31"),
       inicio,
       hoje,
+      { ...hoje },
       despesa(4, "2027-01-06"),
       { ...despesa(5, "2026-12-01"), documentoId: inicio.id },
+      ...outras,
     ]);
     expect(await obterDashboard("2026-10")).toMatchObject({
       ok: true,
       dados: {
         resumoMes: { mes: "2026-10", despesaCentavos: 100 },
-        alertas: [{ chave: `nota_faltando:${inicio.id}` }, { chave: `nota_faltando:${hoje.id}` }],
+        alertas: [{
+          chave: "nota_faltando:2027",
+          tipo: "nota_faltando",
+          titulo: "12 despesas de estoque ou frete sem comprovante",
+          severidade: "info",
+          lancamentoIds: [inicio.id, hoje.id, ...outras.map(({ id }) => id)],
+        }],
       },
     });
   });

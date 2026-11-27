@@ -23,6 +23,7 @@ export const Alerta = z.object({
   mensagem: z.string().max(400),
   vencimento: DataISO.nullable(),
   lancamentoId: Uuid.nullable(),
+  lancamentoIds: z.array(Uuid).optional(),
 });
 
 export const FaixaLimite = z.enum(["ok", "70", "90", "100"]);
