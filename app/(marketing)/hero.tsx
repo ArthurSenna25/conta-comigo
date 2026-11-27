@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Celular } from "@/components/landing/celular";
+import { BotaoExperimente } from "@/components/landing/experimente/botao-experimente";
 import { FioCurto } from "@/components/landing/simbolos";
 
 const GARANTIAS = ["Nada é salvo sem você confirmar", "IA opcional", "Você apaga quando quiser"];
@@ -50,6 +51,7 @@ export function Hero() {
               ↓
             </span>
           </a>
+          <BotaoExperimente />
         </div>
         <ul
           data-movimento="hero-item"

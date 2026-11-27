@@ -1,0 +1,14 @@
+/* Simulação "Experimente sem cadastro". Chega junto com o chunk do diálogo (import dinâmico). */
+
+/* Diálogo aberto: o fundo não rola e o canvas 3D sai do layout, o que faz o IntersectionObserver do
+   fio3d parar o loop; ao fechar ele volta sozinho. */
+html[data-experimente] { overflow: hidden; scrollbar-gutter: stable; }
+html[data-experimente] .lp-fio-3d { display: none; }
+
+/* Entrada curta só com movimento permitido (nem reduced motion nem modo leve). */
+@media (prefers-reduced-motion: no-preference) {
+  html:not(.mv-estatico) .exp-dialogo[open] { animation: exp-entrar 240ms var(--ease-cc) both; }
+}
+@keyframes exp-entrar {
+  from { opacity: 0; transform: translateY(16px); }
+}
