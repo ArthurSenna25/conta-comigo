@@ -213,22 +213,28 @@ describe("gerarAlertas", () => {
   });
 
   describe("nota faltando", () => {
-    it.each(["estoque", "frete"] as const)("lembra de anexar comprovante para despesa de %s", (categoria) => {
+    it("não gera alerta sem lançamentos", () => {
+      expect(gerarAlertas(estado())).toEqual([]);
+    });
+
+    it.each(["estoque", "frete"] as const)("gera título singular para despesa de %s", (categoria) => {
       const despesa = lancamento(2, { tipo: "despesa", categoria });
       const alertas = gerarAlertas(estado({ lancamentos: [despesa] }));
 
       expect(alertas).toEqual([
         expect.objectContaining({
-          chave: `nota_faltando:${despesa.id}`,
+          chave: "nota_faltando:2026",
           tipo: "nota_faltando",
           severidade: "info",
+          titulo: "1 despesa de estoque ou frete sem comprovante",
           vencimento: null,
-          lancamentoId: despesa.id,
+          lancamentoId: null,
+          lancamentoIds: [despesa.id],
         }),
       ]);
       expect(`${alertas[0].titulo} ${alertas[0].mensagem}`).toMatch(/comprovante/i);
       expect(`${alertas[0].titulo} ${alertas[0].mensagem}`).not.toMatch(
-        /irregularidad|irregular|infração|obrigatóri|multa/i,
+        /anexa|irregular|infração|obrigatóri|multa/i,
       );
     });
 
@@ -254,8 +260,28 @@ describe("gerarAlertas", () => {
 
       const alertas = gerarAlertas(estado({ lancamentos: [estoque, frete] }));
 
-      expect(alertas).toHaveLength(2);
-      expect(alertas.map(({ lancamentoId }) => lancamentoId)).toEqual(expect.arrayContaining([estoque.id, frete.id]));
+      expect(alertas).toEqual([
+        expect.objectContaining({
+          chave: "nota_faltando:2026",
+          titulo: "2 despesas de estoque ou frete sem comprovante",
+          lancamentoIds: [estoque.id, frete.id],
+        }),
+      ]);
+    });
+
+    it("mantém a chave quando a quantidade muda e inclui todos os IDs", () => {
+      const lancamentos = Array.from({ length: 12 }, (_, i) =>
+        lancamento(i + 2, { tipo: "despesa", categoria: "frete" }),
+      );
+      const [singular] = gerarAlertas(estado({ lancamentos: lancamentos.slice(0, 1) }));
+      const [plural] = gerarAlertas(estado({ lancamentos }));
+
+      expect(plural.chave).toBe(singular.chave);
+      expect(plural).toMatchObject({
+        titulo: "12 despesas de estoque ou frete sem comprovante",
+        lancamentoIds: lancamentos.map(({ id }) => id),
+      });
+      expect(Alerta.parse(plural).mensagem.length).toBeLessThanOrEqual(400);
     });
   });
 
@@ -267,7 +293,7 @@ describe("gerarAlertas", () => {
       lancamentos: [despesa],
     }));
 
-    expect(alertas.map(({ chave }) => chave)).toEqual([`nota_faltando:${despesa.id}`]);
+    expect(alertas.map(({ chave }) => chave)).toEqual(["nota_faltando:2026"]);
   });
 
   it("gera alertas válidos, com chaves únicas e ordem estável, preservando a entrada", () => {
@@ -284,14 +310,15 @@ describe("gerarAlertas", () => {
     const alertas = gerarAlertas(entrada);
 
     expect(Alerta.array().parse(alertas)).toEqual(alertas);
-    const chaves = alertas.map(({ chave }) => chave);
-    expect(chaves).toHaveLength(4);
-    expect(new Set(chaves)).toEqual(new Set([
-      "das_vencendo:2026-11",
-      "limite_mei:2026:90",
-      `nota_faltando:${frete.id}`,
-      `nota_faltando:${estoque.id}`,
-    ]));
+    expect(alertas).toEqual([
+      expect.objectContaining({ chave: "das_vencendo:2026-11", severidade: "info" }),
+      expect.objectContaining({ chave: "limite_mei:2026:90", severidade: "atencao" }),
+      expect.objectContaining({
+        chave: "nota_faltando:2026",
+        titulo: "2 despesas de estoque ou frete sem comprovante",
+        lancamentoIds: [frete.id, estoque.id],
+      }),
+    ]);
     expect(gerarAlertas(entrada)).toEqual(alertas);
     expect(gerarAlertas({ ...entrada, lancamentos: [...entrada.lancamentos].reverse() })).toEqual(alertas);
     expect(entrada).toEqual(antes);

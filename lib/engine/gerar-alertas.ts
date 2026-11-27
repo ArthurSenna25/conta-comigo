@@ -54,15 +54,28 @@ function alertaLimite(estado: EstadoAlertas, lancamentos: readonly Lancamento[])
   };
 }
 
-function alertaNotaFaltando({ id, categoria }: Lancamento): Alerta {
+function alertaNotaFaltando(
+  lancamentos: readonly Lancamento[],
+  anoReferencia: string,
+): Alerta | undefined {
+  const lancamentoIds = lancamentos
+    .filter(({ tipo, categoria, documentoId }) =>
+      tipo === "despesa" && (categoria === "estoque" || categoria === "frete") && documentoId === null,
+    )
+    .map(({ id }) => id)
+    .sort();
+  const quantidade = lancamentoIds.length;
+  if (quantidade === 0) return;
+
   return {
-    chave: `nota_faltando:${id}`,
+    chave: `nota_faltando:${anoReferencia}`,
     tipo: "nota_faltando",
     severidade: "info",
-    titulo: `Despesa de ${categoria} sem comprovante anexado`,
-    mensagem: "Guarde o comprovante junto ao lançamento, se estiver disponível.",
+    titulo: `${quantidade} ${quantidade === 1 ? "despesa" : "despesas"} de estoque ou frete sem comprovante`,
+    mensagem: "Guarde os comprovantes, se estiverem disponíveis.",
     vencimento: null,
-    lancamentoId: id,
+    lancamentoId: null,
+    lancamentoIds,
   };
 }
 
@@ -91,11 +104,7 @@ export function gerarAlertas(estado: EstadoAlertas): Alerta[] {
     if (limite) alertas.push(limite);
   }
 
-  const notas = lancamentos
-    .filter(({ tipo, categoria, documentoId }) =>
-      tipo === "despesa" && (categoria === "estoque" || categoria === "frete") && documentoId === null,
-    )
-    .map(alertaNotaFaltando)
-    .sort((a, b) => a.chave.localeCompare(b.chave, "en"));
-  return [...alertas, ...notas];
+  const nota = alertaNotaFaltando(lancamentos, hoje.slice(0, 4));
+  if (nota) alertas.push(nota);
+  return alertas;
 }
