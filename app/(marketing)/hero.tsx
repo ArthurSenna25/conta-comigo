@@ -5,7 +5,7 @@ import { Celular } from "@/components/landing/celular";
 import { BotaoExperimente } from "@/components/landing/experimente/botao-experimente";
 import { FioCurto } from "@/components/landing/simbolos";
 
-const GARANTIAS = ["Nada é salvo sem você confirmar", "IA opcional", "Dados tratados conforme a LGPD"];
+const GARANTIAS = ["Nenhum lançamento é salvo sem sua confirmação", "IA opcional", "Dados tratados conforme a LGPD"];
 
 /** CTAs: no celular, coluna de botões da mesma largura; a partir de 640px, linha centralizada. */
 export const GRUPO_CTA =
@@ -63,8 +63,8 @@ export function Hero() {
           className="flex flex-wrap justify-center gap-x-4 gap-y-1.5 text-sm text-t2 md:gap-x-[22px] md:text-[15px]"
         >
           {GARANTIAS.map((g) => (
-            <li key={g} className="inline-flex items-center gap-1.5">
-              <Check aria-hidden="true" size={15} strokeWidth={2.5} className="text-ok" />
+            <li key={g} className="inline-flex items-start gap-1.5 text-balance text-left">
+              <Check aria-hidden="true" size={15} strokeWidth={2.5} className="mt-[3px] shrink-0 text-ok" />
               {g}
             </li>
           ))}

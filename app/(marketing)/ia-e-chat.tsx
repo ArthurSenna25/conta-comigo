@@ -12,7 +12,7 @@ const PAPEIS = [
     cor: "var(--ok)",
     oQue: "Calcula limite anual, DAS e alertas com regras fixas e testadas. A IA não faz conta.",
   },
-  { quem: "Você", cor: "var(--t1)", oQue: "Confere, corrige se precisar e confirma. Sem sua confirmação, nada é salvo." },
+  { quem: "Você", cor: "var(--t1)", oQue: "Confere, corrige se precisar e confirma. Nenhum lançamento é salvo sem sua confirmação." },
 ];
 
 const CAMPOS = [
