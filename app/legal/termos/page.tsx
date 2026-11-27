@@ -26,17 +26,21 @@ export default function PaginaTermos() {
       <section>
         <h2>Confira antes de salvar</h2>
         <p>
-          A IA pode sugerir um rascunho a partir de foto, áudio ou texto e pode interpretar o
-          conteúdo errado. Confira e, se necessário, corrija valor, data e categoria antes de
-          confirmar o lançamento. As estimativas do app dependem dos dados que você registra.
+          Na conta de demonstração, o app usa a API Gemini do Google no plano gratuito para sugerir
+          rascunhos com base no texto que você envia e para ajudar nas respostas do chat. A IA pode
+          interpretar o conteúdo errado.
+          Confira o valor, a data e a categoria antes de confirmar o lançamento. Os cálculos do
+          app dependem dos dados que você registra.
         </p>
       </section>
 
       <section>
         <h2>Uso da demonstração</h2>
         <p>
-          Use somente dados fictícios. Deixe de fora notas reais, documentos, dados pessoais e
-          informações confidenciais, inclusive de clientes e fornecedores.
+          A conta de demonstração é compartilhada. Outros visitantes podem ver e alterar os
+          lançamentos salvos nela. Use somente dados fictícios ao testar, inclusive na digitação
+          manual e no chat. Não inclua dados pessoais, documentos ou informações confidenciais
+          suas ou de terceiros.
         </p>
       </section>
 
