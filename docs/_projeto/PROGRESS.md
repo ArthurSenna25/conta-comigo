@@ -43,6 +43,7 @@ Notas operacionais que seguem valendo:
 - 24/11 Modo mock só com `NODE_ENV` development/test; fora disso a flag **lança**. `pnpm build` local com a flag em `.env.local` falha de propósito: rode `NEXT_PUBLIC_USE_MOCKS=false pnpm build`.
 - 24/11 `USE_MOCKS` removido de `lib/contracts/mocks.ts` (`modoMock()` é a única porta); `lib/security` tem bloco de camadas (só `lib/contracts`); `shadcn` em devDependencies.
 - 24/11 Divisão do time (aprovada pelo grupo): Arthur = landing, design, demo, infra e merge de todos os PRs; Frigeri = telas autenticadas, `app/legal`, `kb`; Murilo = engine, seed, QA; Gui = IA. Detalhes e motivo em `docs/handoff/00-LEIA-PRIMEIRO.md`.
+- 26/11 IA só na conta demo, no servidor: `/api/ingest` agora iguala `/api/chat` (403 `proibido` para conta real, antes de corpo, provedor e reserva). Conta real volta quando houver plano pago (AMEACAS #22).
 - 24/11 Sem client de navegador (login por server action); `lib/supabase/` é pasta reservada sem código.
 ## Pendências / bloqueios
 - Ingestão real via HTTP: reserva pronta; faltam a migration no remoto, as variáveis e a UI degradar para lançamento manual no 429 (AMEACAS #21). Confirmação e meta ponta a ponta dependem da integração da interface.

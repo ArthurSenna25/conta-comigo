@@ -3,7 +3,7 @@ import { AUDIO_MAX_BYTES, IMAGEM_MAX_BYTES, IngestResponse } from "@/lib/contrac
 import { ErroIa } from "@/lib/ai/erro";
 import { POST } from "@/app/api/ingest/route";
 import { criarProcessarIngestao } from "@/app/api/ingest/processar";
-import { respostaErro } from "@/lib/security/portao-api";
+import { MENSAGEM_IA_SOMENTE_DEMO, respostaErro } from "@/lib/security/portao-api";
 
 const { autorizar, provider, reservarUsoIa } = vi.hoisted(() => ({
   autorizar: vi.fn(), provider: vi.fn(), reservarUsoIa: vi.fn(),
@@ -130,8 +130,20 @@ describe("/api/ingest com a reserva atômica de chamadas (reservar_uso_ia)", () 
     extrairViaReserva();
   });
 
-  it("reserva concedida: responde 200 e pede 1 chamada com os limites do usuário", async () => {
+  it("conta real é recusada com 403 antes de ler o corpo, do provedor e da reserva", async () => {
     autorizar.mockResolvedValue(acessoReal(false));
+    const req = pedido(formulario("texto"));
+    const resposta = await POST(req);
+    expect(resposta.status).toBe(403);
+    expect(await resposta.json()).toEqual({ erro: { codigo: "proibido", mensagem: MENSAGEM_IA_SOMENTE_DEMO } });
+    expect(req.bodyUsed).toBe(false);
+    expect(provider).not.toHaveBeenCalled();
+    expect(reservarUsoIa).not.toHaveBeenCalled();
+  });
+
+  it("reserva concedida: responde 200 e pede 1 chamada com os limites do usuário", async () => {
+    vi.stubEnv("DEMO_AI_DAILY_CALLS", "30");
+    autorizar.mockResolvedValue(acessoReal(true));
     reservarUsoIa.mockResolvedValue(true);
     const resposta = await POST(pedido(formulario("texto")));
     expect(resposta.status).toBe(200);
@@ -147,7 +159,7 @@ describe("/api/ingest com a reserva atômica de chamadas (reservar_uso_ia)", () 
   });
 
   it("reserva negada: 429 limite_ia, sem rascunho", async () => {
-    autorizar.mockResolvedValue(acessoReal(false));
+    autorizar.mockResolvedValue(acessoReal(true));
     reservarUsoIa.mockResolvedValue(false);
     const resposta = await POST(pedido(formulario("texto")));
     expect(resposta.status).toBe(429);
@@ -155,7 +167,7 @@ describe("/api/ingest com a reserva atômica de chamadas (reservar_uso_ia)", () 
   });
 
   it("falha do controle: 503 ia_indisponivel, sem rascunho (falha fechada)", async () => {
-    autorizar.mockResolvedValue(acessoReal(false));
+    autorizar.mockResolvedValue(acessoReal(true));
     reservarUsoIa.mockRejectedValue(new Error("banco fora"));
     vi.spyOn(console, "error").mockImplementation(() => {});
     const resposta = await POST(pedido(formulario("texto")));
@@ -165,7 +177,8 @@ describe("/api/ingest com a reserva atômica de chamadas (reservar_uso_ia)", () 
 
   it("sem AI_DAILY_CALLS_GLOBAL o limite global enviado é 0 (nega)", async () => {
     vi.stubEnv("AI_DAILY_CALLS_GLOBAL", "");
-    autorizar.mockResolvedValue(acessoReal(false));
+    vi.stubEnv("DEMO_AI_DAILY_CALLS", "30");
+    autorizar.mockResolvedValue(acessoReal(true));
     reservarUsoIa.mockResolvedValue(false);
     expect((await POST(pedido(formulario("texto")))).status).toBe(429);
     expect(reservarUsoIa).toHaveBeenCalledWith("usuario", { maxUsuario: 30, maxGlobal: 0 });

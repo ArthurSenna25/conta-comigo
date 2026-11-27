@@ -24,6 +24,10 @@ const MENSAGEM: Record<CodigoErro, string> = {
   interno: "Algo deu errado. Tente de novo em instantes.",
 };
 
+/** Recusa de IA para conta real: o plano gratuito do provedor só aceita dado sintético (AMEACAS #16). */
+export const MENSAGEM_IA_SOMENTE_DEMO =
+  "Nesta versão de avaliação, a IA só funciona na conta demo. Entre na demo para testar. Você pode lançar manualmente.";
+
 /** Retorna uma mensagem pública fixa, com status HTTP coerente e sem cache. */
 export function respostaErro(codigo: CodigoErro, mensagemPublica = MENSAGEM[codigo]): Response {
   const corpo: ErroResposta = { erro: { codigo, mensagem: mensagemPublica } };
