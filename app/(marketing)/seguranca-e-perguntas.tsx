@@ -54,7 +54,7 @@ export function Seguranca() {
 const PERGUNTAS = [
   [
     "O que acontece se eu passar do limite?",
-    "O app avisa em âmbar a partir de 80% e em vermelho se passar. Até 20% acima do teto, você segue MEI até dezembro, paga imposto sobre o excesso e vira microempresa no ano seguinte. O chat mostra a regra com a fonte.",
+    "O app avisa em âmbar a partir de 80% e em vermelho se passar. Até 20% acima do teto, você segue MEI até dezembro, paga imposto sobre o excesso e vira microempresa no ano seguinte. O chat mostra a regra, com a fonte quando a resposta depende de uma referência.",
   ],
   [
     "Preciso aceitar a IA?",

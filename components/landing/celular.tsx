@@ -58,14 +58,14 @@ function Painel({ faturado, toast = false }: { faturado: number; toast?: boolean
         tom="ok"
         selo="20"
         titulo="Seu DAS vence em 26 dias"
-        subtitulo="Valor e código de pagamento ficam prontos aqui."
+        subtitulo="O valor e o vencimento ficam no painel."
       />
       <div className="flex items-center justify-between rounded-2xl border border-line bg-card-solid p-4">
         <div className="flex flex-col gap-0.5">
           <span className="text-sm text-t3">Próximo DAS</span>
           <span className="num text-[22px] font-extrabold">R$ 82,05</span>
         </div>
-        <span className="text-sm text-t2">Vence em 20/12/2026</span>
+        <span className="text-sm text-t2">Vence em 21/12/2026</span>
       </div>
       {toast && (
         <div className="absolute inset-x-4 bottom-[180px] flex items-center gap-3 rounded-[18px] border border-line-strong bg-s3 p-4 shadow-toast">

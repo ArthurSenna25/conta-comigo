@@ -130,7 +130,7 @@ export function ChatComFonte() {
             Pergunte. A resposta vem com a lei.
           </h2>
           <p data-movimento="reveal" className="lp-corpo max-w-[480px]">
-            Respostas curtas, sem juridiquês. Cada uma mostra de onde saiu, num chip que você toca para conferir.
+            Respostas curtas, sem juridiquês. Quando a resposta depende de uma referência, ela vem com a fonte, num chip que você toca para conferir.
           </p>
         </div>
         <figure data-movimento="reveal" className="m-0 flex flex-col gap-3.5 md:order-1">

@@ -9,7 +9,7 @@ export const PAINEL_FICTICIO = {
   faturadoCentavos: 3_402_000,
   limiteCentavos: TETO_EXEMPLO_CENTAVOS,
   ano: "2026",
-  das: { valorCentavos: 8_205, vencimento: "20/12/2026" },
+  das: { valorCentavos: 8_205, vencimento: "21/12/2026" },
 } as const;
 
 export const TEXTO_EXEMPLO = "recebi 120 do corte da Maria hoje";

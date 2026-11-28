@@ -93,7 +93,7 @@ function Palco() {
         lado="direita"
         rotulo="Próximo DAS"
         valor="R$ 82,05"
-        rodape={<span className="num text-[15px] text-t2">Vence em 20/12/2026</span>}
+        rodape={<span className="num text-[15px] text-t2">Vence em 21/12/2026</span>}
       />
       <div data-movimento="hero-item abertura-celular" className="relative z-[2]">
         <div data-movimento="flutuar">

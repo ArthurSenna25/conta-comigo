@@ -23,6 +23,7 @@ export function Adicionar({ demo }: { demo: boolean }) {
   const [, despachar] = useFluxo();
   const [texto, setTexto] = useState("");
   const [etapa, setEtapa] = useState<Etapa>({ tipo: "escrever" });
+  const [colouLongo, setColouLongo] = useState(false);
   const campo = useRef<HTMLTextAreaElement>(null);
   const leitura = useRef<AbortController | null>(null);
 
@@ -86,6 +87,8 @@ export function Adicionar({ demo }: { demo: boolean }) {
   }
 
   const liberado = podeEnviarTexto(texto);
+  const limite = demo ? TEXTO_IA_DEMO_MAX : TEXTO_MAX;
+  const encurtado = colouLongo && texto.length >= limite;
   return (
     <main className="mx-auto flex w-full max-w-[480px] flex-1 flex-col">
       <div className="flex flex-1 flex-col gap-5 px-5 pt-[18px] pb-6">
@@ -112,13 +115,23 @@ export function Adicionar({ demo }: { demo: boolean }) {
             ref={campo}
             id="texto-adicionar"
             rows={3}
-            maxLength={demo ? TEXTO_IA_DEMO_MAX : TEXTO_MAX}
+            maxLength={limite}
             value={texto}
             onChange={(e) => setTexto(e.target.value)}
+            onPaste={(e) => {
+              const { selectionStart, selectionEnd } = e.currentTarget;
+              const livre = limite - (texto.length - (selectionEnd - selectionStart));
+              setColouLongo(e.clipboardData.getData("text").length > livre);
+            }}
             placeholder="recebi 120 do corte da Maria hoje"
             aria-describedby={[demo && "aviso-ia-demo", etapa.falha && "falha-adicionar"].filter(Boolean).join(" ") || undefined}
             className="resize-none rounded-2xl border border-line-strong bg-s2 px-4 py-3 text-[17px] leading-[1.45] text-t1 placeholder:text-t3 focus:border-ring focus:shadow-[0_0_0_4px_var(--ring-halo)] focus:outline-none"
           />
+          {encurtado && (
+            <p role="status" className="text-sm text-t2">
+              O texto passou do limite e foi encurtado para {limite} caracteres. Confira se o final ficou de fora.
+            </p>
+          )}
           <AvisoIaDemo demo={demo} id="aviso-ia-demo" />
         </div>
 
