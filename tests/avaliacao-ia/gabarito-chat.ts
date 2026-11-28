@@ -2,7 +2,7 @@ import { Atividade, DataISO, type ChatResponse, type Lancamento } from "@/lib/co
 import { mockPerfil } from "@/lib/contracts/mocks";
 import { montarContexto } from "@/app/api/chat/contexto";
 import { selecionarTrechos } from "@/app/api/chat/conhecimento";
-import { SEM_FONTE_CONFIAVEL } from "@/lib/ai/saidas";
+import { FORA_DO_ESCOPO, SEM_FONTE_CONFIAVEL } from "@/lib/ai/saidas";
 import dados from "./casos-chat.json";
 import { z } from "zod";
 
@@ -39,7 +39,7 @@ export function avaliarResposta(caso: Caso, resultado: ChatResponse, trechos: Aw
   const conteudoCorreto = caso.inclui.every((termo) => resposta.includes(termo));
   const fallbackCorreto = caso.indicador !== null || caso.fontes.length > 0 ||
     (!resposta.includes("R$") && fontes.length === 0 &&
-      (resposta.includes("consulte um contador") || resposta.startsWith(SEM_FONTE_CONFIAVEL)));
+      (resposta.includes("consulte um contador") || resposta.startsWith(SEM_FONTE_CONFIAVEL) || resposta === FORA_DO_ESCOPO));
   return { fontesCorretas, correspondencia, conteudoCorreto, fallbackCorreto,
     aprovado: fontesCorretas && correspondencia && conteudoCorreto && fallbackCorreto };
 }

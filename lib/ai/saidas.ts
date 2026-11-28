@@ -73,12 +73,14 @@ const TERMOS_CHAT = new Set((
   "desenquadramento desenquadrar efeitos desenquadrado das guia valor valores custa pagar pago vencimento vence vencera prazo " +
   "feriado expediente bancario comercio industria servico servicos mista misto inss icms iss salario minimo arrecadacao " +
   "calcule calcular simule simular hipotetico outro terceiro funcionario empregado contratar salario 2026 " +
-  "2027 2028 funcionarios empregados contratacao perdao remissao divida dividas debito debitos lei nova muda mudou " +
+  "2027 2028 2029 2030 2031 2032 2033 lc 238 funcionarios empregados contratacao perdao remissao divida dividas debito debitos lei nova muda mudou " +
   "continua reforma tributaria ibs cbs"
 ).split(" "));
 
 /** Resposta honesta quando a pergunta está fora da base verificada do chat. */
 export const SEM_FONTE_CONFIAVEL = "Não tenho fonte confiável sobre isso nesta versão.";
+const SEM_COBERTURA = `${SEM_FONTE_CONFIAVEL} Posso ajudar com o limite do MEI e o DAS. Para esta dúvida, consulte o Portal do Empreendedor ou consulte um contador.`;
+export const FORA_DO_ESCOPO = "Posso ajudar com dúvidas sobre o MEI e os dados do seu painel.";
 
 function minimizarMensagem(conteudo: string): string {
   const termos: string[] = conteudo.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().match(/[a-z]+|\d+/g) ?? [];
@@ -89,6 +91,7 @@ function minimizarMensagem(conteudo: string): string {
 export function perguntaSobreExcessoMei(pergunta: string): boolean {
   const texto = pergunta.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().match(/[a-z]+/g)?.join(" ") ?? "";
   return /\bdesenquadr[a-z]*\b/.test(texto)
+    || /\b(?:pass|estour|ultrapass|exced)[a-z]* (?:de )?(?:r\$\s*)?81(?:[. ]000|000| mil)\b/i.test(pergunta)
     || /\b(?:pass|estour|ultrapass|exced)[a-z]* (?:(?:do|o|os|dos) )?(?:meu )?limites? (?:do mei|de faturamento)\b/.test(texto)
     || /^(?:(?:e se|o que acontece se|se) (?:eu )?|como |eu )?(?:pass|estour|ultrapass|exced)[a-z]* (?:(?:do|o|os|dos) )?(?:meu )?limites?$/.test(texto);
 }
@@ -103,6 +106,9 @@ function orientarPergunta(pergunta: string): string | null {
   if (/\b(?:invente|forje|fabrique)\b.*\b(?:fonte|lei|url|referencia)\b|\b(?:ignore|desconsidere|esqueca)\b.*\b(?:base juridica|fontes verificadas)\b/.test(texto)) {
     return "Uso apenas fontes verificadas da base jurídica. Se a regra que você procura estiver fora da base, consulte um contador.";
   }
+  if (/\b(?:ignore|desconsidere|revele|mostre)\b.*\b(?:instrucoes|prompt|mensagem do sistema)\b/.test(texto)) {
+    return FORA_DO_ESCOPO;
+  }
   if (/\b(?:calcule|calcular|simule|simular)\b.*\b(?:imposto|tributos?|das)\b/.test(texto)) {
     return "Não faço cálculos tributários sob demanda. Confira o DAS no painel e, para apurar impostos do seu caso, consulte um contador.";
   }
@@ -115,13 +121,15 @@ function orientarPergunta(pergunta: string): string | null {
     return "Para acompanhar o seu negócio no Conta Comigo, registre no painel as receitas e despesas do MEI e acompanhe os gastos pessoais separadamente. Para saber se você pode usar a mesma conta bancária, consulte um contador. A base verificada do chat não cobre essa regra.";
   }
   // ponytail: lista curta de culinária só para "receita" de cozinha não virar receita do MEI.
-  if (/\b(?:bolo|torta|pudim|culinaria|cozinhar|ingredientes?|forno)\b/.test(texto)) return SEM_FONTE_CONFIAVEL;
+  if (/\b(?:bolo|torta|pudim|culinaria|cozinhar|ingredientes?|forno)\b/.test(texto)) return FORA_DO_ESCOPO;
   const assuntoDoChat = perguntaSobreExcessoMei(texto)
     || /\b(?:mei|das-mei|impostos?|tributos?|painel|saldo|receitas?|despesas?|fatur\w*|lancamentos?|vencimento|estoque)\b/.test(texto)
-    || /\b(?:empregad[oa]s?|funcionari[oa]s?|reforma tributaria|ibs|cbs|perdao|remissao)\b/.test(texto)
+    || /\b(?:empregad[oa]s?|funcionari[oa]s?|reforma tributaria|ibs|cbs|perdao|remissao|lei nova|lc 238|nota fiscal)\b/.test(texto)
+    || /\b(?:limite|teto)\b.*\b(?:110|140)(?:[. ]000|000| mil)\b/.test(texto)
     || /\b(?:(?:meu|o|do|proximo) das|mes da abertura|ano de abertura)\b/.test(texto)
-    || /\b(?:meu (?:limite|teto)|limite (?:anual|proporcional))(?: este ano| em 20\d{2})?[?.! ]*$/.test(texto);
-  return assuntoDoChat ? null : SEM_FONTE_CONFIAVEL;
+    || /\b(?:meu (?:limite|teto)|limite (?:anual|proporcional))(?: este ano| em 20\d{2})?[?.! ]*$/.test(texto)
+    || /^limite (?:em )?20\d{2}[?.! ]*$/.test(texto);
+  return assuntoDoChat ? null : FORA_DO_ESCOPO;
 }
 
 export function prepararChat(mensagens: ChatRequest["mensagens"], contexto: ContextoChat) {
@@ -132,6 +140,9 @@ export function prepararChat(mensagens: ChatRequest["mensagens"], contexto: Cont
   const ultima = chat.data.mensagens.at(-1)?.conteudo ?? "";
   const periodoDiferente = Array.from(ultima.matchAll(/\b20\d{2}\b/g))
     .some(([ano]) => ano !== dados.data.dashboard.resumoMes.mes.slice(0, 4));
+  const consultaResumo = /\b(?:saldo|(?:minhas?|meus?|total de) (?:receitas?|despesas?|gastos?))\b/i.test(ultima);
+  const orientacao = orientarPergunta(ultima)
+    ?? (!kb.length && (periodoDiferente || !consultaResumo) ? SEM_COBERTURA : null);
   // O Gemini só roteia a pergunta. Números do painel e dados do
   // perfil permanecem no servidor e são exibidos após a seleção.
   const texto = JSON.stringify({
@@ -139,7 +150,7 @@ export function prepararChat(mensagens: ChatRequest["mensagens"], contexto: Cont
     indicadores: perfil.ehMei ? ["resumo", "limite", "das", "vencimento"] : ["resumo"],
     trechos: kb.map(({ fonte, texto }, indice) => ({ indice, titulo: fonte.titulo, texto })),
   });
-  return { texto, contexto: dados.data, periodoDiferente, orientacao: orientarPergunta(ultima) };
+  return { texto, contexto: dados.data, periodoDiferente, orientacao };
 }
 
 const moeda = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
@@ -179,7 +190,7 @@ export function lerChat(json: unknown, { dashboard, perfil, kb }: ContextoChat, 
     partes.unshift(`O próximo vencimento ordinário do DAS no seu painel é ${proximoDas.vencimento.split("-").reverse().join("/")}.`);
   }
   if (!trechos.length && indicador !== "resumo") {
-    partes.push(`${SEM_FONTE_CONFIAVEL} Para o seu caso, consulte um contador.`);
+    partes.push(SEM_COBERTURA);
   }
   const validada = ChatResponse.safeParse({ resposta: partes.join("\n\n"), fontes: trechos.map(({ fonte }) => fonte) });
   if (!validada.success) throw new ErroIa("resposta");

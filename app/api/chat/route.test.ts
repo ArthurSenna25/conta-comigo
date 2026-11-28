@@ -37,6 +37,26 @@ beforeEach(() => {
 });
 
 describe("POST /api/chat", () => {
+  it.each(["Olá.", "Oi.", "Bom dia.", "Boa tarde.", "Boa noite.", "Tudo bem?", "Oi, tudo bem?"])(
+    "responde %s sem carregar contexto ou reservar IA", async (conteudo) => {
+      const res = await POST(req({ mensagens: [{ role: "user", conteudo }] }));
+      expect(res.status).toBe(200);
+      expect(await res.json()).toEqual({ resposta: expect.stringMatching(/^Olá!.*DAS/), fontes: [] });
+      expect(d.kb).not.toHaveBeenCalled();
+      expect(d.contexto).not.toHaveBeenCalled();
+      expect(d.responder).not.toHaveBeenCalled();
+      expect(d.reservar).not.toHaveBeenCalled();
+    },
+  );
+
+  it("encaminha a pergunta que vem depois da saudação", async () => {
+    const conteudo = "Olá! Quando vence o DAS?";
+    const res = await POST(req({ mensagens: [{ role: "user", conteudo }] }));
+    expect(res.status).toBe(200);
+    expect(d.kb).toHaveBeenCalledWith(conteudo);
+    expect(d.responder).toHaveBeenCalledOnce();
+  });
+
   it("demo: pergunta acima do teto de texto é recusada sem contexto nem reserva", async () => {
     const longa = [{ role: "user", conteudo: "a".repeat(TEXTO_IA_DEMO_MAX + 1) }];
     const res = await POST(req({ mensagens: longa }));
@@ -85,7 +105,7 @@ describe("POST /api/chat", () => {
 
   it("protege perfis reais na operação gratuita", async () => {
     d.acesso.mockResolvedValue({ ...acesso, demo: false });
-    const res = await POST(req());
+    const res = await POST(req({ mensagens: [{ role: "user", conteudo: "Oi" }] }));
     expect(res.status).toBe(403);
     expect(await res.json()).toEqual({ erro: { codigo: "proibido", mensagem: MENSAGEM_IA_SOMENTE_DEMO } });
     expect(d.contexto).not.toHaveBeenCalled();

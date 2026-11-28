@@ -2,7 +2,7 @@
 
 O [gabarito das perguntas](casos-chat.json) registra pergunta, atividade, abertura, data de referência, resposta esperada por critérios textuais, fundamento, fontes e indicador. Todos os casos usam dados fictícios com receita inicial de R$ 1.000,00, receita de R$ 1.250,00 e despesa de R$ 350,00 em novembro de 2026. O mesmo engine da API calcula valores e vencimentos. O teste determinístico fornece a seleção esperada, confere fontes e trechos, valida a resposta e verifica que alertas indisponíveis ficam vazios.
 
-Para rodar o teste externo localmente, confirme que o projeto continua Free e tem cota. A chave deve estar no ambiente local e `AI_PROVIDER` deve ser `gemini`.
+O corpus atual tem 27 casos. A base revisada em 28/11 ainda não foi avaliada no Gemini. A janela anterior encerrou e nova avaliação real depende de autorização expressa de Arthur. Com essa autorização, confirme que o projeto continua Free e tem cota. A chave deve estar no ambiente local e `AI_PROVIDER` deve ser `gemini`.
 
 ```powershell
 $env:AVALIAR_CHAT_GEMINI='sim'
@@ -25,4 +25,4 @@ O lote final fez 17 tentativas e recebeu 14 respostas HTTP 200. O Gemini informo
 
 ## Observado em 26/11/2026 (perguntas de ouro)
 
-Com a kb da LC nº 238/2026 e da reforma tributária, as 6 perguntas de ouro (`ouro-*`) aprovaram **6 de 6** no Gemini Free: 5 chamadas HTTP 200, sem retry, e a pergunta fora do escopo respondida no servidor sem chamar o provedor ("Não tenho fonte confiável sobre isso nesta versão."). O caso `sem-base` passou a ser nota fiscal em 2027, que segue sem fonte oficial confirmada.
+A revisão anterior da KB da LC nº 238/2026 e da reforma tributária aprovou **6 de 6** perguntas de ouro no Gemini Free. Houve 5 chamadas HTTP 200 sem retry e uma resposta local para a pergunta fora do escopo. O caso `sem-base` usa nota fiscal em 2027, tema que o corpus atual não cobre.
