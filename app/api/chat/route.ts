@@ -7,6 +7,7 @@ import { ChatRequest, ChatResponse } from "@/lib/contracts";
 import { mockAiProvider, mockDashboard, mockPerfil } from "@/lib/contracts/mocks";
 import { MENSAGEM_IA_DEMO_TEXTO_LONGO, TEXTO_IA_DEMO_MAX } from "@/lib/security/demo";
 import { MENSAGEM_IA_SOMENTE_DEMO, respostaErro } from "@/lib/security/portao-api";
+import { RESPOSTA_SAUDACAO, saudacaoSimples } from "./saudacao";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -54,11 +55,15 @@ export async function POST(req: Request): Promise<Response> {
   const inicio = performance.now();
   try {
     const { mensagens } = entrada.data;
+    const pergunta = mensagens.at(-1)?.conteudo ?? "";
+    if (saudacaoSimples(pergunta)) {
+      return Response.json(ChatResponse.parse({ resposta: RESPOSTA_SAUDACAO, fontes: [] }), { headers: { "cache-control": "no-store" } });
+    }
     if (acesso.mock) {
       const { resultado } = await mockAiProvider.responder(mensagens, { perfil: mockPerfil, dashboard: mockDashboard, kb: [] });
       return Response.json(ChatResponse.parse(resultado), { headers: { "cache-control": "no-store" } });
     }
-    const kb = await selecionarTrechos(mensagens.at(-1)?.conteudo ?? "");
+    const kb = await selecionarTrechos(pergunta);
     const contexto = await carregarContexto(acesso.userId, kb);
     if (!contexto) return respostaErro("nao_encontrado");
     etapa = "resposta";
