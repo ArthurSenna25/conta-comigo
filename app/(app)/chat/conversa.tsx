@@ -8,9 +8,11 @@ import { ChipFonte, fonteValida } from "@/components/chip-fonte";
 import { AvisoIaDemo, ehRecusaSomenteDemo, SaidasIaSomenteDemo } from "@/components/demo/ia-demo";
 import type { ChatResponse } from "@/lib/contracts";
 import { TEXTO_IA_DEMO_MAX } from "@/lib/security/demo";
+import { saudacaoSimples } from "@/app/api/chat/saudacao";
 import { enviarPergunta } from "./requisicao";
 
-const SUGESTOES = ["Quando vence o DAS?", "Qual o limite do MEI em 2027?", "Posso contratar empregado?"];
+const SUGESTOES_INICIAIS = ["Quando vence o DAS?", "Qual o limite do MEI em 2027?", "Posso contratar empregado?"];
+const SUGESTOES_SAUDACAO = ["Qual é o meu limite?", "Quanto é meu DAS?", "Quando vence o DAS?"];
 const LIMITE_PERGUNTA = 1000;
 type Troca = { pergunta: string; retorno: ChatResponse };
 type Falha = { mensagem: string; status?: number };
@@ -22,8 +24,10 @@ export function JanelaChat({ children }: { children: ReactNode }) {
     function ajustar() {
       const visivel = viewport?.scale === 1 ? viewport : null;
       const altura = Math.round(visivel?.height ?? window.innerHeight);
-      const base = Math.max(0, window.innerHeight - altura - (visivel?.offsetTop ?? 0));
+      const topo = Math.max(0, Math.round(visivel?.offsetTop ?? 0));
+      const base = Math.max(0, window.innerHeight - altura - topo);
       janela.current?.style.setProperty("--chat-altura", `${altura}px`);
+      janela.current?.style.setProperty("--chat-topo", `${topo}px`);
       janela.current?.style.setProperty("--chat-base", `${base}px`);
       janela.current?.setAttribute("data-compacto", String(altura < 540));
     }
@@ -37,7 +41,20 @@ export function JanelaChat({ children }: { children: ReactNode }) {
       window.removeEventListener("resize", ajustar);
     };
   }, []);
-  return <div ref={janela} className="group/chat flex h-[var(--chat-altura,100dvh)] flex-col overflow-hidden bg-bg text-t1">{children}</div>;
+  return <div ref={janela} className="group/chat fixed inset-x-0 top-[var(--chat-topo,0px)] flex h-[var(--chat-altura,100dvh)] flex-col overflow-hidden bg-bg text-t1">{children}</div>;
+}
+
+function SugestoesChat({ opcoes, enviar }: { opcoes: string[]; enviar: (pergunta: string) => void }) {
+  return (
+    <div className="mt-3 flex flex-wrap gap-2">
+      {opcoes.map((opcao) => (
+        <button key={opcao} type="button" onClick={() => enviar(opcao)}
+          className="min-h-11 rounded-lg border border-line-strong bg-s2 px-3 text-left text-sm font-semibold text-acc-ink hover:bg-s3">
+          {opcao}
+        </button>
+      ))}
+    </div>
+  );
 }
 
 function Fontes({ fontes }: { fontes: ChatResponse["fontes"] }) {
@@ -123,7 +140,7 @@ export function Conversa({ demo }: { demo: boolean }) {
           const { scrollTop, scrollHeight, clientHeight } = evento.currentTarget;
           seguirFim.current = scrollHeight - clientHeight - scrollTop <= 48;
         }}
-        className="min-h-0 min-w-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-1 pb-2">
+        className="min-h-0 min-w-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-1 pb-3 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring">
         {/* Saudação fixa, sem chamar a IA. */}
         <article className="rounded-2xl border border-line bg-s1 p-4 sm:p-5">
           <h2 className="mb-2 flex items-center gap-2 text-sm font-semibold text-acc-ink">
@@ -131,14 +148,7 @@ export function Conversa({ demo }: { demo: boolean }) {
           </h2>
           <p className="leading-relaxed">Olá! Tiro dúvidas sobre o MEI com base em fontes oficiais e nos números do seu painel. Experimente uma destas perguntas:</p>
           {historico.length === 0 && !pendente && (
-            <div className="mt-4 flex flex-wrap gap-2">
-              {SUGESTOES.map((sugestao) => (
-                <button key={sugestao} type="button" onClick={() => void enviar(sugestao)}
-                  className="min-h-11 rounded-lg border border-line-strong bg-s2 px-3 text-left text-sm font-semibold text-acc-ink hover:bg-s3">
-                  {sugestao}
-                </button>
-              ))}
-            </div>
+            <SugestoesChat opcoes={SUGESTOES_INICIAIS} enviar={(sugestao) => void enviar(sugestao)} />
           )}
         </article>
         <div role="log" aria-label="Mensagens" aria-relevant="additions" className="space-y-5">
@@ -151,6 +161,9 @@ export function Conversa({ demo }: { demo: boolean }) {
                 </h2>
                 <p className="leading-relaxed wrap-anywhere whitespace-pre-wrap">{retorno.resposta}</p>
                 <Fontes fontes={retorno.fontes} />
+                {i === historico.length - 1 && !pendente && saudacaoSimples(pergunta) && (
+                  <SugestoesChat opcoes={SUGESTOES_SAUDACAO} enviar={(sugestao) => void enviar(sugestao)} />
+                )}
               </article>
             </div>
           ))}
@@ -162,11 +175,11 @@ export function Conversa({ demo }: { demo: boolean }) {
         <p role="status" className={pendente ? "mb-2 text-sm font-medium text-acc-ink" : "sr-only"}>
           {pendente ? "Preparando a resposta…" : ""}
         </p>
-        <label htmlFor="pergunta-chat" className="mb-2 block text-sm font-semibold">Sua pergunta</label>
+        <label htmlFor="pergunta-chat" className="mb-2 block text-sm font-semibold group-data-[compacto=true]/chat:sr-only">Sua pergunta</label>
         {demo && <div className="mb-2"><AvisoIaDemo demo id="aviso-ia-demo" /></div>}
         <div className="flex items-end gap-2">
           <textarea id="pergunta-chat" value={rascunho} maxLength={demo ? TEXTO_IA_DEMO_MAX : LIMITE_PERGUNTA} rows={2}
-            aria-describedby={demo ? "aviso-ia-demo" : undefined}
+            aria-describedby={demo ? "aviso-ia-demo aviso-chat-erros" : "aviso-chat-erros"}
             placeholder="Escreva sua dúvida" readOnly={pendente !== null}
             onChange={(evento) => setRascunho(evento.target.value)}
             onKeyDown={(evento) => {
@@ -181,7 +194,7 @@ export function Conversa({ demo }: { demo: boolean }) {
             <ArrowUp size={24} aria-hidden="true" />
           </button>
         </div>
-        <p className="mt-2 text-xs text-t3">A IA pode cometer erros. Confira informações importantes na fonte ou com um contador.</p>
+        <p id="aviso-chat-erros" className="mt-2 text-xs text-t3">A IA pode cometer erros. Confira informações importantes na fonte ou com um contador.</p>
       </form>
     </>
   );
